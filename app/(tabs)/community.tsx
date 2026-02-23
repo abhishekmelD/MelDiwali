@@ -1,0 +1,584 @@
+import { ReloadOverlay } from '@/components/ReloadOverlay';
+import { StarryBackground } from '@/components/StarryBackground';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { useUser } from '@/contexts/UserContext';
+import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const FILTERS = ['All', 'Events', 'Food', 'Culture'];
+const POST_TYPES = ['Event', 'Food', 'Culture'] as const;
+type PostType = typeof POST_TYPES[number];
+
+const COMMUNITY_POSTS = [
+    // ... (keep existing posts)
+    {
+        id: '1',
+        user: 'Melbourne Diwali Team',
+        date: 'December 2025',
+        content: 'Recap of 2025! What an incredible year of light and community. Stay tuned for 2026 plans!',
+        category: 'Events',
+        url: 'https://newsletter.melbournediwali.com.au/dec-25'
+    },
+    {
+        id: '2',
+        user: 'Melbourne Diwali Team',
+        date: 'November 2025',
+        content: 'What an incredible journey we\'ve shared! On October 11th, 2025, we came together at Marvel Stadium to celebrate the Festival of Lights in a style never seen before.',
+        category: 'Events',
+        url: 'https://newsletter.melbournediwali.com.au/november'
+    },
+    {
+        id: '3',
+        user: 'Melbourne Diwali Team',
+        date: 'October 2025',
+        content: 'The festive guide for Melbourne Diwali at Marvel Stadium Square is here! Check out the map and schedule.',
+        category: 'Events',
+        url: 'https://newsletter.melbournediwali.com.au/october'
+    },
+    {
+        id: '4',
+        user: 'Melbourne Diwali Team',
+        date: 'September 2025',
+        content: 'Save the date! September highlights upcoming festivities, community stories, and cultural celebrations across Melbourne.',
+        category: 'Culture',
+        url: 'https://newsletter.melbournediwali.com.au/sept-25'
+    },
+    {
+        id: '5',
+        user: 'Melbourne Diwali Team',
+        date: 'August 2025',
+        content: 'Monthly news and updates highlighting the final preparations for Melbourne Diwali 2025.',
+        category: 'All',
+        url: 'https://newsletter.melbournediwali.com.au/august'
+    },
+    {
+        id: '6',
+        user: 'Melbourne Diwali Team',
+        date: 'July 2025',
+        content: 'Amazing updates on how Melbourne Diwali at Marvel Stadium Square is shaping the community through inclusive celebrations.',
+        category: 'Local',
+        url: 'https://newsletter.melbournediwali.com.au/july'
+    },
+    {
+        id: '7',
+        user: 'Melbourne Diwali Team',
+        date: 'June 2025',
+        content: 'The launch of Melbourne Diwali newsletter! Follow us for monthly developments and behind-the-scenes festival prep.',
+        category: 'All',
+        url: 'https://newsletter.melbournediwali.com.au/june'
+    }
+];
+
+function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    const handlePressIn = () => {
+        scale.value = withSpring(0.92);
+        Haptics.selectionAsync();
+    };
+    const handlePressOut = () => { scale.value = withSpring(1); };
+
+    return (
+        <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+            <Animated.View style={[styles.chip, active && styles.chipActive, animatedStyle]}>
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+            </Animated.View>
+        </Pressable>
+    );
+}
+
+function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index: number }) {
+    const scale = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    const handlePressIn = () => {
+        scale.value = withSpring(0.98);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    };
+    const handlePressOut = () => { scale.value = withSpring(1); };
+
+    const handlePress = () => {
+        if (post.url) { WebBrowser.openBrowserAsync(post.url); }
+    };
+
+    const categoryColors: Record<string, string> = {
+        'Events': Colors.light.gold,
+        'Food': '#4ADE80', // Emerald
+        'Culture': '#A78BFA', // Amethyst
+        'All': 'rgba(255,255,255,0.15)'
+    };
+
+    const headerColor = categoryColors[post.category] || categoryColors['All'];
+
+    return (
+        <Animated.View entering={FadeInDown.delay(index * 100).springify()}>
+            <Animated.View style={[styles.postCard, animatedStyle]}>
+                <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
+                    <View style={styles.postHeader}>
+                        <View style={[styles.avatar, { backgroundColor: headerColor + '20', borderColor: headerColor + '40', borderWidth: 1 }]}>
+                            <Text style={styles.avatarText}>🪔</Text>
+                        </View>
+                        <View style={styles.headerInfo}>
+                            <Text style={[styles.userName, { color: headerColor }]}>{post.user}</Text>
+                            <Text style={styles.postDate}>{post.date}</Text>
+                        </View>
+                    </View>
+                    <Text style={styles.postContent}>{post.content}</Text>
+                    <View style={styles.postFooter}>
+                        <Pressable style={styles.readMoreBtn} onPress={handlePress}>
+                            <Text style={styles.readMoreText}>Read Newsletter</Text>
+                            <MaterialCommunityIcons name="arrow-right" size={16} color={Colors.light.gold} />
+                        </Pressable>
+                    </View>
+                </Pressable>
+            </Animated.View>
+        </Animated.View>
+    );
+}
+
+export default function CommunityScreen() {
+    const { userName, userRole } = useUser();
+    const [activeFilter, setActiveFilter] = useState('All');
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [isDraftsVisible, setDraftsVisible] = useState(false);
+    const [postType, setPostType] = useState<PostType>('Event');
+    const [postTitle, setPostTitle] = useState('');
+    const [postDesc, setPostDesc] = useState('');
+    const { refreshing, onRefresh } = useReloadOnRefresh();
+
+    const handleCreatePost = () => {
+        console.log('\n--- NEW COMMUNITY POST ---');
+        console.log(`Author:      ${userName || 'N/A'}`);
+        console.log(`Type:        ${postType}`);
+        console.log(`Title:       ${postTitle}`);
+        console.log(`Description: ${postDesc}`);
+        console.log(`Timestamp:   ${new Date().toISOString()}`);
+        console.log('---------------------------\n');
+
+        // Reset and close
+        setPostTitle('');
+        setPostDesc('');
+        setPostType('Event');
+        setModalVisible(false);
+    };
+
+    return (
+        <View style={styles.container}>
+            <StarryBackground />
+            <ReloadOverlay visible={refreshing} />
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <Text style={styles.header}>Community</Text>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.filterRow}
+                    contentContainerStyle={styles.filterContent}
+                >
+                    {FILTERS.map((f) => (
+                        <FilterChip key={f} label={f} active={activeFilter === f} onPress={() => setActiveFilter(f)} />
+                    ))}
+                </ScrollView>
+
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.feedContent}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor="transparent"
+                            colors={['transparent']}
+                        />
+                    }
+                >
+                    {COMMUNITY_POSTS.map((post, index) => (
+                        <CommunityPost key={post.id} post={post} index={index} />
+                    ))}
+
+                    <Text style={styles.emptyText}>You&apos;re all caught up!</Text>
+                    <View style={{ height: 100 }} />
+                </ScrollView>
+            </SafeAreaView>
+
+            {/* Create Post Modal */}
+            <Modal
+                visible={isModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.modalContent}
+                    >
+                        <LinearGradient
+                            colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]}
+                            style={styles.modalCard}
+                        >
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Create Post</Text>
+                                <Pressable onPress={() => setModalVisible(false)}>
+                                    <View style={styles.closeBtn}>
+                                        <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                                    </View>
+                                </Pressable>
+                            </View>
+
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <Text style={styles.inputLabel}>CHOOSE TYPE</Text>
+                                <View style={styles.typeRow}>
+                                    {POST_TYPES.map((type) => (
+                                        <Pressable
+                                            key={type}
+                                            onPress={() => setPostType(type)}
+                                            style={[styles.typeBtn, postType === type && styles.typeBtnActive]}
+                                        >
+                                            <Text style={[styles.typeBtnText, postType === type && styles.typeBtnTextActive]}>
+                                                {type}
+                                            </Text>
+                                        </Pressable>
+                                    ))}
+                                </View>
+
+                                <Text style={styles.inputLabel}>POST TITLE</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="What's happening?"
+                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    value={postTitle}
+                                    onChangeText={setPostTitle}
+                                />
+
+                                <Text style={styles.inputLabel}>DESCRIPTION</Text>
+                                <TextInput
+                                    style={[styles.input, styles.textArea]}
+                                    placeholder="Tell us more about it..."
+                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    value={postDesc}
+                                    onChangeText={setPostDesc}
+                                    multiline
+                                    numberOfLines={4}
+                                    textAlignVertical="top"
+                                />
+
+                                <Pressable
+                                    style={[styles.postBtn, (!postTitle || !postDesc) && styles.postBtnDisabled]}
+                                    onPress={handleCreatePost}
+                                    disabled={!postTitle || !postDesc}
+                                >
+                                    <Text style={styles.postBtnText}>Post to Community</Text>
+                                </Pressable>
+                            </ScrollView>
+                        </LinearGradient>
+                    </KeyboardAvoidingView>
+                </View>
+            </Modal>
+
+            {/* Draft Drops Modal (Admin) */}
+            <Modal
+                visible={isDraftsVisible}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setDraftsVisible(false)}
+            >
+                <View style={[styles.modalOverlay, styles.draftsOverlay]}>
+                    <View style={styles.draftsCard}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Draft Drops</Text>
+                            <Pressable onPress={() => setDraftsVisible(false)}>
+                                <View style={styles.closeBtn}>
+                                    <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                                </View>
+                            </Pressable>
+                        </View>
+                        <Text style={styles.draftsEmptyTitle}>No drafts yet</Text>
+                        <Text style={styles.draftsEmptyText}>
+                            Draft drops submitted by the community will appear here for approval.
+                        </Text>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* FAB - Hidden for Guest and Stage Manager */}
+            {userRole && !['Guest', 'Stage Manager'].includes(userRole) && (
+                <Pressable
+                    style={styles.fab}
+                    onPress={() => {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        setModalVisible(true);
+                    }}
+                >
+                    <MaterialCommunityIcons name="plus" size={32} color="#000" />
+                </Pressable>
+            )}
+
+            {/* Admin Drafts Button */}
+            {userRole === 'Admin' && (
+                <Pressable
+                    style={styles.adminFab}
+                    onPress={() => {
+                        Haptics.selectionAsync();
+                        setDraftsVisible(true);
+                    }}
+                >
+                    <MaterialCommunityIcons name="clipboard-text-outline" size={26} color={Colors.light.gold} />
+                </Pressable>
+            )}
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#0B0B0F' },
+    safeArea: { flex: 1 },
+    header: {
+        fontSize: 32,
+        color: '#fff',
+        fontFamily: Fonts.header,
+        marginTop: Spacing.md,
+        marginBottom: Spacing.md,
+        paddingHorizontal: Spacing.lg
+    },
+    filterRow: {
+        flexGrow: 0,
+        marginBottom: Spacing.md,
+        paddingHorizontal: Spacing.lg,
+        height: 64,
+    },
+    filterContent: {
+        paddingRight: Spacing.lg,
+        paddingVertical: 13,
+    },
+    feedContent: { paddingHorizontal: Spacing.lg },
+    chip: {
+        paddingHorizontal: 16,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+        overflow: 'visible',
+    },
+    chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
+    chipText: {
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+        textAlign: 'center',
+        includeFontPadding: false,
+    },
+    chipTextActive: { color: '#000' },
+
+    // Post Card Styles
+    postCard: {
+        backgroundColor: 'rgba(255,255,255,0.04)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
+        padding: Spacing.lg,
+        marginBottom: Spacing.md,
+    },
+    postHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: Spacing.md,
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,215,0,0.15)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    avatarText: { fontSize: 20 },
+    headerInfo: { flex: 1 },
+    userName: { color: '#fff', fontSize: 15, fontFamily: Fonts.bold },
+    postDate: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular, marginTop: 1 },
+    postContent: {
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: 15,
+        fontFamily: Fonts.regular,
+        lineHeight: 22,
+        marginBottom: Spacing.lg,
+    },
+    postFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)',
+        paddingTop: Spacing.md,
+    },
+    readMoreBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    readMoreText: {
+        color: Colors.light.gold,
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+    },
+
+    emptyText: { color: 'rgba(255,255,255,0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
+
+    // Modal Styles
+    modalOverlay: { flex: 1, justifyContent: 'flex-end' },
+    modalContent: { height: '85%' },
+    modalCard: {
+        flex: 1,
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+        padding: Spacing.xl,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: Spacing.xl,
+    },
+    modalTitle: { color: '#fff', fontSize: 28, fontFamily: Fonts.header },
+    closeBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    inputLabel: {
+        color: 'rgba(255,255,255,0.4)',
+        fontSize: 11,
+        fontFamily: Fonts.bold,
+        letterSpacing: 1.5,
+        marginBottom: Spacing.md,
+        marginTop: Spacing.lg,
+    },
+    typeRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
+    typeBtn: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,215,0,0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,215,0,0.1)',
+        flex: 1,
+        alignItems: 'center',
+    },
+    typeBtnActive: {
+        backgroundColor: Colors.light.gold,
+        borderColor: Colors.light.gold,
+    },
+    typeBtnText: { color: Colors.light.gold, fontSize: 13, fontFamily: Fonts.bold },
+    typeBtnTextActive: { color: '#000' },
+    input: {
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        color: '#fff',
+        fontSize: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    textArea: {
+        minHeight: 120,
+        paddingTop: 16,
+    },
+    postBtn: {
+        backgroundColor: Colors.light.gold,
+        borderRadius: 16,
+        paddingVertical: 16,
+        alignItems: 'center',
+        marginTop: Spacing.xl * 1.5,
+        shadowColor: Colors.light.gold,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    postBtnDisabled: {
+        opacity: 0.3,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        shadowOpacity: 0,
+    },
+    postBtnText: { color: '#000', fontSize: 16, fontFamily: Fonts.bold },
+
+    fab: {
+        position: 'absolute',
+        bottom: 24,
+        right: 24,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: Colors.light.gold,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    adminFab: {
+        position: 'absolute',
+        bottom: 96,
+        right: 24,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,215,0,0.35)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    draftsOverlay: {
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        justifyContent: 'center',
+        paddingHorizontal: Spacing.lg,
+    },
+    draftsCard: {
+        backgroundColor: Colors.light.cardGradientEnd,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.12)',
+        padding: Spacing.xl,
+    },
+    draftsEmptyTitle: {
+        color: '#fff',
+        fontSize: 18,
+        fontFamily: Fonts.bold,
+        marginBottom: Spacing.sm,
+    },
+    draftsEmptyText: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 14,
+        fontFamily: Fonts.regular,
+        lineHeight: 20,
+    },
+});
