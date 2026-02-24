@@ -1,11 +1,8 @@
-import { ReloadOverlay } from '@/components/ReloadOverlay';
-import { StarryBackground } from '@/components/StarryBackground';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
@@ -47,35 +44,35 @@ const LIVE_DROPS = [
   {
     id: '1',
     badge: 'SPONSOR DROP',
-    badgeColor: '#ffd700',
+    badgeColor: '#FFD580',
     title: 'Sponsor Drop: Rangoli Competition',
     description: 'Enter & share your design to unlock a festival stamp.',
     cta: 'Enter now',
-    gradient: ['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.85)'] as const,
+    gradient: ['rgba(255,245,230,0.2)', 'rgba(168,230,207,0.6)'] as const,
     image: require('@/assets/images/drop_rangoli.png'),
-    tintColor: '#4a1a8a',
+    tintColor: '#FFB59C',
   },
   {
     id: '2',
     badge: 'VENDOR',
-    badgeColor: '#ffd700',
+    badgeColor: '#FFD580',
     title: 'Vendor Spotlight: Curry House',
     description: 'Exclusive tasting menu drop this week. Limited serves.',
     cta: 'View menu',
-    gradient: ['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.85)'] as const,
+    gradient: ['rgba(255,245,230,0.2)', 'rgba(251,201,210,0.55)'] as const,
     image: require('@/assets/images/drop_curry.png'),
-    tintColor: '#5a2a3a',
+    tintColor: '#D8B4E2',
   },
   {
     id: '3',
     badge: 'PERFORMER',
-    badgeColor: '#d8b4fe',
+    badgeColor: '#FBC9D2',
     title: 'Performer Reveal: DJ Karma',
     description: 'Get ready for the main stage! Preview the setlist.',
     cta: 'Listen now',
-    gradient: ['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.85)'] as const,
+    gradient: ['rgba(255,245,230,0.2)', 'rgba(216,180,226,0.55)'] as const,
     image: require('@/assets/images/drop_dj.png'),
-    tintColor: '#1a3a5a',
+    tintColor: '#A8E6CF',
   },
 ];
 
@@ -189,7 +186,7 @@ function LiveDropCard({ item, index, onPress, isModal }: { item: typeof LIVE_DRO
             imageStyle={{ borderRadius: 16 }}
             resizeMode="cover"
           >
-            <LinearGradient colors={[...item.gradient]} style={styles.dropGradient}>
+            <View style={styles.dropGradient}>
               <View style={styles.cardHeader}>
                 <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
                   <Text style={styles.dropBadgeText}>{item.badge}</Text>
@@ -202,10 +199,10 @@ function LiveDropCard({ item, index, onPress, isModal }: { item: typeof LIVE_DRO
                 <Text style={styles.dropDesc} numberOfLines={1}>{item.description}</Text>
                 <View style={styles.dropCta}>
                   <Text style={styles.dropCtaText}>{item.cta}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={16} color={Colors.light.gold} />
+                  <MaterialCommunityIcons name="chevron-right" size={16} color={Colors.light.accentText} />
                 </View>
               </View>
-            </LinearGradient>
+            </View>
           </ImageBackground>
         </Pressable>
       </Animated.View>
@@ -236,8 +233,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StarryBackground />
-      <ReloadOverlay visible={refreshing} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -292,33 +287,33 @@ export default function HomeScreen() {
           {/* Action Cards */}
           <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.actionRow}>
             <Pressable style={styles.actionCard} onPress={() => handleActionPress('/events')}>
-              <LinearGradient colors={['#2a1a5e', '#1a0a3e']} style={styles.actionGradient}>
+              <View style={styles.actionGradient}>
                 <Text style={styles.actionIcon}>📅</Text>
                 <Text style={styles.actionTitle}>Schedule</Text>
                 <Text style={styles.actionSubtitle}>What&apos;s on now?</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
             <Pressable style={styles.actionCard} onPress={() => handleActionPress('/rewards')}>
-              <LinearGradient colors={['#2a1a5e', '#1a0a3e']} style={styles.actionGradient}>
+              <View style={styles.actionGradient}>
                 <Text style={styles.actionIcon}>🎫</Text>
                 <Text style={styles.actionTitle}>My Passport</Text>
                 <Text style={styles.actionSubtitle}>View your stamps</Text>
-              </LinearGradient>
+              </View>
             </Pressable>
           </Animated.View>
 
           {/* Scan & Collect */}
           <Animated.View entering={FadeInDown.delay(1000).duration(800)}>
             <Pressable style={styles.scanBanner} onPress={() => handleActionPress('/rewards')}>
-              <LinearGradient colors={['#2a1a5e', '#1a0a3e']} style={styles.scanGradient}>
+              <View style={styles.scanGradient}>
                 <View style={styles.scanLeft}>
-                  <MaterialCommunityIcons name="qrcode-scan" size={34} color={Colors.light.gold} style={styles.scanIcon} />
+                  <MaterialCommunityIcons name="qrcode-scan" size={34} color={Colors.light.accentText} style={styles.scanIcon} />
                   <View>
                     <Text style={styles.scanTitle}>Scan & Collect</Text>
                     <Text style={styles.scanSubtitle}>Visit stalls to earn stamps</Text>
                   </View>
                 </View>
-              </LinearGradient>
+              </View>
             </Pressable>
           </Animated.View>
 
@@ -335,15 +330,12 @@ export default function HomeScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <LinearGradient
-              colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]}
-              style={styles.modalCard}
-            >
+            <View style={styles.modalCard}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>All Live Drops</Text>
                 <Pressable onPress={() => setIsDropsModalVisible(false)}>
                   <View style={styles.modalCloseBtn}>
-                    <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                    <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                   </View>
                 </Pressable>
               </View>
@@ -367,7 +359,7 @@ export default function HomeScreen() {
                   </View>
                 )}
               />
-            </LinearGradient>
+            </View>
           </View>
         </View>
       </Modal>
@@ -377,14 +369,11 @@ export default function HomeScreen() {
         <View style={styles.detailOverlay}>
           <Pressable style={styles.detailBackdrop} onPress={() => setSelectedDrop(null)} />
           <Animated.View entering={FadeInDown} style={styles.detailContent}>
-            <LinearGradient
-              colors={['#2a1640', '#1a0b2e']}
-              style={styles.detailGradient}
-            >
+            <View style={styles.detailGradient}>
               <View style={styles.detailHeader}>
                 <Text style={styles.detailTitle}>{selectedDrop.title}</Text>
                 <Pressable onPress={() => setSelectedDrop(null)} style={styles.closeBtnSmall}>
-                  <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                  <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                 </Pressable>
               </View>
 
@@ -415,7 +404,7 @@ export default function HomeScreen() {
               <Pressable style={styles.detailActionBtn} onPress={() => setSelectedDrop(null)}>
                 <Text style={styles.detailActionText}>{selectedDrop.cta}</Text>
               </Pressable>
-            </LinearGradient>
+            </View>
           </Animated.View>
         </View>
       )}
@@ -424,15 +413,15 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0B0F' },
+  container: { flex: 1, backgroundColor: Colors.light.background },
   safeArea: { flex: 1 },
   scrollContent: { paddingHorizontal: Spacing.lg },
 
   // Namaste
   namaste: {
     fontSize: 42,
-    color: Colors.light.gold,
-    fontFamily: Fonts.header,
+    color: Colors.light.accentText,
+    fontFamily: Fonts.regular,
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
     letterSpacing: 1,
@@ -440,7 +429,7 @@ const styles = StyleSheet.create({
 
   // Countdown
   countdownCard: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: Colors.light.surfaceElevated,
     borderRadius: 16,
     position: 'relative',
     marginBottom: Spacing.lg,
@@ -450,8 +439,8 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,215,0,0.2)',
-    shadowColor: Colors.light.gold,
+    borderColor: 'rgba(255,213,128,0.35)',
+    shadowColor: Colors.light.accentText,
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 10,
   },
@@ -471,7 +460,7 @@ const styles = StyleSheet.create({
   countdownRow: { flexDirection: 'row', gap: Spacing.sm },
   countdownBlock: { alignItems: 'center', minWidth: 64 },
   countdownValue: {
-    color: Colors.light.gold,
+    color: Colors.light.accentText,
     fontSize: 28,
     fontFamily: Fonts.bold,
     fontVariant: ['tabular-nums']
@@ -480,8 +469,8 @@ const styles = StyleSheet.create({
 
   // Section
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
-  sectionTitle: { color: '#fff', fontSize: 20, fontWeight: '700' },
-  viewAll: { color: Colors.light.gold, fontSize: 14, fontWeight: '500' },
+  sectionTitle: { color: Colors.light.text, fontSize: 20, fontWeight: '700' },
+  viewAll: { color: Colors.light.accentText, fontSize: 14, fontWeight: '500' },
 
   // Live Drops
   dropList: { paddingRight: Spacing.lg },
@@ -491,9 +480,9 @@ const styles = StyleSheet.create({
     marginRight: Spacing.md,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#1A1A1F',
+    backgroundColor: Colors.light.surfaceElevated,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: '#3a1c00',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -508,14 +497,15 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     flex: 1,
     justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,245,230,0.3)', // balanced readability + vibrancy
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   tintOverlay: { width: 4, height: 24, borderRadius: 2, opacity: 0.8 },
   dropBadge: { alignSelf: 'flex-start', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
-  dropBadgeText: { color: '#000', fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
+  dropBadgeText: { color: Colors.light.text, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
   dropContent: { marginTop: 'auto' },
   dropTitle: {
-    color: '#fff',
+    color: Colors.light.text,
     fontSize: 20,
     fontFamily: Fonts.bold,
     marginBottom: 4,
@@ -530,7 +520,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: Colors.light.gold,
+    borderColor: Colors.light.accentText,
     paddingHorizontal: 16,
     paddingVertical: 8,
     flexDirection: 'row',
@@ -538,7 +528,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   dropCtaText: {
-    color: Colors.light.gold,
+    color: Colors.light.accentText,
     fontSize: 13,
     fontFamily: Fonts.medium,
     marginRight: 4,
@@ -551,11 +541,12 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.15)',
+    borderColor: Colors.light.border,
     minHeight: 120,
+    backgroundColor: Colors.light.surfaceElevated,
   },
   actionIcon: { fontSize: 28, marginBottom: Spacing.sm },
-  actionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  actionTitle: { color: Colors.light.text, fontSize: 16, fontWeight: '700', marginBottom: 4 },
   actionSubtitle: { color: Colors.light.textSecondary, fontSize: 13 },
 
   // Scan
@@ -567,17 +558,18 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.15)',
+    borderColor: Colors.light.border,
+    backgroundColor: Colors.light.surfaceElevated,
   },
   scanLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   scanIcon: { marginRight: 4 },
-  scanTitle: { color: '#fff', fontSize: 16, fontWeight: '700', marginBottom: 2 },
+  scanTitle: { color: Colors.light.text, fontSize: 16, fontWeight: '700', marginBottom: 2 },
   scanSubtitle: { color: Colors.light.textSecondary, fontSize: 13 },
 
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(58,28,0,0.35)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -588,8 +580,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: Colors.light.borderSubtle,
     padding: Spacing.xl,
+    backgroundColor: Colors.light.surfaceElevated,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -598,7 +591,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   modalTitle: {
-    color: '#fff',
+    color: Colors.light.text,
     fontSize: 28,
     fontFamily: Fonts.header,
   },
@@ -606,7 +599,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,213,128,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -628,7 +621,7 @@ const styles = StyleSheet.create({
   },
   detailBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(58,28,0,0.45)',
   },
   detailContent: {
     width: SCREEN_WIDTH * 0.9,
@@ -636,10 +629,11 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.3)',
+    borderColor: 'rgba(255, 213, 128, 0.5)',
   },
   detailGradient: {
     padding: Spacing.xl,
+    backgroundColor: Colors.light.surfaceElevated,
   },
   detailHeader: {
     flexDirection: 'row',
@@ -651,14 +645,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     fontFamily: Fonts.header,
-    color: '#fff',
+    color: Colors.light.text,
     marginRight: Spacing.md,
   },
   closeBtnSmall: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,213,128,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -679,7 +673,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   detailBadgeText: {
-    color: '#000',
+    color: Colors.light.text,
     fontSize: 11,
     fontFamily: Fonts.bold,
     textTransform: 'uppercase',
@@ -691,14 +685,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   detailDescriptionHeader: {
-    color: Colors.light.gold,
+    color: Colors.light.accentText,
     fontSize: 12,
     fontFamily: Fonts.bold,
     letterSpacing: 2,
     marginBottom: 8,
   },
   detailDescriptionText: {
-    color: '#fff',
+    color: Colors.light.text,
     fontSize: 15,
     fontFamily: Fonts.regular,
     lineHeight: 22,
@@ -711,7 +705,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   detailActionText: {
-    color: '#000',
+    color: Colors.light.text,
     fontSize: 16,
     fontFamily: Fonts.bold,
     textTransform: 'uppercase',

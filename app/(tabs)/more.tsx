@@ -5,7 +5,6 @@ import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -164,7 +163,7 @@ export default function MoreScreen() {
                         {/* Name Input */}
 
 
-                        <Text style={styles.roleDisplay}>Role: <Text style={{ color: Colors.light.gold }}>{userRole || 'Guest'}</Text></Text>
+                        <Text style={styles.roleDisplay}>Role: <Text style={{ color: Colors.light.accentText }}>{userRole || 'Guest'}</Text></Text>
 
                         {/* Top Right Menu Button */}
                         <Pressable
@@ -172,7 +171,7 @@ export default function MoreScreen() {
                             onPress={() => setMenuVisible(!isMenuVisible)}
                             hitSlop={10}
                         >
-                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(255,255,255,0.6)" />
+                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(58,28,0,0.6)" />
                         </Pressable>
 
                         {/* Menu Overlay & Dropdown */}
@@ -184,7 +183,7 @@ export default function MoreScreen() {
                                     logout();
                                     setMenuVisible(false);
                                 }}>
-                                    <MaterialCommunityIcons name="logout" size={18} color="#ff6b6b" />
+                                    <MaterialCommunityIcons name="logout" size={18} color={Colors.light.peach} />
                                     <Text style={styles.menuText}>Logout</Text>
                                 </Pressable>
                             </>
@@ -271,16 +270,13 @@ export default function MoreScreen() {
                         <Text style={styles.dangerText}>Clear event registrations</Text>
                     </Pressable>
 
-                    <LinearGradient
-                        colors={['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.01)']}
-                        style={styles.ackCard}
-                    >
+                    <View style={styles.ackCard}>
                         <MaterialCommunityIcons name="dharmachakra" size={24} color={Colors.light.gold} style={styles.ackIcon} />
                         <Text style={styles.ackTitle}>Acknowledgement of Country</Text>
                         <Text style={styles.ackText}>
                             We acknowledge the Traditional Owners of the land where we work and live, and pay our respects to Elders past and present. We celebrate the stories, culture, and traditions of Aboriginal and Torres Strait Islander peoples.
                         </Text>
-                    </LinearGradient>
+                    </View>
 
                     <Text style={styles.version}>Melbourne Diwali v1.0.0</Text>
                     <View style={{ height: 40 }} />
@@ -291,29 +287,29 @@ export default function MoreScreen() {
             <Modal visible={isVolunteerVisible} animationType="slide" transparent={true} onRequestClose={() => setVolunteerVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
-                        <LinearGradient colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]} style={styles.modalCard}>
+                        <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Join the Team</Text>
                                 <Pressable onPress={() => setVolunteerVisible(false)}>
-                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color="#fff" /></View>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.modalIntro}>Become a part of the Melbourne Diwali family! Tell us how you&apos;d like to help spread the light.</Text>
                                 <Text style={styles.inputLabel}>FULL NAME</Text>
-                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(255,255,255,0.3)" value={volName} onChangeText={setVolName} />
+                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(58,28,0,0.35)" value={volName} onChangeText={setVolName} />
                                 <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
-                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(255,255,255,0.3)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
+                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(58,28,0,0.35)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
                                 {volEmail && !isEmailValid && <Text style={styles.errorText}>Invalid email address</Text>}
                                 <Text style={styles.inputLabel}>PHONE NUMBER</Text>
-                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(255,255,255,0.3)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
+                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(58,28,0,0.35)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
                                 {volPhone && !isPhoneValid && <Text style={styles.errorText}>Invalid AU phone number</Text>}
                                 <Text style={styles.inputLabel}>INTEREST AREAS</Text>
                                 <View style={styles.chipRow}>{INTERESTS.map(i => <SelectChip key={i} label={i} active={selectedInterests.includes(i)} onPress={() => toggleInterest(i)} />)}</View>
                                 <Text style={styles.inputLabel}>AVAILABILITY (DAYS)</Text>
                                 <View style={styles.chipRow}>{DAYS.map(d => <SelectChip key={d} label={d} active={selectedDays.includes(d)} onPress={() => toggleDay(d)} />)}</View>
                                 <Text style={styles.inputLabel}>WHY DO YOU WANT TO JOIN?</Text>
-                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(255,255,255,0.3)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
+                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(58,28,0,0.35)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
                                 <Pressable style={[styles.submitBtn, !isFormValid && styles.submitBtnDisabled]} onPress={handleVolunteerSubmit} disabled={!isFormValid}>
                                     <Text style={styles.submitText}>Submit Application</Text>
                                 </Pressable>
@@ -329,7 +325,7 @@ export default function MoreScreen() {
                                     </View>
                                 </Animated.View>
                             )}
-                        </LinearGradient>
+                        </View>
                     </KeyboardAvoidingView>
                 </View>
             </Modal>
@@ -338,11 +334,11 @@ export default function MoreScreen() {
             <Modal visible={isContactVisible} animationType="slide" transparent={true} onRequestClose={() => setContactVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <LinearGradient colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]} style={styles.modalCard}>
+                        <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Contact Us</Text>
                                 <Pressable onPress={() => setContactVisible(false)}>
-                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color="#fff" /></View>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
                             <ScrollView showsVerticalScrollIndicator={false}>
@@ -357,7 +353,7 @@ export default function MoreScreen() {
                                     <Text style={styles.copyright}>©2025 by Melbourne Diwali</Text>
                                 </View>
                             </ScrollView>
-                        </LinearGradient>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -415,11 +411,11 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
         <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View style={styles.modalOverlay}>
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
-                    <LinearGradient colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]} style={styles.modalCard}>
+                    <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Submit BTS</Text>
                             <Pressable onPress={onClose}>
-                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color="#fff" /></View>
+                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
                         <ScrollView showsVerticalScrollIndicator={false}>
@@ -429,7 +425,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
                             <TextInput
                                 style={styles.input}
                                 placeholder="https://photos.google.com/..."
-                                placeholderTextColor="rgba(255,255,255,0.3)"
+                                placeholderTextColor="rgba(58,28,0,0.35)"
                                 value={link}
                                 onChangeText={setLink}
                                 autoCapitalize="none"
@@ -444,7 +440,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
                                 <Text style={styles.submitText}>{loading ? 'Submitting...' : 'Send to Team'}</Text>
                             </Pressable>
                         </ScrollView>
-                    </LinearGradient>
+                    </View>
                 </KeyboardAvoidingView>
             </View>
         </Modal>
@@ -456,17 +452,17 @@ function BTSReviewModal({ visible, onClose }: { visible: boolean; onClose: () =>
         <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <LinearGradient colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]} style={styles.modalCard}>
+                    <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Review BTS</Text>
                             <Pressable onPress={onClose}>
-                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color="#fff" /></View>
+                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
                         <Text style={styles.modalIntro}>
                             No submissions yet. Draft BTS clips from the community will appear here.
                         </Text>
-                    </LinearGradient>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -507,11 +503,11 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
         <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View style={styles.modalOverlay}>
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
-                    <LinearGradient colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]} style={styles.modalCard}>
+                    <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Sign Up</Text>
                             <Pressable onPress={onClose}>
-                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color="#fff" /></View>
+                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
                         <ScrollView showsVerticalScrollIndicator={false}>
@@ -521,7 +517,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="e.g. Alexis"
-                                placeholderTextColor="rgba(255,255,255,0.3)"
+                                placeholderTextColor="rgba(58,28,0,0.35)"
                                 value={userName}
                                 onChangeText={setUserName}
                                 maxLength={20}
@@ -531,7 +527,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={[styles.input, email && !validateEmail(email) && styles.inputError]}
                                 placeholder="you@example.com"
-                                placeholderTextColor="rgba(255,255,255,0.3)"
+                                placeholderTextColor="rgba(58,28,0,0.35)"
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -543,7 +539,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="Set a password"
-                                placeholderTextColor="rgba(255,255,255,0.3)"
+                                placeholderTextColor="rgba(58,28,0,0.35)"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
@@ -569,7 +565,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                                 <Text style={styles.submitText}>{loading ? 'Creating...' : 'Create Account'}</Text>
                             </Pressable>
                         </ScrollView>
-                    </LinearGradient>
+                    </View>
                 </KeyboardAvoidingView>
             </View>
         </Modal>
@@ -579,28 +575,28 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
 function ContactCard({ icon, title, value, onPress }: { icon: any; title: string; value: string; onPress: () => void }) {
     return (
         <Pressable onPress={onPress}>
-            <LinearGradient colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.02)']} style={styles.contactCard}>
+            <View style={styles.contactCard}>
                 <View style={styles.iconCircle}><MaterialCommunityIcons name={icon} size={24} color={Colors.light.gold} /></View>
                 <View style={styles.contactInfo}><Text style={styles.contactLabel}>{title}</Text><Text style={styles.contactValue}>{value}</Text></View>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
-            </LinearGradient>
+                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(58,28,0,0.3)" />
+            </View>
         </Pressable>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#0B0B0F' },
+    container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1, paddingHorizontal: Spacing.lg },
-    header: { fontSize: 32, fontFamily: Fonts.header, color: '#fff', marginTop: Spacing.md, marginBottom: Spacing.lg },
+    header: { fontSize: 32, fontFamily: Fonts.header, color: Colors.light.text, marginTop: Spacing.md, marginBottom: Spacing.lg },
     profileCard: {
-        backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20,
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: Colors.light.surfaceElevated, borderRadius: 20,
+        borderWidth: 1, borderColor: Colors.light.borderSubtle,
         padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.lg,
         position: 'relative', // For absolute positioning of menu
     },
-    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
+    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,213,128,0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
     avatarText: { fontSize: 28 },
-    profileTitle: { color: Colors.light.gold, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
+    profileTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
     signUpBtn: {
         backgroundColor: Colors.light.gold,
         borderRadius: 12,
@@ -610,64 +606,65 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: Spacing.sm,
     },
-    signUpBtnText: { color: '#000', fontFamily: Fonts.bold, fontSize: 16 },
+    signUpBtnText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 16 },
     welcomeText: {
-        color: '#fff',
+        color: Colors.light.text,
         fontFamily: Fonts.bold,
         fontSize: 20,
         marginTop: Spacing.sm,
     },
     nameInputContainer: { width: '100%', marginTop: Spacing.xl, alignItems: 'center' },
-    nameInputLabel: { color: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
+    nameInputLabel: { color: 'rgba(58,28,0,0.5)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
     nameInput: {
         width: '100%',
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(255,245,230,0.8)',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 16,
         fontFamily: Fonts.medium,
         textAlign: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
     },
     roleDisplay: {
-        color: 'rgba(255,255,255,0.5)',
+        color: 'rgba(58,28,0,0.55)',
         fontSize: 13,
         fontFamily: Fonts.medium,
         marginTop: Spacing.md,
     },
     linkCard: {
         flexDirection: 'row', alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16,
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: Colors.light.surfaceElevated, borderRadius: 16,
+        borderWidth: 1, borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg, marginBottom: Spacing.md,
     },
     linkIcon: { fontSize: 24, marginRight: Spacing.md },
     linkInfo: { flex: 1 },
-    linkTitle: { color: '#fff', fontSize: 16, fontFamily: Fonts.bold, marginBottom: 2 },
+    linkTitle: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold, marginBottom: 2 },
     linkSubtitle: { color: Colors.light.textSecondary, fontSize: 13, fontFamily: Fonts.regular },
     chevron: { color: Colors.light.textSecondary, fontSize: 24 },
-    sectionTitle: { color: '#fff', fontSize: 24, fontFamily: Fonts.header, marginTop: Spacing.md, marginBottom: Spacing.md },
+    sectionTitle: { color: Colors.light.text, fontSize: 24, fontFamily: Fonts.header, marginTop: Spacing.md, marginBottom: Spacing.md },
     dangerCard: {
-        backgroundColor: 'rgba(255,80,80,0.08)', borderRadius: 16,
-        borderWidth: 1, borderColor: 'rgba(255,80,80,0.15)',
+        backgroundColor: 'rgba(255,181,156,0.2)', borderRadius: 16,
+        borderWidth: 1, borderColor: 'rgba(255,181,156,0.5)',
         padding: Spacing.lg, marginBottom: Spacing.md,
     },
-    dangerText: { color: '#ff6b6b', fontSize: 15, fontFamily: Fonts.medium },
-    version: { color: 'rgba(255,255,255,0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
+    dangerText: { color: Colors.light.peach, fontSize: 15, fontFamily: Fonts.medium },
+    version: { color: 'rgba(58,28,0,0.3)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(58,28,0,0.35)', justifyContent: 'flex-end' },
     modalContent: { height: '85%' },
     modalCard: {
         flex: 1,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.xl,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -675,17 +672,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: Spacing.xl,
     },
-    modalTitle: { color: '#fff', fontSize: 28, fontFamily: Fonts.header },
+    modalTitle: { color: Colors.light.text, fontSize: 28, fontFamily: Fonts.header },
     modalCloseBtn: {
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,213,128,0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     modalIntro: {
-        color: 'rgba(255,255,255,0.6)',
+        color: 'rgba(58,28,0,0.6)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -695,11 +692,11 @@ const styles = StyleSheet.create({
         marginTop: Spacing.xl,
         paddingTop: Spacing.xl,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        borderTopColor: Colors.light.borderSubtle,
         alignItems: 'center',
     },
     inputLabel: {
-        color: 'rgba(255,255,255,0.4)',
+        color: 'rgba(58,28,0,0.5)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1.5,
@@ -707,30 +704,30 @@ const styles = StyleSheet.create({
         marginTop: Spacing.lg,
     },
     input: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(255,245,230,0.8)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 15,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
     },
-    inputError: { borderColor: 'rgba(255,80,80,0.5)', backgroundColor: 'rgba(255,80,80,0.05)' },
-    errorText: { color: '#ff6b6b', fontSize: 12, fontFamily: Fonts.regular, marginTop: 4 },
+    inputError: { borderColor: 'rgba(255,181,156,0.7)', backgroundColor: 'rgba(255,181,156,0.2)' },
+    errorText: { color: Colors.light.peach, fontSize: 12, fontFamily: Fonts.regular, marginTop: 4 },
     textArea: { minHeight: 100, textAlignVertical: 'top', paddingTop: 16 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
     chip: {
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.06)',
+        backgroundColor: 'rgba(255,245,230,0.7)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
     },
     chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
-    chipText: { color: 'rgba(255,255,255,0.6)', fontSize: 13, fontFamily: Fonts.medium },
-    chipTextActive: { color: '#000' },
+    chipText: { color: 'rgba(58,28,0,0.6)', fontSize: 13, fontFamily: Fonts.medium },
+    chipTextActive: { color: Colors.light.text },
     submitBtn: {
         backgroundColor: Colors.light.gold,
         borderRadius: 16,
@@ -738,8 +735,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: Spacing.xl,
     },
-    submitBtnDisabled: { opacity: 0.3, backgroundColor: 'rgba(255,255,255,0.2)' },
-    submitText: { color: '#000', fontSize: 16, fontFamily: Fonts.bold },
+    submitBtnDisabled: { opacity: 0.5, backgroundColor: 'rgba(255,213,128,0.25)' },
+    submitText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
 
     // Contact Card
     contactCard: {
@@ -749,28 +746,29 @@ const styles = StyleSheet.create({
         padding: Spacing.lg,
         marginBottom: Spacing.md,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: Colors.light.borderSubtle,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     iconCircle: {
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(255,215,0,0.1)',
+        backgroundColor: 'rgba(255,213,128,0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
     },
     contactInfo: { flex: 1 },
-    contactLabel: { color: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
-    contactValue: { color: '#fff', fontSize: 15, fontFamily: Fonts.medium },
-    ackTitle: { color: Colors.light.gold, fontSize: 13, fontFamily: Fonts.bold, marginBottom: 8, textAlign: 'center' },
-    ackText: { color: 'rgba(255,255,255,0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
-    copyright: { color: 'rgba(255,255,255,0.2)', fontSize: 11, fontFamily: Fonts.regular },
+    contactLabel: { color: 'rgba(58,28,0,0.45)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
+    contactValue: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.medium },
+    ackTitle: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold, marginBottom: 8, textAlign: 'center' },
+    ackText: { color: 'rgba(58,28,0,0.5)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
+    copyright: { color: 'rgba(58,28,0,0.3)', fontSize: 11, fontFamily: Fonts.regular },
 
     // Success Overlay Styles
     successOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.95)',
+        backgroundColor: 'rgba(58,28,0,0.75)',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 32,
@@ -779,13 +777,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     successText: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 24,
         fontFamily: Fonts.bold,
         marginTop: 16,
     },
     successSubtext: {
-        color: 'rgba(255,255,255,0.6)',
+        color: 'rgba(58,28,0,0.6)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         marginTop: 8,
@@ -796,9 +794,10 @@ const styles = StyleSheet.create({
         padding: Spacing.xl,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.1)',
+        borderColor: 'rgba(255, 213, 128, 0.35)',
         alignItems: 'center',
         marginVertical: Spacing.xl,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     ackIcon: {
         marginBottom: 12,
@@ -826,17 +825,17 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 48,
         right: 16,
-        backgroundColor: '#1A1A1F',
+        backgroundColor: Colors.light.surface,
         borderRadius: 12,
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
         zIndex: 30, // Higher than overlay
-        shadowColor: "#000",
+        shadowColor: "#3a1c00",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 4.65,
@@ -852,7 +851,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     menuText: {
-        color: '#ff6b6b',
+        color: Colors.light.peach,
         fontSize: 14,
         fontFamily: Fonts.medium,
     },

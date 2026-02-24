@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     width: '80%',
-    backgroundColor: '#ccc',
+    backgroundColor: Colors.light.borderSubtle,
     opacity: 0.2,
     marginBottom: 32,
   },

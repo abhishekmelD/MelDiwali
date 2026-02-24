@@ -65,32 +65,32 @@ export function Button({
     };
 
     const getGradientColors = (pressed: boolean) => {
-        if (disabled) return ['#4a4a4a', '#4a4a4a']; // Gray for disabled
+        if (disabled) return ['#e2d9cf', '#e2d9cf']; // Soft neutral for disabled
 
         switch (variant) {
             case 'primary':
-                // Gold Gradient: Lighter Gold -> Gold -> Darker Gold
+                // Soft Marigold -> Peach Coral
                 return pressed
-                    ? ['#d4a017', '#b8860b']
-                    : ['#ffd700', '#fbcd3e', '#f3b431'];
+                    ? ['#FFB59C', '#F4A783']
+                    : ['#FFD580', '#FFCFA1', '#FFB59C'];
             case 'secondary':
-                // Translucent Violet Gradient
+                // Lavender Mist -> Blush Pink
                 return pressed
-                    ? ['rgba(212, 187, 255, 0.3)', 'rgba(212, 187, 255, 0.2)']
-                    : ['rgba(212, 187, 255, 0.15)', 'rgba(212, 187, 255, 0.05)'];
+                    ? ['rgba(216, 180, 226, 0.45)', 'rgba(251, 201, 210, 0.35)']
+                    : ['rgba(216, 180, 226, 0.25)', 'rgba(251, 201, 210, 0.18)'];
             default:
                 return ['transparent', 'transparent'];
         }
     };
 
     const getTextColor = () => {
-        if (disabled) return palette.surface;
+        if (disabled) return palette.textSecondary;
         switch (variant) {
-            case 'primary': return '#3a1c00'; // Deep Brown for contrast on Gold
-            case 'secondary': return '#ffffff';
-            case 'outline': return palette.tint;
-            case 'ghost': return palette.tint;
-            default: return '#3a1c00';
+            case 'primary': return palette.text; // Deep Brown for contrast on Marigold
+            case 'secondary': return palette.text;
+            case 'outline': return palette.peach;
+            case 'ghost': return palette.peach;
+            default: return palette.text;
         }
     };
 
@@ -192,18 +192,18 @@ const styles = StyleSheet.create({
     },
     primaryBorder: {
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.4)', // Highlight at top
+        borderTopColor: 'rgba(255,255,255,0.6)', // Highlight at top
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.1)', // Shadow at bottom
+        borderBottomColor: 'rgba(58,28,0,0.12)', // Soft shadow at bottom
     },
     secondaryBorder: {
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(58,28,0,0.1)',
     },
     shadow: {
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
+                shadowColor: '#3a1c00',
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.2,
                 shadowRadius: 8,

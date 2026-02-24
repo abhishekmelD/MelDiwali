@@ -17,7 +17,7 @@ export default function TabTwoScreen() {
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#f2e9ff', dark: '#2c1846' }}
+      headerBackgroundColor={{ light: Colors.light.warmCream, dark: Colors.dark.warmCream }}
       headerImage={
         <IconSymbol
           size={310}
@@ -85,7 +85,7 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#808080',
+    color: '#6b5a4a',
     bottom: -90,
     left: -35,
     position: 'absolute',

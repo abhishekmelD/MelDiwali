@@ -1,12 +1,10 @@
 import {
-  Outfit_400Regular,
-  Outfit_600SemiBold,
-  Outfit_700Bold
-} from '@expo-google-fonts/outfit';
-import {
-  PlayfairDisplay_700Bold,
+  Montserrat_400Regular,
+  Montserrat_600SemiBold,
+  Montserrat_700Bold,
+  Montserrat_800ExtraBold,
   useFonts
-} from '@expo-google-fonts/playfair-display';
+} from '@expo-google-fonts/montserrat';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -30,10 +28,10 @@ export default function RootLayout() {
   const isDark = colorScheme === 'dark';
 
   const [loaded, error] = useFonts({
-    PlayfairDisplay_700Bold,
-    Outfit_400Regular,
-    Outfit_600SemiBold,
-    Outfit_700Bold,
+    Montserrat_400Regular,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
+    Montserrat_800ExtraBold,
   });
 
   useEffect(() => {

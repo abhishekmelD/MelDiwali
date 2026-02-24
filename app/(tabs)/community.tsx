@@ -5,7 +5,6 @@ import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -115,9 +114,9 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 
     const categoryColors: Record<string, string> = {
         'Events': Colors.light.gold,
-        'Food': '#4ADE80', // Emerald
-        'Culture': '#A78BFA', // Amethyst
-        'All': 'rgba(255,255,255,0.15)'
+        'Food': '#A8E6CF', // Mint
+        'Culture': '#D8B4E2', // Lavender
+        'All': 'rgba(255,213,128,0.25)'
     };
 
     const headerColor = categoryColors[post.category] || categoryColors['All'];
@@ -219,20 +218,17 @@ export default function CommunityScreen() {
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(58,28,0,0.35)' }]}>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         style={styles.modalContent}
                     >
-                        <LinearGradient
-                            colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]}
-                            style={styles.modalCard}
-                        >
+                        <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Create Post</Text>
                                 <Pressable onPress={() => setModalVisible(false)}>
                                     <View style={styles.closeBtn}>
-                                        <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                                        <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                                     </View>
                                 </Pressable>
                             </View>
@@ -257,7 +253,7 @@ export default function CommunityScreen() {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="What's happening?"
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor="rgba(58,28,0,0.35)"
                                     value={postTitle}
                                     onChangeText={setPostTitle}
                                 />
@@ -266,7 +262,7 @@ export default function CommunityScreen() {
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
                                     placeholder="Tell us more about it..."
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor="rgba(58,28,0,0.35)"
                                     value={postDesc}
                                     onChangeText={setPostDesc}
                                     multiline
@@ -282,7 +278,7 @@ export default function CommunityScreen() {
                                     <Text style={styles.postBtnText}>Post to Community</Text>
                                 </Pressable>
                             </ScrollView>
-                        </LinearGradient>
+                        </View>
                     </KeyboardAvoidingView>
                 </View>
             </Modal>
@@ -300,7 +296,7 @@ export default function CommunityScreen() {
                             <Text style={styles.modalTitle}>Draft Drops</Text>
                             <Pressable onPress={() => setDraftsVisible(false)}>
                                 <View style={styles.closeBtn}>
-                                    <MaterialCommunityIcons name="close" size={20} color="#fff" />
+                                    <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                                 </View>
                             </Pressable>
                         </View>
@@ -321,7 +317,7 @@ export default function CommunityScreen() {
                         setModalVisible(true);
                     }}
                 >
-                    <MaterialCommunityIcons name="plus" size={32} color="#000" />
+                    <MaterialCommunityIcons name="plus" size={32} color={Colors.light.text} />
                 </Pressable>
             )}
 
@@ -342,11 +338,11 @@ export default function CommunityScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#0B0B0F' },
+    container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1 },
     header: {
         fontSize: 32,
-        color: '#fff',
+        color: Colors.light.text,
         fontFamily: Fonts.header,
         marginTop: Spacing.md,
         marginBottom: Spacing.md,
@@ -367,9 +363,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         height: 38,
         borderRadius: 19,
-        backgroundColor: 'rgba(255,255,255,0.06)',
+        backgroundColor: 'rgba(255,245,230,0.7)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 10,
@@ -377,20 +373,20 @@ const styles = StyleSheet.create({
     },
     chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
     chipText: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 14,
         fontFamily: Fonts.medium,
         textAlign: 'center',
         includeFontPadding: false,
     },
-    chipTextActive: { color: '#000' },
+    chipTextActive: { color: Colors.light.text },
 
     // Post Card Styles
     postCard: {
-        backgroundColor: 'rgba(255,255,255,0.04)',
+        backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg,
         marginBottom: Spacing.md,
     },
@@ -403,17 +399,17 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,215,0,0.15)',
+        backgroundColor: 'rgba(255,213,128,0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
     },
     avatarText: { fontSize: 20 },
     headerInfo: { flex: 1 },
-    userName: { color: '#fff', fontSize: 15, fontFamily: Fonts.bold },
+    userName: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.bold },
     postDate: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular, marginTop: 1 },
     postContent: {
-        color: 'rgba(255,255,255,0.9)',
+        color: 'rgba(58,28,0,0.9)',
         fontSize: 15,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -423,7 +419,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        borderTopColor: Colors.light.borderSubtle,
         paddingTop: Spacing.md,
     },
     readMoreBtn: {
@@ -432,12 +428,12 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     readMoreText: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 14,
         fontFamily: Fonts.medium,
     },
 
-    emptyText: { color: 'rgba(255,255,255,0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
+    emptyText: { color: 'rgba(58,28,0,0.35)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
     modalOverlay: { flex: 1, justifyContent: 'flex-end' },
@@ -447,8 +443,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.xl,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -456,17 +453,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: Spacing.xl,
     },
-    modalTitle: { color: '#fff', fontSize: 28, fontFamily: Fonts.header },
+    modalTitle: { color: Colors.light.text, fontSize: 28, fontFamily: Fonts.header },
     closeBtn: {
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,213,128,0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     inputLabel: {
-        color: 'rgba(255,255,255,0.4)',
+        color: 'rgba(58,28,0,0.5)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1.5,
@@ -478,9 +475,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 12,
-        backgroundColor: 'rgba(255,215,0,0.05)',
+        backgroundColor: 'rgba(255,213,128,0.18)',
         borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.1)',
+        borderColor: 'rgba(255,213,128,0.35)',
         flex: 1,
         alignItems: 'center',
     },
@@ -488,17 +485,17 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.gold,
         borderColor: Colors.light.gold,
     },
-    typeBtnText: { color: Colors.light.gold, fontSize: 13, fontFamily: Fonts.bold },
-    typeBtnTextActive: { color: '#000' },
+    typeBtnText: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold },
+    typeBtnTextActive: { color: Colors.light.text },
     input: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(255,245,230,0.85)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 15,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.light.borderSubtle,
     },
     textArea: {
         minHeight: 120,
@@ -518,10 +515,10 @@ const styles = StyleSheet.create({
     },
     postBtnDisabled: {
         opacity: 0.3,
-        backgroundColor: 'rgba(255,255,255,0.2)',
+        backgroundColor: 'rgba(255,213,128,0.25)',
         shadowOpacity: 0,
     },
-    postBtnText: { color: '#000', fontSize: 16, fontFamily: Fonts.bold },
+    postBtnText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
 
     fab: {
         position: 'absolute',
@@ -533,7 +530,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.gold,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: '#3a1c00',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -546,37 +543,37 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(255,245,230,0.9)',
         borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.35)',
+        borderColor: 'rgba(255,213,128,0.5)',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: '#3a1c00',
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.25,
         shadowRadius: 6,
         elevation: 6,
     },
     draftsOverlay: {
-        backgroundColor: 'rgba(0,0,0,0.7)',
+        backgroundColor: 'rgba(58,28,0,0.35)',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
     },
     draftsCard: {
-        backgroundColor: Colors.light.cardGradientEnd,
+        backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.12)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.xl,
     },
     draftsEmptyTitle: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 18,
         fontFamily: Fonts.bold,
         marginBottom: Spacing.sm,
     },
     draftsEmptyText: {
-        color: 'rgba(255,255,255,0.7)',
+        color: 'rgba(58,28,0,0.7)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 20,

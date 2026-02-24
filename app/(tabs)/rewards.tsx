@@ -7,7 +7,6 @@ import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -229,7 +228,7 @@ export default function RewardsScreen() {
                                             <IconSymbol
                                                 name={flashOn ? "bolt.fill" : "bolt.slash.fill"}
                                                 size={20}
-                                                color={flashOn ? "#000" : Colors.light.gold}
+                                                color={flashOn ? Colors.light.text : Colors.light.gold}
                                             />
                                         </Pressable>
 
@@ -345,10 +344,7 @@ export default function RewardsScreen() {
                 <View style={styles.modalOverlay}>
                     <Pressable style={styles.modalBackdrop} onPress={() => setPassportModalVisible(false)} />
                     <View style={styles.modalContainer}>
-                        <LinearGradient
-                            colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]}
-                            style={styles.modalCard}
-                        >
+                        <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Festival Passport</Text>
                                 <Pressable style={styles.modalCloseBtn} onPress={() => setPassportModalVisible(false)}>
@@ -383,7 +379,7 @@ export default function RewardsScreen() {
                             >
                                 <Text style={styles.modalActionText}>Back to Rewards</Text>
                             </Pressable>
-                        </LinearGradient>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -398,10 +394,7 @@ export default function RewardsScreen() {
                     <View style={styles.modalOverlay}>
                         <Pressable style={styles.modalBackdrop} onPress={() => setSelectedReward(null)} />
                         <View style={styles.modalContainer}>
-                            <LinearGradient
-                                colors={[Colors.light.cardGradientStart, Colors.light.cardGradientEnd]}
-                                style={styles.modalCard}
-                            >
+                            <View style={styles.modalCard}>
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>{selectedReward.title}</Text>
                                     <Pressable style={styles.modalCloseBtn} onPress={() => setSelectedReward(null)}>
@@ -438,7 +431,7 @@ export default function RewardsScreen() {
                                         {claimedRewards.includes(selectedReward.id) ? 'Claimed' : 'Claim Reward'}
                                     </Text>
                                 </Pressable>
-                            </LinearGradient>
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -448,26 +441,26 @@ export default function RewardsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#0B0B0F' },
+    container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1, paddingHorizontal: Spacing.lg },
     header: {
         fontSize: 32,
-        color: '#fff',
+        color: Colors.light.text,
         fontFamily: Fonts.header,
         marginTop: Spacing.md,
         marginBottom: Spacing.lg,
     },
     passportCard: {
-        backgroundColor: 'rgba(255,255,255,0.04)',
+        backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.2)',
+        borderColor: 'rgba(255,213,128,0.45)',
         padding: Spacing.lg,
         alignItems: 'center',
         marginBottom: Spacing.lg,
     },
     passportTitle: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 18,
         fontFamily: Fonts.bold,
         marginBottom: Spacing.md,
@@ -487,7 +480,7 @@ const styles = StyleSheet.create({
     },
     cameraOffState: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.35)',
+        backgroundColor: 'rgba(58,28,0,0.3)',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
@@ -497,7 +490,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     cameraOffTitle: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 16,
         fontFamily: Fonts.bold,
         marginBottom: 4,
@@ -515,7 +508,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     cameraToggleText: {
-        color: '#000',
+        color: Colors.light.text,
         fontFamily: Fonts.bold,
         fontSize: 13,
     },
@@ -569,11 +562,11 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(58, 28, 0, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.3)',
+        borderColor: 'rgba(255, 213, 128, 0.5)',
     },
     flashBtnActive: {
         backgroundColor: Colors.light.gold,
@@ -586,12 +579,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 12,
-        backgroundColor: 'rgba(0,0,0,0.55)',
+        backgroundColor: 'rgba(58,28,0,0.35)',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.25)',
+        borderColor: 'rgba(255, 213, 128, 0.45)',
     },
     cameraOffBtnText: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 11,
         fontFamily: Fonts.medium,
     },
@@ -602,9 +595,9 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
     },
     scanBtn: {
-        backgroundColor: 'rgba(255,215,0,0.08)',
+        backgroundColor: 'rgba(255,213,128,0.2)',
         borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.3)',
+        borderColor: 'rgba(255,213,128,0.45)',
         borderRadius: 16,
         paddingVertical: 28,
         alignItems: 'center',
@@ -615,7 +608,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     scanBtnText: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 17,
         fontFamily: Fonts.bold,
         marginBottom: 4,
@@ -627,17 +620,17 @@ const styles = StyleSheet.create({
 
     passportSubtitle: { color: Colors.light.textSecondary, fontSize: 14, fontFamily: Fonts.regular },
     progressCard: {
-        backgroundColor: 'rgba(255,255,255,0.04)',
+        backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg,
         marginBottom: Spacing.lg,
     },
     progressCardPressed: {
         opacity: 0.9,
         transform: [{ scale: 0.99 }],
-        borderColor: 'rgba(255,215,0,0.3)',
+        borderColor: 'rgba(255,213,128,0.5)',
     },
     progressHeader: {
         flexDirection: 'row',
@@ -645,9 +638,9 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 8,
     },
-    progressTitle: { color: Colors.light.gold, fontSize: 18, fontFamily: Fonts.bold },
+    progressTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold },
     stampLabel: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.medium, textAlign: 'right' },
-    stampCount: { color: '#fff', fontSize: 28, fontFamily: Fonts.bold, textAlign: 'right' },
+    stampCount: { color: Colors.light.text, fontSize: 28, fontFamily: Fonts.bold, textAlign: 'right' },
     levelRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -656,36 +649,36 @@ const styles = StyleSheet.create({
     },
     levelIcon: { fontSize: 16 },
     levelText: { color: Colors.light.textSecondary, fontSize: 14, fontFamily: Fonts.regular },
-    levelName: { color: '#fff', fontFamily: Fonts.bold },
+    levelName: { color: Colors.light.text, fontFamily: Fonts.bold },
     progressBarBg: {
         height: 6,
         borderRadius: 3,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(58,28,0,0.12)',
         marginBottom: Spacing.sm,
     },
     progressBarFill: { height: 6, borderRadius: 3, backgroundColor: Colors.light.gold },
-    progressHint: { color: Colors.light.gold, fontSize: 13 },
+    progressHint: { color: Colors.light.accentText, fontSize: 13 },
     rewardsHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: Spacing.md,
     },
-    sectionTitle: { color: '#fff', fontSize: 24, fontFamily: Fonts.header },
+    sectionTitle: { color: Colors.light.text, fontSize: 24, fontFamily: Fonts.header },
     partnerText: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular },
     rewardCard: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: 'rgba(255,255,255,0.04)',
+        backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg,
         marginBottom: Spacing.md,
     },
     rewardInfo: { flex: 1, marginRight: Spacing.md },
-    rewardTitle: { color: '#fff', fontSize: 16, fontFamily: Fonts.bold, marginBottom: 4 },
+    rewardTitle: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold, marginBottom: 4 },
     rewardSubtitle: { color: Colors.light.textSecondary, fontSize: 13, fontFamily: Fonts.regular },
     claimBtn: {
         backgroundColor: Colors.light.gold,
@@ -693,23 +686,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
-    claimText: { color: '#000', fontFamily: Fonts.bold, fontSize: 14 },
+    claimText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 14 },
     claimBtnClaimed: {
-        backgroundColor: 'rgba(76, 175, 80, 0.9)',
+        backgroundColor: 'rgba(59, 155, 122, 0.85)',
     },
-    claimTextClaimed: { color: '#fff' },
+    claimTextClaimed: { color: Colors.light.text },
     testStampBtn: {
         alignSelf: 'flex-start',
         marginBottom: Spacing.lg,
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 14,
-        backgroundColor: 'rgba(255,215,0,0.12)',
+        backgroundColor: 'rgba(255,213,128,0.25)',
         borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.3)',
+        borderColor: 'rgba(255,213,128,0.45)',
     },
     testStampText: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontFamily: Fonts.bold,
         fontSize: 13,
         letterSpacing: 0.4,
@@ -723,17 +716,18 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.82)',
+        backgroundColor: 'rgba(58,28,0,0.4)',
     },
     modalContainer: {
         width: '88%',
         borderRadius: 24,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.25)',
+        borderColor: 'rgba(255, 213, 128, 0.5)',
     },
     modalCard: {
         padding: Spacing.xl,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -742,7 +736,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.lg,
     },
     modalTitle: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 28,
         fontFamily: Fonts.header,
     },
@@ -752,10 +746,10 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,213,128,0.35)',
     },
     modalCloseText: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 12,
         fontFamily: Fonts.bold,
     },
@@ -763,7 +757,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
         paddingBottom: Spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.08)',
+        borderBottomColor: Colors.light.borderSubtle,
     },
     modalMetaLabel: {
         color: Colors.light.textSecondary,
@@ -773,7 +767,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     modalMetaValue: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 18,
         fontFamily: Fonts.bold,
         lineHeight: 24,
@@ -786,12 +780,12 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
     },
     modalActionText: {
-        color: '#000',
+        color: Colors.light.text,
         fontSize: 15,
         fontFamily: Fonts.bold,
     },
     modalActionBtnClaimed: {
-        backgroundColor: 'rgba(76, 175, 80, 0.9)',
+        backgroundColor: 'rgba(59, 155, 122, 0.85)',
     },
-    modalActionTextClaimed: { color: '#fff' },
+    modalActionTextClaimed: { color: Colors.light.text },
 });

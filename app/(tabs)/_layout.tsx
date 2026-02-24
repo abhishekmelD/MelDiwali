@@ -18,8 +18,8 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[theme].tabIconSelected,
         tabBarInactiveTintColor: Colors[theme].tabIconDefault,
         tabBarStyle: {
-          backgroundColor: '#0B0B0F',
-          borderTopColor: 'rgba(255,215,0,0.1)',
+          backgroundColor: Colors[theme].background,
+          borderTopColor: Colors[theme].border,
           borderTopWidth: 1,
           height: 60,
           paddingBottom: 8,

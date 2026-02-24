@@ -104,7 +104,7 @@ function ShootingStar() {
     return (
         <Animated.View style={[styles.shootingStar, animatedStyle]}>
             <LinearGradient
-                colors={['#fff', 'transparent']}
+                colors={['#FFD580', 'transparent']}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}
@@ -164,7 +164,7 @@ function Star({ star }: { star: StarData }) {
         ],
     }));
 
-    const color = star.layer === 3 ? '#fffde0' : star.layer === 2 ? '#e8e0ff' : '#fff';
+    const color = star.layer === 3 ? '#FFD580' : star.layer === 2 ? '#D8B4E2' : '#FFF5E6';
 
     return (
         <Animated.View
@@ -192,11 +192,7 @@ export function StarryBackground() {
 
     return (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <LinearGradient
-                colors={['#0B0B0F', '#0f0824', '#1a0a3e', '#0f0824', '#0B0B0F']}
-                locations={[0, 0.25, 0.5, 0.75, 1]}
-                style={StyleSheet.absoluteFill}
-            />
+            <View style={[StyleSheet.absoluteFill, styles.base]} />
             {stars.map((star) => (
                 <Star key={star.id} star={star} />
             ))}
@@ -212,5 +208,8 @@ const styles = StyleSheet.create({
         width: 100,
         height: 2,
         borderRadius: 1,
+    },
+    base: {
+        backgroundColor: '#FFF5E6',
     },
 });

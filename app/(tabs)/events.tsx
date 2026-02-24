@@ -5,7 +5,6 @@ import { EVENTS } from '@/constants/EventData';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -61,7 +60,7 @@ function EventCard({ event, index, onPress }: { event: typeof EVENTS[0]; index: 
                             ]}>
                                 <Text style={[
                                     styles.dateBadgeText,
-                                    isRegistered && { color: '#4caf50' },
+                                    isRegistered && { color: '#3B9B7A' },
                                     isPast && { color: Colors.light.textSecondary }
                                 ]}>{event.date}</Text>
                             </View>
@@ -81,7 +80,7 @@ function EventCard({ event, index, onPress }: { event: typeof EVENTS[0]; index: 
                             <Text style={[styles.registerText, isRegistered && styles.registerTextActive]}>
                                 {isRegistered ? 'Going' : 'Register'}
                             </Text>
-                            {isRegistered && <IconSymbol size={16} name="checkmark" color="#fff" style={{ marginLeft: 4 }} />}
+                            {isRegistered && <IconSymbol size={16} name="checkmark" color={Colors.light.text} style={{ marginLeft: 4 }} />}
                         </Pressable>
                     )}
                 </Animated.View>
@@ -219,10 +218,7 @@ export default function EventsScreen() {
 
                     {/* Premium Calendar */}
                     <View style={styles.calendarCard}>
-                        <LinearGradient
-                            colors={['rgba(255, 215, 0, 0.05)', 'rgba(26, 26, 46, 0.02)']}
-                            style={styles.calendarGradient}
-                        >
+                        <View style={styles.calendarGradient}>
                             <View style={styles.calendarHeader}>
                                 <Pressable onPress={prevMonth} hitSlop={20} style={styles.navBtn}>
                                     <IconSymbol name="chevron.right" size={24} color={Colors.light.gold} style={{ transform: [{ rotate: '180deg' }] }} />
@@ -276,7 +272,7 @@ export default function EventsScreen() {
                                     );
                                 })}
                             </View>
-                        </LinearGradient>
+                        </View>
                     </View>
 
                     {/* Events List */}
@@ -288,7 +284,7 @@ export default function EventsScreen() {
 
                         {filteredEvents.length === 0 ? (
                             <View style={styles.emptyState}>
-                                <IconSymbol name="calendar" size={48} color="rgba(255,255,255,0.1)" />
+                                <IconSymbol name="calendar" size={48} color="rgba(58,28,0,0.15)" />
                                 <Text style={styles.emptyStateText}>
                                     {activeTab === 'Registered' ? "You haven't registered for any events yet." : "No events found in this category."}
                                 </Text>
@@ -307,14 +303,11 @@ export default function EventsScreen() {
                 <View style={styles.modalOverlay}>
                     <Pressable style={styles.modalBackdrop} onPress={() => setSelectedEvent(null)} />
                     <Animated.View entering={FadeInDown} style={styles.modalContent}>
-                        <LinearGradient
-                            colors={['#2a1640', '#1a0b2e']}
-                            style={styles.modalGradient}
-                        >
+                        <View style={styles.modalGradient}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>{selectedEvent.title}</Text>
                                 <Pressable onPress={() => setSelectedEvent(null)} style={styles.closeBtn}>
-                                    <IconSymbol name="chevron.right" size={24} color="#fff" style={{ transform: [{ rotate: '90deg' }] }} />
+                                    <IconSymbol name="chevron.right" size={24} color={Colors.light.text} style={{ transform: [{ rotate: '90deg' }] }} />
                                 </Pressable>
                             </View>
 
@@ -350,7 +343,7 @@ export default function EventsScreen() {
                                         >
                                             <Text style={[
                                                 styles.modalActionText,
-                                                registeredEvents.includes(selectedEvent.id) && { color: '#4caf50' }
+                                                registeredEvents.includes(selectedEvent.id) && { color: '#3B9B7A' }
                                             ]}>
                                                 {registeredEvents.includes(selectedEvent.id) ? 'Registered ✓' : 'Secure my spot'}
                                             </Text>
@@ -362,7 +355,7 @@ export default function EventsScreen() {
                                     );
                                 })()}
                             </View>
-                        </LinearGradient>
+                        </View>
                     </Animated.View>
                 </View>
             )}
@@ -372,17 +365,14 @@ export default function EventsScreen() {
                 <View style={styles.modalOverlay}>
                     <Pressable style={styles.modalBackdrop} onPress={() => setSelectedDayEvents(null)} />
                     <Animated.View entering={FadeInDown} style={styles.dayModalContent}>
-                        <LinearGradient
-                            colors={['#1f1040', '#0f071a']}
-                            style={styles.modalGradient}
-                        >
+                        <View style={styles.modalGradient}>
                             <View style={styles.modalHeader}>
                                 <View style={{ flex: 1 }}>
                                     <Text style={styles.dayModalTitle}>{selectedDay}</Text>
                                     <Text style={styles.dayModalSubtitle}>{selectedDayEvents.length} Registered {selectedDayEvents.length === 1 ? 'Event' : 'Events'}</Text>
                                 </View>
                                 <Pressable onPress={() => setSelectedDayEvents(null)} style={styles.closeBtn}>
-                                    <IconSymbol name="chevron.right" size={24} color="#fff" style={{ transform: [{ rotate: '90deg' }] }} />
+                                    <IconSymbol name="chevron.right" size={24} color={Colors.light.text} style={{ transform: [{ rotate: '90deg' }] }} />
                                 </Pressable>
                             </View>
 
@@ -407,7 +397,7 @@ export default function EventsScreen() {
                                     </Pressable>
                                 ))}
                             </ScrollView>
-                        </LinearGradient>
+                        </View>
                     </Animated.View>
                 </View>
             )}
@@ -416,35 +406,35 @@ export default function EventsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#0B0B0F' },
+    container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1, paddingHorizontal: Spacing.lg },
     header: { marginTop: Spacing.md, marginBottom: Spacing.lg },
-    headerTitle: { fontSize: 32, fontFamily: Fonts.header, color: Colors.light.gold, marginBottom: 4 },
+    headerTitle: { fontSize: 32, fontFamily: Fonts.header, color: Colors.light.accentText, marginBottom: 4 },
     headerSubtitle: { fontSize: 16, fontFamily: Fonts.regular, color: Colors.light.textSecondary },
 
     tabContainer: { marginBottom: Spacing.lg },
     tabRow: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(255,213,128,0.18)',
         borderRadius: 16,
         padding: 4,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)'
+        borderColor: Colors.light.borderSubtle
     },
     tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12 },
     tabActive: { backgroundColor: Colors.light.gold },
     tabText: { color: Colors.light.textSecondary, fontSize: 14, fontFamily: Fonts.medium },
-    tabTextActive: { color: '#000', fontFamily: Fonts.bold },
+    tabTextActive: { color: Colors.light.text, fontFamily: Fonts.bold },
 
     calendarCard: {
-        borderRadius: 24,
+        borderRadius: 20,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.2)',
+        borderColor: Colors.light.borderSubtle,
         marginBottom: Spacing.xl,
-        backgroundColor: 'rgba(26, 26, 46, 0.02)',
+        backgroundColor: Colors.light.surfaceElevated,
     },
-    calendarGradient: { padding: Spacing.md },
+    calendarGradient: { padding: Spacing.md, backgroundColor: Colors.light.surfaceElevated },
     calendarHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -453,13 +443,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.sm
     },
     monthTitleContainer: { alignItems: 'center' },
-    monthTitle: { color: '#fff', fontSize: 22, fontFamily: Fonts.header, letterSpacing: 0.5 },
-    yearTitle: { color: Colors.light.gold, fontSize: 14, fontFamily: Fonts.medium, marginTop: -2 },
+    monthTitle: { color: Colors.light.text, fontSize: 22, fontFamily: Fonts.header, letterSpacing: 0.5 },
+    yearTitle: { color: Colors.light.accentText, fontSize: 14, fontFamily: Fonts.medium, marginTop: -2 },
     navBtn: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        backgroundColor: 'rgba(255, 213, 128, 0.25)',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -467,7 +457,7 @@ const styles = StyleSheet.create({
     weekDay: {
         flex: 1,
         textAlign: 'center',
-        color: 'rgba(255, 255, 255, 0.4)',
+        color: 'rgba(58, 28, 0, 0.45)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1
@@ -493,9 +483,9 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: Colors.light.gold,
     },
-    dayText: { color: '#fff', fontSize: 15, fontFamily: Fonts.medium },
-    todayText: { color: '#000', fontFamily: Fonts.bold },
-    registeredText: { color: Colors.light.gold, fontFamily: Fonts.bold },
+    dayText: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.medium },
+    todayText: { color: Colors.light.text, fontFamily: Fonts.bold },
+    registeredText: { color: Colors.light.accentText, fontFamily: Fonts.bold },
     eventIndicator: {
         width: 4,
         height: 4,
@@ -506,29 +496,29 @@ const styles = StyleSheet.create({
     },
 
     listSection: { flex: 1 },
-    sectionTitle: { color: '#fff', fontSize: 22, fontFamily: Fonts.header, marginBottom: Spacing.md },
+    sectionTitle: { color: Colors.light.text, fontSize: 22, fontFamily: Fonts.header, marginBottom: Spacing.md },
     eventCardContainer: {
         marginBottom: Spacing.md,
     },
     eventCard: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 20,
-        borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)',
+        backgroundColor: Colors.light.surfaceElevated, borderRadius: 20,
+        borderWidth: 1, borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg,
     },
     eventCardRegistered: {
-        borderColor: 'rgba(255, 215, 0, 0.2)',
-        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+        borderColor: Colors.light.border,
+        backgroundColor: Colors.light.surface,
     },
     eventCardPast: {
-        borderColor: 'rgba(255, 255, 255, 0.05)',
-        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderColor: Colors.light.borderSubtle,
+        backgroundColor: Colors.light.surface,
     },
     eventInfo: { flex: 1, marginRight: Spacing.md },
-    eventTitle: { color: '#fff', fontSize: 17, fontFamily: Fonts.bold, marginBottom: 8 },
+    eventTitle: { color: Colors.light.text, fontSize: 17, fontFamily: Fonts.bold, marginBottom: 8 },
     eventMeta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    dateBadge: { backgroundColor: 'rgba(255, 215, 0, 0.12)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-    dateBadgeText: { color: Colors.light.gold, fontSize: 12, fontFamily: Fonts.bold },
+    dateBadge: { backgroundColor: 'rgba(255, 213, 128, 0.3)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+    dateBadgeText: { color: Colors.light.accentText, fontSize: 12, fontFamily: Fonts.bold },
     eventLocation: { color: Colors.light.textSecondary, fontSize: 13, fontFamily: Fonts.regular },
     registerBtn: {
         backgroundColor: Colors.light.gold,
@@ -539,20 +529,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     registerBtnActive: {
-        backgroundColor: 'rgba(76, 175, 80, 0.9)',
+        backgroundColor: 'rgba(59, 155, 122, 0.85)',
     },
-    registerText: { color: '#000', fontFamily: Fonts.bold, fontSize: 13 },
-    registerTextActive: { color: '#fff' },
+    registerText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 13 },
+    registerTextActive: { color: Colors.light.text },
     pastLabel: {
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: 'rgba(255, 245, 230, 0.6)',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderColor: Colors.light.borderSubtle,
     },
     pastLabelText: {
-        color: 'rgba(255, 255, 255, 0.3)',
+        color: 'rgba(58, 28, 0, 0.35)',
         fontFamily: Fonts.bold,
         fontSize: 12,
         letterSpacing: 1,
@@ -576,7 +566,7 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.85)',
+        backgroundColor: 'rgba(58, 28, 0, 0.45)',
     },
     modalContent: {
         width: SCREEN_WIDTH * 0.9,
@@ -584,10 +574,11 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.3)',
+        borderColor: 'rgba(255, 213, 128, 0.5)',
     },
     modalGradient: {
         padding: Spacing.xl,
+        backgroundColor: Colors.light.surfaceElevated,
     },
     modalHeader: {
         flexDirection: 'row',
@@ -599,14 +590,14 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 26,
         fontFamily: Fonts.header,
-        color: '#fff',
+        color: Colors.light.text,
         marginRight: Spacing.md,
     },
     closeBtn: {
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,213,128,0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -620,7 +611,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     modalInfoText: {
-        color: 'rgba(255,255,255,0.7)',
+        color: 'rgba(58, 28, 0, 0.65)',
         fontSize: 15,
         fontFamily: Fonts.medium,
     },
@@ -628,7 +619,7 @@ const styles = StyleSheet.create({
         marginTop: Spacing.lg,
     },
     descriptionTitle: {
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         fontSize: 14,
         fontFamily: Fonts.bold,
         textTransform: 'uppercase',
@@ -636,7 +627,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     descriptionText: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 16,
         lineHeight: 24,
         fontFamily: Fonts.regular,
@@ -656,10 +647,10 @@ const styles = StyleSheet.create({
     modalActionBtnActive: {
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: '#4caf50',
+        borderColor: '#3B9B7A',
     },
     modalActionText: {
-        color: '#000',
+        color: Colors.light.text,
         fontSize: 16,
         fontFamily: Fonts.bold,
     },
@@ -667,10 +658,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(255,245,230,0.6)',
     },
     modalPastBadgeText: {
-        color: 'rgba(255,255,255,0.4)',
+        color: 'rgba(58,28,0,0.4)',
         fontFamily: Fonts.medium,
         fontSize: 14,
     },
@@ -680,22 +671,22 @@ const styles = StyleSheet.create({
         borderRadius: 28,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 215, 0, 0.4)',
+        borderColor: Colors.light.border,
         elevation: 10,
-        shadowColor: Colors.light.gold,
+        shadowColor: '#3a1c00',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
     },
     dayModalTitle: {
         fontSize: 22,
         fontFamily: Fonts.header,
-        color: '#fff',
+        color: Colors.light.text,
     },
     dayModalSubtitle: {
         fontSize: 14,
         fontFamily: Fonts.medium,
-        color: Colors.light.gold,
+        color: Colors.light.accentText,
         marginTop: 2,
     },
     dayModalBody: {
@@ -706,13 +697,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 16,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+        borderBottomColor: Colors.light.borderSubtle,
     },
     miniEventInfo: {
         flex: 1,
     },
     miniEventTitle: {
-        color: '#fff',
+        color: Colors.light.text,
         fontSize: 16,
         fontFamily: Fonts.bold,
         marginBottom: 4,
