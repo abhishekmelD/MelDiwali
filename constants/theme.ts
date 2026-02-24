@@ -8,7 +8,7 @@ export const Colors = {
   light: {
     text: '#3a1c00',
     textSecondary: '#4b382c',
-    background: '#FFF5E6',
+    background: '#C62828',
     tint: '#FFD580', // Soft Marigold
     icon: '#4b382c',
     tabIconDefault: '#C5A0D2',
@@ -28,13 +28,13 @@ export const Colors = {
     mint: '#A8E6CF',
     lavender: '#D8B4E2',
     peach: '#FFB59C',
-    warmCream: '#FFF5E6',
+    warmCream: '#C62828',
     accentText: '#D85E3F',
   },
   dark: {
     text: '#3a1c00',
     textSecondary: '#4b382c',
-    background: '#FFF5E6',
+    background: '#C62828',
     tint: '#FFD580',
     icon: '#4b382c',
     tabIconDefault: '#C5A0D2',
@@ -54,7 +54,7 @@ export const Colors = {
     mint: '#A8E6CF',
     lavender: '#D8B4E2',
     peach: '#FFB59C',
-    warmCream: '#FFF5E6',
+    warmCream: '#C62828',
     accentText: '#D85E3F',
   },
 };
