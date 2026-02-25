@@ -12,7 +12,7 @@ import Animated, {
 const { width, height } = Dimensions.get('window');
 const PARTICLES_PER_FIREWORK = 12;
 
-const FIREWORK_COLORS = ['#FF6B35', '#FFD700', '#FF1493', '#00FF41', '#FFB6C1', '#FFB347', '#FF9500', '#DDA0DD'];
+const FIREWORK_COLORS = ['#2A9D8F', '#4F8FC0', '#1F3A93', '#2A9D8F', '#F3E9D2', '#4F8FC0', '#4F8FC0', '#4F8FC0'];
 
 const Particle = ({ angle, radius, color, delay }: { angle: number; radius: number; color: string; delay: number }) => {
     const opacity = useSharedValue(0);

@@ -1,5 +1,4 @@
 import { ReloadOverlay } from '@/components/ReloadOverlay';
-import { StarryBackground } from '@/components/StarryBackground';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
@@ -129,7 +128,6 @@ export default function MoreScreen() {
 
     return (
         <View style={styles.container}>
-            <StarryBackground />
             <ReloadOverlay visible={refreshing} />
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView
@@ -171,7 +169,7 @@ export default function MoreScreen() {
                             onPress={() => setMenuVisible(!isMenuVisible)}
                             hitSlop={10}
                         >
-                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(93, 58, 111, 0.4)" />
+                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(31, 58, 147, 0.4)" />
                         </Pressable>
 
                         {/* Menu Overlay & Dropdown */}
@@ -297,19 +295,19 @@ export default function MoreScreen() {
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.modalIntro}>Become a part of the Melbourne Diwali family! Tell us how you&apos;d like to help spread the light.</Text>
                                 <Text style={styles.inputLabel}>FULL NAME</Text>
-                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(93, 58, 111, 0.25)" value={volName} onChangeText={setVolName} />
+                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(31, 58, 147, 0.25)" value={volName} onChangeText={setVolName} />
                                 <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
-                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(93, 58, 111, 0.25)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
+                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(31, 58, 147, 0.25)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
                                 {volEmail && !isEmailValid && <Text style={styles.errorText}>Invalid email address</Text>}
                                 <Text style={styles.inputLabel}>PHONE NUMBER</Text>
-                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(93, 58, 111, 0.25)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
+                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(31, 58, 147, 0.25)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
                                 {volPhone && !isPhoneValid && <Text style={styles.errorText}>Invalid AU phone number</Text>}
                                 <Text style={styles.inputLabel}>INTEREST AREAS</Text>
                                 <View style={styles.chipRow}>{INTERESTS.map(i => <SelectChip key={i} label={i} active={selectedInterests.includes(i)} onPress={() => toggleInterest(i)} />)}</View>
                                 <Text style={styles.inputLabel}>AVAILABILITY (DAYS)</Text>
                                 <View style={styles.chipRow}>{DAYS.map(d => <SelectChip key={d} label={d} active={selectedDays.includes(d)} onPress={() => toggleDay(d)} />)}</View>
                                 <Text style={styles.inputLabel}>WHY DO YOU WANT TO JOIN?</Text>
-                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(58,28,0,0.35)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
+                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(18, 58, 100, 0.35)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
                                 <Pressable style={[styles.submitBtn, !isFormValid && styles.submitBtnDisabled]} onPress={handleVolunteerSubmit} disabled={!isFormValid}>
                                     <Text style={styles.submitText}>Submit Application</Text>
                                 </Pressable>
@@ -425,7 +423,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
                             <TextInput
                                 style={styles.input}
                                 placeholder="https://photos.google.com/..."
-                                placeholderTextColor="rgba(58,28,0,0.35)"
+                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
                                 value={link}
                                 onChangeText={setLink}
                                 autoCapitalize="none"
@@ -517,7 +515,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="e.g. Alexis"
-                                placeholderTextColor="rgba(58,28,0,0.35)"
+                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
                                 value={userName}
                                 onChangeText={setUserName}
                                 maxLength={20}
@@ -527,7 +525,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={[styles.input, email && !validateEmail(email) && styles.inputError]}
                                 placeholder="you@example.com"
-                                placeholderTextColor="rgba(58,28,0,0.35)"
+                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -539,7 +537,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="Set a password"
-                                placeholderTextColor="rgba(58,28,0,0.35)"
+                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
@@ -578,7 +576,7 @@ function ContactCard({ icon, title, value, onPress }: { icon: any; title: string
             <View style={styles.contactCard}>
                 <View style={styles.iconCircle}><MaterialCommunityIcons name={icon} size={24} color={Colors.light.gold} /></View>
                 <View style={styles.contactInfo}><Text style={styles.contactLabel}>{title}</Text><Text style={styles.contactValue}>{value}</Text></View>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(93, 58, 111, 0.2)" />
+                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(31, 58, 147, 0.2)" />
             </View>
         </Pressable>
     );
@@ -594,7 +592,7 @@ const styles = StyleSheet.create({
         padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.lg,
         position: 'relative', // For absolute positioning of menu
     },
-    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,213,128,0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
+    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(79, 143, 192, 0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
     avatarText: { fontSize: 28 },
     profileTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
     signUpBtn: {
@@ -614,10 +612,10 @@ const styles = StyleSheet.create({
         marginTop: Spacing.sm,
     },
     nameInputContainer: { width: '100%', marginTop: Spacing.xl, alignItems: 'center' },
-    nameInputLabel: { color: 'rgba(93, 58, 111, 0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
+    nameInputLabel: { color: 'rgba(31, 58, 147, 0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
     nameInput: {
         width: '100%',
-        backgroundColor: 'rgba(255,245,230,0.8)',
+        backgroundColor: 'rgba(243, 233, 210, 0.8)',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -629,7 +627,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.light.borderSubtle,
     },
     roleDisplay: {
-        color: 'rgba(93, 58, 111, 0.45)',
+        color: 'rgba(31, 58, 147, 0.45)',
         fontSize: 13,
         fontFamily: Fonts.medium,
         marginTop: Spacing.md,
@@ -647,15 +645,15 @@ const styles = StyleSheet.create({
     chevron: { color: Colors.light.textSecondary, fontSize: 24 },
     sectionTitle: { color: Colors.light.text, fontSize: 24, fontFamily: Fonts.header, marginTop: Spacing.md, marginBottom: Spacing.md },
     dangerCard: {
-        backgroundColor: 'rgba(255,181,156,0.2)', borderRadius: 16,
-        borderWidth: 1, borderColor: 'rgba(255,181,156,0.5)',
+        backgroundColor: 'rgba(79, 143, 192, 0.2)', borderRadius: 16,
+        borderWidth: 1, borderColor: 'rgba(79, 143, 192, 0.5)',
         padding: Spacing.lg, marginBottom: Spacing.md,
     },
     dangerText: { color: Colors.light.peach, fontSize: 15, fontFamily: Fonts.medium },
-    version: { color: 'rgba(93, 58, 111, 0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
+    version: { color: 'rgba(31, 58, 147, 0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(93, 58, 111, 0.35)', justifyContent: 'flex-end' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(31, 58, 147, 0.35)', justifyContent: 'flex-end' },
     modalContent: { height: '85%' },
     modalCard: {
         flex: 1,
@@ -677,12 +675,12 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,213,128,0.35)',
+        backgroundColor: 'rgba(79, 143, 192, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     modalIntro: {
-        color: 'rgba(93, 58, 111, 0.5)',
+        color: 'rgba(31, 58, 147, 0.5)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -696,7 +694,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     inputLabel: {
-        color: 'rgba(58,28,0,0.5)',
+        color: 'rgba(18, 58, 100, 0.5)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1.5,
@@ -704,7 +702,7 @@ const styles = StyleSheet.create({
         marginTop: Spacing.lg,
     },
     input: {
-        backgroundColor: 'rgba(255,245,230,0.8)',
+        backgroundColor: 'rgba(243, 233, 210, 0.8)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -713,7 +711,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
     },
-    inputError: { borderColor: 'rgba(255,181,156,0.7)', backgroundColor: 'rgba(255,181,156,0.2)' },
+    inputError: { borderColor: 'rgba(79, 143, 192, 0.7)', backgroundColor: 'rgba(79, 143, 192, 0.2)' },
     errorText: { color: Colors.light.peach, fontSize: 12, fontFamily: Fonts.regular, marginTop: 4 },
     textArea: { minHeight: 100, textAlignVertical: 'top', paddingTop: 16 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
@@ -721,12 +719,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,245,230,0.7)',
+        backgroundColor: 'rgba(243, 233, 210, 0.7)',
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
     },
     chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
-    chipText: { color: 'rgba(93, 58, 111, 0.5)', fontSize: 13, fontFamily: Fonts.medium },
+    chipText: { color: 'rgba(31, 58, 147, 0.5)', fontSize: 13, fontFamily: Fonts.medium },
     chipTextActive: { color: Colors.light.text },
     submitBtn: {
         backgroundColor: Colors.light.gold,
@@ -735,7 +733,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: Spacing.xl,
     },
-    submitBtnDisabled: { opacity: 0.5, backgroundColor: 'rgba(255,213,128,0.25)' },
+    submitBtnDisabled: { opacity: 0.5, backgroundColor: 'rgba(79, 143, 192, 0.25)' },
     submitText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
 
     // Contact Card
@@ -753,22 +751,22 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(255,213,128,0.25)',
+        backgroundColor: 'rgba(79, 143, 192, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
     },
     contactInfo: { flex: 1 },
-    contactLabel: { color: 'rgba(93, 58, 111, 0.35)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
+    contactLabel: { color: 'rgba(31, 58, 147, 0.35)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
     contactValue: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.medium },
     ackTitle: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold, marginBottom: 8, textAlign: 'center' },
-    ackText: { color: 'rgba(93, 58, 111, 0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
-    copyright: { color: 'rgba(93, 58, 111, 0.2)', fontSize: 11, fontFamily: Fonts.regular },
+    ackText: { color: 'rgba(31, 58, 147, 0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
+    copyright: { color: 'rgba(31, 58, 147, 0.2)', fontSize: 11, fontFamily: Fonts.regular },
 
     // Success Overlay Styles
     successOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(93, 58, 111, 0.6)',
+        backgroundColor: 'rgba(31, 58, 147, 0.6)',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 32,
@@ -783,7 +781,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     successSubtext: {
-        color: 'rgba(58,28,0,0.6)',
+        color: 'rgba(18, 58, 100, 0.6)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         marginTop: 8,
@@ -794,7 +792,7 @@ const styles = StyleSheet.create({
         padding: Spacing.xl,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255, 213, 128, 0.35)',
+        borderColor: 'rgba(79, 143, 192, 0.35)',
         alignItems: 'center',
         marginVertical: Spacing.xl,
         backgroundColor: Colors.light.surfaceElevated,
@@ -835,7 +833,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         zIndex: 30, // Higher than overlay
-        shadowColor: "#3a1c00",
+        shadowColor: "#173070",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 4.65,

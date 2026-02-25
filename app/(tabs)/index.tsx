@@ -2,6 +2,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
@@ -38,37 +39,64 @@ const LIVE_DROPS = [
   {
     id: '1',
     badge: 'SPONSOR DROP',
-    badgeColor: '#FFD700',
+    badgeColor: '#4F8FC0',
     title: 'Sponsor Drop: Rangoli Competition',
     description: 'Enter & share your design to unlock a festival stamp.',
     cta: 'Enter now',
-    gradient: ['rgba(255, 250, 205, 0.2)', 'rgba(0, 255, 65, 0.5)'] as const,
+    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(42, 157, 143, 0.5)'] as const,
     image: require('@/assets/images/drop_rangoli.png'),
-    tintColor: '#00FF41',
+    tintColor: '#2A9D8F',
   },
   {
     id: '2',
     badge: 'VENDOR',
-    badgeColor: '#FFD700',
+    badgeColor: '#4F8FC0',
     title: 'Vendor Spotlight: Curry House',
     description: 'Exclusive tasting menu drop this week. Limited serves.',
     cta: 'View menu',
-    gradient: ['rgba(255, 250, 205, 0.2)', 'rgba(255, 107, 53, 0.5)'] as const,
+    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(42, 157, 143, 0.5)'] as const,
     image: require('@/assets/images/drop_curry.png'),
-    tintColor: '#FF6B35',
+    tintColor: '#2A9D8F',
   },
   {
     id: '3',
     badge: 'PERFORMER',
-    badgeColor: '#FF1493',
+    badgeColor: '#1F3A93',
     title: 'Performer Reveal: DJ Karma',
     description: 'Get ready for the main stage! Preview the setlist.',
     cta: 'Listen now',
-    gradient: ['rgba(255, 250, 205, 0.2)', 'rgba(147, 112, 219, 0.5)'] as const,
+    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(79, 143, 192, 0.5)'] as const,
     image: require('@/assets/images/drop_dj.png'),
-    tintColor: '#9370DB',
+    tintColor: '#4F8FC0',
   },
 ];
+
+const QUICK_ACTIONS = [
+  {
+    key: 'schedule',
+    label: 'Schedule',
+    icon: 'calendar-month',
+    path: '/events',
+    bgColor: '#1F3A93',
+    borderColor: '#173070',
+  },
+  {
+    key: 'passport',
+    label: 'My Passport',
+    icon: 'passport',
+    path: '/rewards',
+    bgColor: '#2A9D8F',
+    borderColor: '#1E7D72',
+  },
+  {
+    key: 'scan',
+    label: 'Scan & Collect',
+    icon: 'qrcode-scan',
+    path: '/rewards',
+    bgColor: '#2A9D8F',
+    borderColor: '#1E7D72',
+  },
+] as const;
 
 // ----- Countdown Timer -----
 function CountdownTimer() {
@@ -114,7 +142,7 @@ function CountdownTimer() {
   }, [glow, tiltX, tiltY]);
 
   const animatedGlow = useAnimatedStyle(() => ({
-    borderColor: `rgba(255, 215, 0, ${glow.value})`,
+    borderColor: `rgba(79, 143, 192, ${glow.value})`,
     shadowOpacity: glow.value * 0.4,
   }));
 
@@ -197,7 +225,11 @@ function LiveDropCard({
             imageStyle={{ borderRadius: 16 }}
             resizeMode="cover"
           >
-            <View style={styles.dropGradient}>
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.03)', 'rgba(0, 0, 0, 0.26)', 'rgba(0, 0, 0, 0.62)']}
+              locations={[0, 0.55, 1]}
+              style={styles.dropGradient}
+            >
               <View style={styles.cardHeader}>
                 <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
                   <Text style={styles.dropBadgeText}>{item.badge}</Text>
@@ -210,10 +242,10 @@ function LiveDropCard({
                 <Text style={styles.dropDesc} numberOfLines={1}>{item.description}</Text>
                 <View style={styles.dropCta}>
                   <Text style={styles.dropCtaText}>{item.cta}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={16} color={Colors.light.accentText} />
+                  <MaterialCommunityIcons name="chevron-right" size={16} color="#FFFFFF" />
                 </View>
               </View>
-            </View>
+            </LinearGradient>
           </ImageBackground>
         </Pressable>
       </Animated.View>
@@ -342,40 +374,32 @@ export default function HomeScreen() {
             )}
           </Animated.View>
 
-          {/* Action Cards */}
+          {/* Quick Actions */}
           <Animated.View
             entering={FadeInDown.delay(800).duration(800)}
-            style={[styles.actionRow, viewportWidth < 520 && styles.actionRowStacked]}
+            style={styles.quickActionsRow}
           >
-            <Pressable style={styles.actionCard} onPress={() => handleActionPress('/events')}>
-              <View style={styles.actionGradient}>
-                <Text style={styles.actionIcon}>📅</Text>
-                <Text style={styles.actionTitle}>Schedule</Text>
-                <Text style={styles.actionSubtitle}>What&apos;s on now?</Text>
-              </View>
-            </Pressable>
-            <Pressable style={styles.actionCard} onPress={() => handleActionPress('/rewards')}>
-              <View style={styles.actionGradient}>
-                <Text style={styles.actionIcon}>🎫</Text>
-                <Text style={styles.actionTitle}>My Passport</Text>
-                <Text style={styles.actionSubtitle}>View your stamps</Text>
-              </View>
-            </Pressable>
-          </Animated.View>
-
-          {/* Scan & Collect */}
-          <Animated.View entering={FadeInDown.delay(1000).duration(800)}>
-            <Pressable style={styles.scanBanner} onPress={() => handleActionPress('/rewards')}>
-              <View style={styles.scanGradient}>
-                <View style={styles.scanLeft}>
-                  <MaterialCommunityIcons name="qrcode-scan" size={34} color={Colors.light.accentText} style={styles.scanIcon} />
-                  <View>
-                    <Text style={styles.scanTitle}>Scan & Collect</Text>
-                    <Text style={styles.scanSubtitle}>Visit stalls to earn stamps</Text>
-                  </View>
+            {QUICK_ACTIONS.map((action, index) => (
+              <Pressable
+                key={action.key}
+                style={({ pressed }) => [
+                  styles.quickActionButton,
+                  index === 1 && styles.quickActionButtonMiddle,
+                  {
+                    backgroundColor: action.bgColor,
+                    borderColor: action.borderColor,
+                    shadowColor: action.borderColor,
+                  },
+                  pressed && styles.quickActionButtonPressed,
+                ]}
+                onPress={() => handleActionPress(action.path)}
+              >
+                <View style={styles.quickActionInner}>
+                  <MaterialCommunityIcons name={action.icon} size={30} color="#F3E9D2" />
+                  <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </View>
-              </View>
-            </Pressable>
+              </Pressable>
+            ))}
           </Animated.View>
 
           <View style={{ height: 40 }} />
@@ -517,7 +541,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
+    borderColor: 'rgba(42, 157, 143, 0.35)',
     shadowColor: Colors.light.accentText,
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 10,
@@ -564,9 +588,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.light.surfaceElevated,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
+    borderColor: 'rgba(42, 157, 143, 0.35)',
     elevation: 5,
-    shadowColor: '#FF6B35',
+    shadowColor: '#2A9D8F',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 10,
@@ -576,7 +600,6 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 250, 205, 0.5)',
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   tintOverlay: { width: 4, height: 24, borderRadius: 2, opacity: 0.8 },
@@ -584,87 +607,91 @@ const styles = StyleSheet.create({
   dropBadgeText: { color: Colors.light.text, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
   dropContent: { marginTop: 'auto' },
   dropTitle: {
-    color: Colors.light.text,
+    color: '#FFFFFF',
     fontSize: 20,
     fontFamily: Fonts.bold,
     marginBottom: 4,
+    textShadowColor: 'rgba(23, 48, 112, 0.65)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   dropDesc: {
-    color: Colors.light.textSecondary,
+    color: 'rgba(255, 255, 255, 0.92)',
     fontSize: 14,
     fontFamily: Fonts.regular,
     marginBottom: 12,
+    textShadowColor: 'rgba(23, 48, 112, 0.65)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   dropCta: {
     alignSelf: 'flex-start',
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: '#FF6B35',
+    borderColor: 'rgba(255, 255, 255, 0.82)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: 'rgba(23, 48, 112, 0.32)',
   },
   dropCtaText: {
-    color: '#FF6B35',
+    color: '#FFFFFF',
     fontSize: 13,
     fontFamily: Fonts.medium,
     marginRight: 4,
   },
 
-  // Action Cards
-  actionRow: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.lg, marginBottom: Spacing.lg },
-  actionRowStacked: { flexDirection: 'column' },
-  actionCard: {
-    flex: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
-    shadowColor: '#9370DB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-  },
-  actionGradient: {
-    padding: Spacing.lg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
-    minHeight: 120,
-    backgroundColor: '#FFFACD',
-  },
-  actionIcon: { fontSize: 28, marginBottom: Spacing.sm },
-  actionTitle: { color: Colors.light.text, fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  actionSubtitle: { color: Colors.light.textSecondary, fontSize: 13 },
-
-  // Scan
-  scanBanner: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
-  },
-  scanGradient: {
+  // Quick Actions
+  quickActionsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.lg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
-    backgroundColor: '#FFFACD',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
-  scanLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  scanIcon: { marginRight: 4 },
-  scanTitle: { color: Colors.light.text, fontSize: 16, fontWeight: '700', marginBottom: 2 },
-  scanSubtitle: { color: Colors.light.textSecondary, fontSize: 13 },
+  quickActionButton: {
+    width: '29%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#1F3A93',
+    backgroundColor: '#2A9D8F',
+    shadowColor: '#1F3A93',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  quickActionButtonMiddle: {
+    marginHorizontal: 0,
+  },
+  quickActionButtonPressed: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.9,
+  },
+  quickActionInner: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.sm,
+  },
+  quickActionLabel: {
+    color: '#F3E9D2',
+    fontSize: 11,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
+    lineHeight: 14,
+  },
 
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(93, 58, 111, 0.35)',
+    backgroundColor: 'rgba(31, 58, 147, 0.35)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -675,9 +702,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
+    borderColor: 'rgba(42, 157, 143, 0.35)',
     padding: Spacing.xl,
-    backgroundColor: '#FFFACD',
+    backgroundColor: '#FFFFFF',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -694,7 +721,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 107, 53, 0.25)',
+    backgroundColor: 'rgba(42, 157, 143, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -716,14 +743,14 @@ const styles = StyleSheet.create({
   },
   detailBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(93, 58, 111, 0.4)',
+    backgroundColor: 'rgba(31, 58, 147, 0.4)',
   },
   detailContent: {
     maxHeight: '70%',
     borderRadius: 32,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.35)',
+    borderColor: 'rgba(42, 157, 143, 0.35)',
   },
   detailGradient: {
     padding: Spacing.xl,
@@ -746,7 +773,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 107, 53, 0.25)',
+    backgroundColor: 'rgba(42, 157, 143, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -793,7 +820,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   detailActionBtn: {
-    backgroundColor: '#FFD700',
+    backgroundColor: '#4F8FC0',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',

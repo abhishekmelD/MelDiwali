@@ -87,7 +87,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-        <StatusBar style="light" />
+        <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
       </ThemeProvider>
     </UserProvider>
   );

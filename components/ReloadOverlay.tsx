@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     overlay: {
         ...StyleSheet.absoluteFillObject,
         zIndex: 99999,
-        backgroundColor: 'rgba(11, 11, 15, 0.85)',
+        backgroundColor: 'rgba(31, 58, 147, 0.85)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -78,11 +78,11 @@ const styles = StyleSheet.create({
         height: 44,
         borderRadius: 22,
         borderWidth: 2,
-        borderColor: 'rgba(255, 215, 0, 0.1)',
+        borderColor: 'rgba(79, 143, 192, 0.1)',
         borderTopColor: Colors.light.gold,
     },
     text: {
-        color: 'rgba(255, 215, 0, 0.8)',
+        color: 'rgba(79, 143, 192, 0.8)',
         fontSize: 13,
         fontFamily: Fonts.medium,
         letterSpacing: 2.5,

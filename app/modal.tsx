@@ -16,7 +16,7 @@ export default function ModalScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor: palette.background }]}>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
       <Card variant="elevated" style={[styles.card, { backgroundColor: palette.surface }]}>
         <ThemedText
           type="title"

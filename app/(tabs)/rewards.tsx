@@ -1,5 +1,4 @@
 import { ReloadOverlay } from '@/components/ReloadOverlay';
-import { StarryBackground } from '@/components/StarryBackground';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
@@ -180,7 +179,6 @@ export default function RewardsScreen() {
 
     return (
         <View style={styles.container}>
-            <StarryBackground />
             <ReloadOverlay visible={refreshing} />
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView
@@ -225,7 +223,7 @@ export default function RewardsScreen() {
                                                 setCameraEnabled(true);
                                             }}
                                         >
-                                            <Text style={styles.cameraToggleText}>Turn camera on (TEST)</Text>
+                                            <Text style={styles.cameraToggleText}>Turn camera on</Text>
                                         </Pressable>
                                     </View>
                                 )}
@@ -257,18 +255,6 @@ export default function RewardsScreen() {
                                             />
                                         </Pressable>
 
-                                        <Pressable
-                                            onPress={() => {
-                                                Haptics.selectionAsync();
-                                                setCameraEnabled(false);
-                                            }}
-                                            style={({ pressed }) => [
-                                                styles.cameraOffBtn,
-                                                pressed && { opacity: 0.85 }
-                                            ]}
-                                        >
-                                            <Text style={styles.cameraOffBtnText}>Turn camera off (TEST)</Text>
-                                        </Pressable>
                                     </View>
                                 )}
                             </View>
@@ -331,20 +317,6 @@ export default function RewardsScreen() {
                                 ? 'Level maxxed out'
                                 : `${Math.max(nextLevelAt - totalScannedStamps, 0)} more stamps to reach Level ${level + 1}`}
                         </Text>
-                    </Pressable>
-
-                    {/* Test-only: quick add stamps */}
-                    <Pressable
-                        style={({ pressed }) => [
-                            styles.testStampBtn,
-                            pressed && { opacity: 0.85 }
-                        ]}
-                        onPress={() => {
-                            setStamps((prev) => prev + 5);
-                            setTotalScannedStamps((prev) => prev + 5);
-                        }}
-                    >
-                        <Text style={styles.testStampText}>+5 Stamps (TEST)</Text>
                     </Pressable>
 
                     {/* Available Rewards */}
@@ -506,7 +478,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(255,213,128,0.45)',
+        borderColor: 'rgba(79, 143, 192, 0.45)',
         padding: Spacing.lg,
         alignItems: 'center',
         marginBottom: Spacing.lg,
@@ -532,7 +504,7 @@ const styles = StyleSheet.create({
     },
     cameraOffState: {
         flex: 1,
-        backgroundColor: 'rgba(93, 58, 111, 0.2)',
+        backgroundColor: 'rgba(31, 58, 147, 0.2)',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
@@ -614,42 +586,25 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: 'rgba(93, 58, 111, 0.25)',
+        backgroundColor: 'rgba(31, 58, 147, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255, 213, 128, 0.5)',
+        borderColor: 'rgba(79, 143, 192, 0.5)',
     },
     flashBtnActive: {
         backgroundColor: Colors.light.gold,
         borderColor: Colors.light.gold,
     },
-    cameraOffBtn: {
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 12,
-        backgroundColor: 'rgba(58,28,0,0.35)',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 213, 128, 0.45)',
-    },
-    cameraOffBtnText: {
-        color: Colors.light.accentText,
-        fontSize: 11,
-        fontFamily: Fonts.medium,
-    },
-
     // Scan button styles (fallback when permission not granted)
     qrContainer: {
         width: '100%',
         marginBottom: Spacing.md,
     },
     scanBtn: {
-        backgroundColor: 'rgba(255, 250, 205, 0.2)',
+        backgroundColor: 'rgba(243, 233, 210, 0.2)',
         borderWidth: 1,
-        borderColor: 'rgba(255,213,128,0.45)',
+        borderColor: 'rgba(79, 143, 192, 0.45)',
         borderRadius: 16,
         paddingVertical: 28,
         alignItems: 'center',
@@ -682,7 +637,7 @@ const styles = StyleSheet.create({
     progressCardPressed: {
         opacity: 0.9,
         transform: [{ scale: 0.99 }],
-        borderColor: 'rgba(255,213,128,0.5)',
+        borderColor: 'rgba(79, 143, 192, 0.5)',
     },
     progressHeader: {
         flexDirection: 'row',
@@ -705,7 +660,7 @@ const styles = StyleSheet.create({
     progressBarBg: {
         height: 6,
         borderRadius: 3,
-        backgroundColor: 'rgba(58,28,0,0.12)',
+        backgroundColor: 'rgba(18, 58, 100, 0.12)',
         marginBottom: Spacing.sm,
     },
     progressBarFill: { height: 6, borderRadius: 3, backgroundColor: Colors.light.gold },
@@ -746,27 +701,9 @@ const styles = StyleSheet.create({
     },
     claimText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 14 },
     claimBtnClaimed: {
-        backgroundColor: 'rgba(59, 155, 122, 0.85)',
+        backgroundColor: 'rgba(42, 157, 143, 0.85)',
     },
     claimTextClaimed: { color: Colors.light.text },
-    testStampBtn: {
-        alignSelf: 'flex-start',
-        marginBottom: Spacing.lg,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 14,
-        backgroundColor: 'rgba(255, 250, 205, 0.25)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,213,128,0.45)',
-    },
-    testStampText: {
-        color: Colors.light.accentText,
-        fontFamily: Fonts.bold,
-        fontSize: 13,
-        letterSpacing: 0.4,
-        textTransform: 'uppercase',
-    },
-
     modalOverlay: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
@@ -774,14 +711,14 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(93, 58, 111, 0.3)',
+        backgroundColor: 'rgba(31, 58, 147, 0.3)',
     },
     modalContainer: {
         width: '88%',
         borderRadius: 24,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 213, 128, 0.5)',
+        borderColor: 'rgba(79, 143, 192, 0.5)',
     },
     modalCard: {
         padding: Spacing.xl,
@@ -804,7 +741,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 250, 205, 0.35)',
+        backgroundColor: 'rgba(243, 233, 210, 0.35)',
     },
     modalCloseText: {
         color: Colors.light.text,
@@ -843,7 +780,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.bold,
     },
     modalActionBtnClaimed: {
-        backgroundColor: 'rgba(59, 155, 122, 0.85)',
+        backgroundColor: 'rgba(42, 157, 143, 0.85)',
     },
     modalActionTextClaimed: { color: Colors.light.text },
 });
