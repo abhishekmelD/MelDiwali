@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -41,6 +41,11 @@ function SelectChip({ label, active, onPress }: { label: string; active: boolean
 
 
 export default function MoreScreen() {
+    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
+    const isExpanded = viewportWidth >= 1024;
+    const appFrameWidth = isExpanded
+        ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
+        : viewportWidth;
     const { userName, userRole, logout } = useUser();
     const { openSignup } = useLocalSearchParams();
 
@@ -131,7 +136,10 @@ export default function MoreScreen() {
         <View style={styles.container}>
             <AppBackground />
             <ReloadOverlay visible={refreshing} />
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <SafeAreaView
+                style={[styles.safeArea, isExpanded && { width: appFrameWidth, alignSelf: 'center' }]}
+                edges={['top']}
+            >
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     refreshControl={

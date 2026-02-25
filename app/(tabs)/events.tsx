@@ -6,7 +6,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import React, { useMemo, useState } from 'react';
-import { Dimensions, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -98,6 +98,11 @@ function getFirstDayOfMonth(month: number, year: number) {
 }
 
 export default function EventsScreen() {
+    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
+    const isExpanded = viewportWidth >= 1024;
+    const appFrameWidth = isExpanded
+        ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
+        : viewportWidth;
     const { registeredEvents, toggleEventRegistration } = useUser();
     const [activeTab, setActiveTab] = useState<TabType>('Upcoming');
     const [selectedEvent, setSelectedEvent] = useState<typeof EVENTS[0] | null>(null);
@@ -182,7 +187,10 @@ export default function EventsScreen() {
         <View style={styles.container}>
             <AppBackground />
             <ReloadOverlay visible={refreshing} />
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <SafeAreaView
+                style={[styles.safeArea, isExpanded && { width: appFrameWidth, alignSelf: 'center' }]}
+                edges={['top']}
+            >
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 100 }}

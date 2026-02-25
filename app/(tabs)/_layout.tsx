@@ -1,11 +1,17 @@
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
+import { useWindowDimensions } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useUser } from '@/contexts/UserContext';
 
 export default function TabLayout() {
+  const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
+  const isExpanded = viewportWidth >= 1024;
+  const appFrameWidth = isExpanded
+    ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
+    : undefined;
   const { userRole } = useUser();
   const router = useRouter();
 
@@ -21,6 +27,8 @@ export default function TabLayout() {
           height: 66,
           paddingBottom: 12,
           paddingTop: 6,
+          width: appFrameWidth,
+          alignSelf: isExpanded ? 'center' : undefined,
         },
         tabBarLabelStyle: {
           fontWeight: '600',

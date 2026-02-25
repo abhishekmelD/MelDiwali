@@ -76,13 +76,18 @@ function RewardCard({
 }
 
 export default function RewardsScreen() {
-    const { width: viewportWidth } = useWindowDimensions();
-    const isTablet = viewportWidth >= 768;
+    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
     const isExpanded = viewportWidth >= 1024;
+    const appFrameWidth = isExpanded
+        ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
+        : viewportWidth;
+    const isTablet = appFrameWidth >= 768;
     const sidePadding = isExpanded ? Spacing.xl * 2 : isTablet ? Spacing.xl : Spacing.lg;
     const maxContentWidth = isExpanded ? 1120 : isTablet ? 920 : 720;
-    const contentWidth = Math.min(maxContentWidth, Math.max(viewportWidth - sidePadding * 2, 280));
-    const rewardColumns = viewportWidth >= 1200 ? 3 : isTablet ? 2 : 1;
+    const contentWidth = isExpanded
+        ? Math.max(280, appFrameWidth - sidePadding * 2)
+        : Math.min(maxContentWidth, Math.max(appFrameWidth - sidePadding * 2, 280));
+    const rewardColumns = appFrameWidth >= 1200 ? 3 : isTablet ? 2 : 1;
     const rewardGap = Spacing.md;
     const rewardCardWidth = rewardColumns === 1
         ? contentWidth

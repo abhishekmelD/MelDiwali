@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -148,6 +148,11 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 }
 
 export default function CommunityScreen() {
+    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
+    const isExpanded = viewportWidth >= 1024;
+    const appFrameWidth = isExpanded
+        ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
+        : viewportWidth;
     const { userName, userRole } = useUser();
     const [activeFilter, setActiveFilter] = useState('All');
     const [isModalVisible, setModalVisible] = useState(false);
@@ -177,7 +182,10 @@ export default function CommunityScreen() {
         <View style={styles.container}>
             <AppBackground />
             <ReloadOverlay visible={refreshing} />
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <SafeAreaView
+                style={[styles.safeArea, isExpanded && { width: appFrameWidth, alignSelf: 'center' }]}
+                edges={['top']}
+            >
                 <Text style={styles.header}>Community</Text>
                 <ScrollView
                     horizontal
