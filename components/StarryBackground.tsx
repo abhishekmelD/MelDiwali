@@ -104,7 +104,7 @@ function ShootingStar() {
     return (
         <Animated.View style={[styles.shootingStar, animatedStyle]}>
             <LinearGradient
-                colors={['#FFD580', 'transparent']}
+                colors={['#FFD700', '#FF6B35', 'transparent']}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}
@@ -164,7 +164,7 @@ function Star({ star }: { star: StarData }) {
         ],
     }));
 
-    const color = star.layer === 3 ? '#FFD580' : star.layer === 2 ? '#D8B4E2' : '#FFF5E6';
+    const color = star.layer === 3 ? '#FFD700' : star.layer === 2 ? '#FF6B35' : '#FFFACD';
 
     return (
         <Animated.View
@@ -210,6 +210,6 @@ const styles = StyleSheet.create({
         borderRadius: 1,
     },
     base: {
-        backgroundColor: '#FFF5E6',
+        backgroundColor: '#5D3A6F', // Deep Purple background for festive theme
     },
 });

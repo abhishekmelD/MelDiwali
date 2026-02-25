@@ -284,7 +284,7 @@ export default function EventsScreen() {
 
                         {filteredEvents.length === 0 ? (
                             <View style={styles.emptyState}>
-                                <IconSymbol name="calendar" size={48} color="rgba(58,28,0,0.15)" />
+                                <IconSymbol name="calendar" size={48} color="rgba(255, 107, 53, 0.1)" />
                                 <Text style={styles.emptyStateText}>
                                     {activeTab === 'Registered' ? "You haven't registered for any events yet." : "No events found in this category."}
                                 </Text>
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     tabContainer: { marginBottom: Spacing.lg },
     tabRow: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(255,213,128,0.18)',
+        backgroundColor: 'rgba(255, 107, 53, 0.15)',
         borderRadius: 16,
         padding: 4,
         borderWidth: 1,
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,245,230,0.6)',
     },
     modalPastBadgeText: {
-        color: 'rgba(58,28,0,0.4)',
+        color: 'rgba(255, 107, 53, 0.3)',
         fontFamily: Fonts.medium,
         fontSize: 14,
     },

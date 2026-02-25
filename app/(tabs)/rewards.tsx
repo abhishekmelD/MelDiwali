@@ -8,7 +8,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -75,6 +75,18 @@ function RewardCard({
 }
 
 export default function RewardsScreen() {
+    const { width: viewportWidth } = useWindowDimensions();
+    const isTablet = viewportWidth >= 768;
+    const isExpanded = viewportWidth >= 1024;
+    const sidePadding = isExpanded ? Spacing.xl * 2 : isTablet ? Spacing.xl : Spacing.lg;
+    const maxContentWidth = isExpanded ? 1120 : isTablet ? 920 : 720;
+    const contentWidth = Math.min(maxContentWidth, Math.max(viewportWidth - sidePadding * 2, 280));
+    const rewardColumns = viewportWidth >= 1200 ? 3 : isTablet ? 2 : 1;
+    const rewardGap = Spacing.md;
+    const rewardCardWidth = rewardColumns === 1
+        ? contentWidth
+        : (contentWidth - rewardGap * (rewardColumns - 1)) / rewardColumns;
+
     const isWeb = Platform.OS === 'web';
     const { userName } = useUser();
     const [stamps, setStamps] = useState(0);
@@ -173,6 +185,10 @@ export default function RewardsScreen() {
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        { paddingHorizontal: sidePadding, alignItems: 'center' },
+                    ]}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -182,6 +198,7 @@ export default function RewardsScreen() {
                         />
                     }
                 >
+                    <View style={[styles.contentShell, { width: contentWidth }]}>
                     <Text style={styles.header}>Rewards</Text>
 
                     {/* Passport Card */}
@@ -335,23 +352,36 @@ export default function RewardsScreen() {
                         <Text style={styles.sectionTitle}>Available rewards</Text>
                         <Text style={styles.partnerText}>✨ Powered by partners</Text>
                     </View>
-                    {REWARDS.map((reward, index) => (
-                        <RewardCard
-                            key={reward.id}
-                            reward={reward}
-                            index={index}
-                            isClaimed={claimedRewards.includes(reward.id)}
-                            onPress={() => {
-                                Haptics.selectionAsync();
-                                setSelectedReward(reward);
-                            }}
-                            onClaim={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                claimReward(reward);
-                            }}
-                        />
-                    ))}
+                    <View style={styles.rewardsGrid}>
+                        {REWARDS.map((reward, index) => (
+                            <View
+                                key={reward.id}
+                                style={[
+                                    styles.rewardGridItem,
+                                    {
+                                        width: rewardCardWidth,
+                                        marginRight: (index + 1) % rewardColumns === 0 ? 0 : rewardGap,
+                                    },
+                                ]}
+                            >
+                                <RewardCard
+                                    reward={reward}
+                                    index={index}
+                                    isClaimed={claimedRewards.includes(reward.id)}
+                                    onPress={() => {
+                                        Haptics.selectionAsync();
+                                        setSelectedReward(reward);
+                                    }}
+                                    onClaim={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        claimReward(reward);
+                                    }}
+                                />
+                            </View>
+                        ))}
+                    </View>
                     <View style={{ height: 40 }} />
+                    </View>
                 </ScrollView>
             </SafeAreaView>
 
@@ -462,7 +492,9 @@ export default function RewardsScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.light.background },
-    safeArea: { flex: 1, paddingHorizontal: Spacing.lg },
+    safeArea: { flex: 1 },
+    scrollContent: { paddingHorizontal: Spacing.lg },
+    contentShell: { width: '100%' },
     header: {
         fontSize: 32,
         color: Colors.light.text,
@@ -500,7 +532,7 @@ const styles = StyleSheet.create({
     },
     cameraOffState: {
         flex: 1,
-        backgroundColor: 'rgba(58,28,0,0.3)',
+        backgroundColor: 'rgba(93, 58, 111, 0.2)',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
@@ -582,7 +614,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: 'rgba(58, 28, 0, 0.35)',
+        backgroundColor: 'rgba(93, 58, 111, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
@@ -615,7 +647,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
     },
     scanBtn: {
-        backgroundColor: 'rgba(255,213,128,0.2)',
+        backgroundColor: 'rgba(255, 250, 205, 0.2)',
         borderWidth: 1,
         borderColor: 'rgba(255,213,128,0.45)',
         borderRadius: 16,
@@ -686,6 +718,13 @@ const styles = StyleSheet.create({
     },
     sectionTitle: { color: Colors.light.text, fontSize: 24, fontFamily: Fonts.header },
     partnerText: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular },
+    rewardsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    rewardGridItem: {
+        marginBottom: Spacing.md,
+    },
     rewardCard: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -695,7 +734,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
         padding: Spacing.lg,
-        marginBottom: Spacing.md,
     },
     rewardInfo: { flex: 1, marginRight: Spacing.md },
     rewardTitle: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold, marginBottom: 4 },
@@ -717,7 +755,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 14,
-        backgroundColor: 'rgba(255,213,128,0.25)',
+        backgroundColor: 'rgba(255, 250, 205, 0.25)',
         borderWidth: 1,
         borderColor: 'rgba(255,213,128,0.45)',
     },
@@ -736,7 +774,7 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(58,28,0,0.4)',
+        backgroundColor: 'rgba(93, 58, 111, 0.3)',
     },
     modalContainer: {
         width: '88%',
@@ -766,7 +804,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255,213,128,0.35)',
+        backgroundColor: 'rgba(255, 250, 205, 0.35)',
     },
     modalCloseText: {
         color: Colors.light.text,

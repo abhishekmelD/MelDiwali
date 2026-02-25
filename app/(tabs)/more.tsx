@@ -171,7 +171,7 @@ export default function MoreScreen() {
                             onPress={() => setMenuVisible(!isMenuVisible)}
                             hitSlop={10}
                         >
-                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(58,28,0,0.6)" />
+                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(93, 58, 111, 0.4)" />
                         </Pressable>
 
                         {/* Menu Overlay & Dropdown */}
@@ -297,12 +297,12 @@ export default function MoreScreen() {
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.modalIntro}>Become a part of the Melbourne Diwali family! Tell us how you&apos;d like to help spread the light.</Text>
                                 <Text style={styles.inputLabel}>FULL NAME</Text>
-                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(58,28,0,0.35)" value={volName} onChangeText={setVolName} />
+                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(93, 58, 111, 0.25)" value={volName} onChangeText={setVolName} />
                                 <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
-                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(58,28,0,0.35)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
+                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(93, 58, 111, 0.25)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
                                 {volEmail && !isEmailValid && <Text style={styles.errorText}>Invalid email address</Text>}
                                 <Text style={styles.inputLabel}>PHONE NUMBER</Text>
-                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(58,28,0,0.35)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
+                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(93, 58, 111, 0.25)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
                                 {volPhone && !isPhoneValid && <Text style={styles.errorText}>Invalid AU phone number</Text>}
                                 <Text style={styles.inputLabel}>INTEREST AREAS</Text>
                                 <View style={styles.chipRow}>{INTERESTS.map(i => <SelectChip key={i} label={i} active={selectedInterests.includes(i)} onPress={() => toggleInterest(i)} />)}</View>
@@ -578,7 +578,7 @@ function ContactCard({ icon, title, value, onPress }: { icon: any; title: string
             <View style={styles.contactCard}>
                 <View style={styles.iconCircle}><MaterialCommunityIcons name={icon} size={24} color={Colors.light.gold} /></View>
                 <View style={styles.contactInfo}><Text style={styles.contactLabel}>{title}</Text><Text style={styles.contactValue}>{value}</Text></View>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(58,28,0,0.3)" />
+                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(93, 58, 111, 0.2)" />
             </View>
         </Pressable>
     );
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
         marginTop: Spacing.sm,
     },
     nameInputContainer: { width: '100%', marginTop: Spacing.xl, alignItems: 'center' },
-    nameInputLabel: { color: 'rgba(58,28,0,0.5)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
+    nameInputLabel: { color: 'rgba(93, 58, 111, 0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
     nameInput: {
         width: '100%',
         backgroundColor: 'rgba(255,245,230,0.8)',
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.light.borderSubtle,
     },
     roleDisplay: {
-        color: 'rgba(58,28,0,0.55)',
+        color: 'rgba(93, 58, 111, 0.45)',
         fontSize: 13,
         fontFamily: Fonts.medium,
         marginTop: Spacing.md,
@@ -652,10 +652,10 @@ const styles = StyleSheet.create({
         padding: Spacing.lg, marginBottom: Spacing.md,
     },
     dangerText: { color: Colors.light.peach, fontSize: 15, fontFamily: Fonts.medium },
-    version: { color: 'rgba(58,28,0,0.3)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
+    version: { color: 'rgba(93, 58, 111, 0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(58,28,0,0.35)', justifyContent: 'flex-end' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(93, 58, 111, 0.35)', justifyContent: 'flex-end' },
     modalContent: { height: '85%' },
     modalCard: {
         flex: 1,
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     modalIntro: {
-        color: 'rgba(58,28,0,0.6)',
+        color: 'rgba(93, 58, 111, 0.5)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.light.borderSubtle,
     },
     chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
-    chipText: { color: 'rgba(58,28,0,0.6)', fontSize: 13, fontFamily: Fonts.medium },
+    chipText: { color: 'rgba(93, 58, 111, 0.5)', fontSize: 13, fontFamily: Fonts.medium },
     chipTextActive: { color: Colors.light.text },
     submitBtn: {
         backgroundColor: Colors.light.gold,
@@ -759,16 +759,16 @@ const styles = StyleSheet.create({
         marginRight: 16,
     },
     contactInfo: { flex: 1 },
-    contactLabel: { color: 'rgba(58,28,0,0.45)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
+    contactLabel: { color: 'rgba(93, 58, 111, 0.35)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
     contactValue: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.medium },
     ackTitle: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold, marginBottom: 8, textAlign: 'center' },
-    ackText: { color: 'rgba(58,28,0,0.5)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
-    copyright: { color: 'rgba(58,28,0,0.3)', fontSize: 11, fontFamily: Fonts.regular },
+    ackText: { color: 'rgba(93, 58, 111, 0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
+    copyright: { color: 'rgba(93, 58, 111, 0.2)', fontSize: 11, fontFamily: Fonts.regular },
 
     // Success Overlay Styles
     successOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(58,28,0,0.75)',
+        backgroundColor: 'rgba(93, 58, 111, 0.6)',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 32,

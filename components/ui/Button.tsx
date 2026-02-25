@@ -65,19 +65,19 @@ export function Button({
     };
 
     const getGradientColors = (pressed: boolean) => {
-        if (disabled) return ['#e2d9cf', '#e2d9cf']; // Soft neutral for disabled
+        if (disabled) return ['#e8d4f0', '#e8d4f0']; // Soft neutral for disabled
 
         switch (variant) {
             case 'primary':
-                // Soft Marigold -> Peach Coral
+                // Bright Orange -> Golden gradient - Vibrant festive colors
                 return pressed
-                    ? ['#FFB59C', '#F4A783']
-                    : ['#FFD580', '#FFCFA1', '#FFB59C'];
+                    ? ['#FF5722', '#FF6B35']
+                    : ['#FF6B35', '#FFD700', '#FF9500'];
             case 'secondary':
-                // Lavender Mist -> Blush Pink
+                // Hot Pink -> Lime Green subtle gradient
                 return pressed
-                    ? ['rgba(216, 180, 226, 0.45)', 'rgba(251, 201, 210, 0.35)']
-                    : ['rgba(216, 180, 226, 0.25)', 'rgba(251, 201, 210, 0.18)'];
+                    ? ['rgba(255, 20, 147, 0.6)', 'rgba(0, 255, 65, 0.5)']
+                    : ['rgba(255, 105, 180, 0.35)', 'rgba(0, 255, 65, 0.25)'];
             default:
                 return ['transparent', 'transparent'];
         }
@@ -86,7 +86,7 @@ export function Button({
     const getTextColor = () => {
         if (disabled) return palette.textSecondary;
         switch (variant) {
-            case 'primary': return palette.text; // Deep Brown for contrast on Marigold
+            case 'primary': return '#FFFFFF'; // White text on bright orange for high contrast
             case 'secondary': return palette.text;
             case 'outline': return palette.peach;
             case 'ghost': return palette.peach;
@@ -203,9 +203,9 @@ const styles = StyleSheet.create({
     shadow: {
         ...Platform.select({
             ios: {
-                shadowColor: '#3a1c00',
+                shadowColor: '#5D3A6F', // Deep Purple shadow for new theme
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.2,
+                shadowOpacity: 0.25,
                 shadowRadius: 8,
             },
             android: {

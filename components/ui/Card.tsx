@@ -13,7 +13,7 @@ export function Card({ style, variant = 'elevated', children, ...props }: CardPr
     const palette = Colors[theme];
 
     const getBorderColor = () => {
-        return 'rgba(58, 28, 0, 0.08)'; // Very subtle warm border
+        return 'rgba(93, 58, 111, 0.15)'; // Subtle purple border matching new theme
     };
 
     if (variant === 'elevated') {
@@ -31,7 +31,7 @@ export function Card({ style, variant = 'elevated', children, ...props }: CardPr
                     {...props}
                 >
                     <LinearGradient
-                        colors={['#FFF4D6', '#FFE4C7', '#FCD9EB', '#DFF4EA', '#E7DEFF']}
+                        colors={['#FFFACD', '#FFD700', '#FFB6C1', '#DDA0DD', '#87CEEB', '#98FB98']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={styles.rangoliGradient}
@@ -52,8 +52,8 @@ export function Card({ style, variant = 'elevated', children, ...props }: CardPr
                 styles.container,
                 styles.flatContainer,
                 {
-                    backgroundColor: variant === 'flat' ? '#FFF1D6' : 'transparent',
-                    borderColor: variant === 'outlined' ? '#E8B27D' : palette.border,
+                    backgroundColor: variant === 'flat' ? '#FFFACD' : 'transparent',
+                    borderColor: variant === 'outlined' ? '#FF6B35' : palette.border,
                     borderWidth: variant === 'outlined' ? 1 : 0,
                 },
                 style,
@@ -68,9 +68,9 @@ const styles = StyleSheet.create({
     shadowContainer: {
         ...Platform.select({
             ios: {
-                shadowColor: '#C66A3D',
+                shadowColor: '#5D3A6F', // Deep Purple shadow for new theme
                 shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.22,
+                shadowOpacity: 0.25,
                 shadowRadius: 18,
             },
             android: {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: 'rgba(255, 181, 156, 0.28)',
+        backgroundColor: 'rgba(255, 107, 53, 0.28)', // Bright Orange halo
     },
     rangoliHaloBottom: {
         position: 'absolute',
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
         width: 140,
         height: 140,
         borderRadius: 70,
-        backgroundColor: 'rgba(168, 230, 207, 0.24)',
+        backgroundColor: 'rgba(0, 255, 65, 0.24)', // Lime Green halo
     },
     childContainer: {
         padding: 20,

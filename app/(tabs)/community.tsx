@@ -114,9 +114,9 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 
     const categoryColors: Record<string, string> = {
         'Events': Colors.light.gold,
-        'Food': '#A8E6CF', // Mint
-        'Culture': '#D8B4E2', // Lavender
-        'All': 'rgba(255,213,128,0.25)'
+        'Food': '#00FF41', // Lime Green
+        'Culture': '#9370DB', // Lavender
+        'All': 'rgba(255, 107, 53, 0.25)'
     };
 
     const headerColor = categoryColors[post.category] || categoryColors['All'];
@@ -218,7 +218,7 @@ export default function CommunityScreen() {
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(58,28,0,0.35)' }]}>
+                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(93, 58, 111, 0.4)' }]}>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         style={styles.modalContent}
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
         overflow: 'visible',
     },
-    chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
+    chipActive: { backgroundColor: '#FFD700', borderColor: '#FFD700' },
     chipText: {
         color: Colors.light.text,
         fontSize: 14,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.medium,
     },
 
-    emptyText: { color: 'rgba(58,28,0,0.35)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
+    emptyText: { color: 'rgba(93, 58, 111, 0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
     modalOverlay: { flex: 1, justifyContent: 'flex-end' },
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,213,128,0.35)',
+        backgroundColor: 'rgba(255, 107, 53, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -475,20 +475,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 12,
-        backgroundColor: 'rgba(255,213,128,0.18)',
+        backgroundColor: 'rgba(255, 107, 53, 0.15)',
         borderWidth: 1,
-        borderColor: 'rgba(255,213,128,0.35)',
+        borderColor: 'rgba(255, 107, 53, 0.35)',
         flex: 1,
         alignItems: 'center',
     },
     typeBtnActive: {
-        backgroundColor: Colors.light.gold,
-        borderColor: Colors.light.gold,
+        backgroundColor: '#FFD700',
+        borderColor: '#FFD700',
     },
     typeBtnText: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold },
     typeBtnTextActive: { color: Colors.light.text },
     input: {
-        backgroundColor: 'rgba(255,245,230,0.85)',
+        backgroundColor: 'rgba(255, 250, 205, 0.8)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         backgroundColor: 'rgba(255,245,230,0.9)',
         borderWidth: 1,
-        borderColor: 'rgba(255,213,128,0.5)',
+        borderColor: 'rgba(255, 107, 53, 0.45)',
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#3a1c00',
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
         elevation: 6,
     },
     draftsOverlay: {
-        backgroundColor: 'rgba(58,28,0,0.35)',
+        backgroundColor: 'rgba(93, 58, 111, 0.25)',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
     },
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.sm,
     },
     draftsEmptyText: {
-        color: 'rgba(58,28,0,0.7)',
+        color: 'rgba(93, 58, 111, 0.5)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 20,

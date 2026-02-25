@@ -1,61 +1,69 @@
 /**
  * Melbourne Diwali — Design tokens
- * Deep violet / gold palette inspired by melbournediwali.au
+ * Vibrant Rangoli-inspired palette with festive colors
+ * Deep purples, bright oranges, golds, and multicolor accents
  */
 
 
 export const Colors = {
   light: {
-    text: '#3a1c00',
-    textSecondary: '#4b382c',
-    background: '#C62828',
-    tint: '#FFD580', // Soft Marigold
-    icon: '#4b382c',
-    tabIconDefault: '#C5A0D2',
-    tabIconSelected: '#FFB59C',
-    accent: '#FFD580',
-    surface: '#F7EDE0', // soft cream card
-    surfaceElevated: '#F1DECC', // slightly deeper cream for contrast
-    border: 'rgba(58, 28, 0, 0.20)',
-    borderSubtle: 'rgba(58, 28, 0, 0.14)',
-    cardGradientStart: '#F7EDE0',
-    cardGradientEnd: '#F1DECC',
-    gold: '#FFD580',
-    goldDark: '#FFB59C', // Peach Coral
-    violet: '#D8B4E2',
-    violetLight: '#FBC9D2',
-    blush: '#FBC9D2',
-    mint: '#A8E6CF',
-    lavender: '#D8B4E2',
-    peach: '#FFB59C',
-    warmCream: '#C62828',
-    accentText: '#D85E3F',
+    text: '#1a1a1a',
+    textSecondary: '#4a4a4a',
+    background: '#5D3A6F', // Deep Purple - Primary festive color
+    tint: '#FF6B35', // Bright Orange - Primary CTA
+    icon: '#FF6B35',
+    tabIconDefault: '#FFD700', // Golden Yellow
+    tabIconSelected: '#FF1493', // Hot Pink
+    accent: '#FF6B35',
+    surface: '#FFF8DC', // Cornsilk - Bright cream background
+    surfaceElevated: '#FFFACD', // Light yellow - Slightly brighter
+    border: 'rgba(93, 58, 111, 0.25)',
+    borderSubtle: 'rgba(93, 58, 111, 0.15)',
+    cardGradientStart: '#FFF8DC',
+    cardGradientEnd: '#FFFACD',
+    gold: '#FFD700', // Bright Gold
+    goldDark: '#FF9500', // Saffron Orange
+    violet: '#8B2E5F', // Deep Magenta
+    violetLight: '#FF1493', // Hot Pink
+    blush: '#FF69B4', // Light Pink
+    mint: '#00FF41', // Lime Green
+    lavender: '#9370DB', // Medium Purple
+    peach: '#FF6B35',
+    warmCream: '#5D3A6F',
+    accentText: '#FF6B35',
+    // Additional rangoli colors
+    deepBlue: '#1F3A93',
+    teal: '#004D40',
+    brightRed: '#FF0000',
   },
   dark: {
-    text: '#3a1c00',
-    textSecondary: '#4b382c',
-    background: '#C62828',
-    tint: '#FFD580',
-    icon: '#4b382c',
-    tabIconDefault: '#C5A0D2',
-    tabIconSelected: '#FFB59C',
-    accent: '#FFD580',
-    surface: '#F7EDE0',
-    surfaceElevated: '#F1DECC',
-    border: 'rgba(58, 28, 0, 0.20)',
-    borderSubtle: 'rgba(58, 28, 0, 0.14)',
-    cardGradientStart: '#F7EDE0',
-    cardGradientEnd: '#F1DECC',
-    gold: '#FFD580',
-    goldDark: '#FFB59C',
-    violet: '#D8B4E2',
-    violetLight: '#FBC9D2',
-    blush: '#FBC9D2',
-    mint: '#A8E6CF',
-    lavender: '#D8B4E2',
-    peach: '#FFB59C',
-    warmCream: '#C62828',
-    accentText: '#D85E3F',
+    text: '#1a1a1a',
+    textSecondary: '#4a4a4a',
+    background: '#5D3A6F', // Deep Purple
+    tint: '#FF6B35', // Bright Orange
+    icon: '#FF6B35',
+    tabIconDefault: '#FFD700',
+    tabIconSelected: '#FF1493',
+    accent: '#FF6B35',
+    surface: '#FFF8DC',
+    surfaceElevated: '#FFFACD',
+    border: 'rgba(93, 58, 111, 0.25)',
+    borderSubtle: 'rgba(93, 58, 111, 0.15)',
+    cardGradientStart: '#FFF8DC',
+    cardGradientEnd: '#FFFACD',
+    gold: '#FFD700',
+    goldDark: '#FF9500',
+    violet: '#8B2E5F',
+    violetLight: '#FF1493',
+    blush: '#FF69B4',
+    mint: '#00FF41',
+    lavender: '#9370DB',
+    peach: '#FF6B35',
+    warmCream: '#5D3A6F',
+    accentText: '#FF6B35',
+    deepBlue: '#1F3A93',
+    teal: '#004D40',
+    brightRed: '#FF0000',
   },
 };
 
