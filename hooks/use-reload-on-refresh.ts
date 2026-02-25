@@ -1,4 +1,4 @@
-import { DevSettings } from 'react-native';
+import { DevSettings, Platform } from 'react-native';
 import { useCallback, useState } from 'react';
 
 interface UseReloadOnRefreshOptions {
@@ -16,7 +16,17 @@ export function useReloadOnRefresh({
     onBeforeReload?.();
     setRefreshing(true);
     setTimeout(() => {
-      DevSettings.reload();
+      try {
+        if (Platform.OS === 'web') {
+          window.location.reload();
+          return;
+        }
+        DevSettings.reload();
+      } catch {
+        if (Platform.OS === 'web') {
+          window.location.reload();
+        }
+      }
     }, delayMs);
   }, [delayMs, onBeforeReload]);
 

@@ -8,7 +8,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -75,6 +75,7 @@ function RewardCard({
 }
 
 export default function RewardsScreen() {
+    const isWeb = Platform.OS === 'web';
     const { userName } = useUser();
     const [stamps, setStamps] = useState(0);
     const [totalScannedStamps, setTotalScannedStamps] = useState(0);
@@ -120,10 +121,17 @@ export default function RewardsScreen() {
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
     useEffect(() => {
-        if (!permission?.granted) {
-            requestPermission();
+        if (isWeb || permission?.granted) {
+            return;
         }
-    }, [permission, requestPermission]);
+        (async () => {
+            try {
+                await requestPermission();
+            } catch (error) {
+                console.warn('Camera permission request failed:', error);
+            }
+        })();
+    }, [isWeb, permission, requestPermission]);
 
     const handleBarCodeScanned = ({ data }: { data: string }) => {
         if (scanned) return;
@@ -178,7 +186,7 @@ export default function RewardsScreen() {
 
                     {/* Passport Card */}
                     <View style={styles.passportCard}>
-                        {permission?.granted && isFocused ? (
+                        {!isWeb && permission?.granted && isFocused ? (
                             <View style={styles.cameraContainer}>
                                 {cameraEnabled ? (
                                     <CameraView
@@ -249,10 +257,22 @@ export default function RewardsScreen() {
                             </View>
                         ) : (
                             <View style={styles.qrContainer}>
-                                <Pressable style={styles.scanBtn} onPress={() => requestPermission()}>
+                                <Pressable
+                                    style={styles.scanBtn}
+                                    onPress={async () => {
+                                        if (isWeb) return;
+                                        try {
+                                            await requestPermission();
+                                        } catch (error) {
+                                            console.warn('Camera permission request failed:', error);
+                                        }
+                                    }}
+                                >
                                     <Text style={styles.scanIcon}>📷</Text>
-                                    <Text style={styles.scanBtnText}>Enable Camera</Text>
-                                    <Text style={styles.scanHint}>Camera permission required</Text>
+                                    <Text style={styles.scanBtnText}>{isWeb ? 'Camera unavailable on web' : 'Enable Camera'}</Text>
+                                    <Text style={styles.scanHint}>
+                                        {isWeb ? 'QR scanning works on mobile app builds.' : 'Camera permission required'}
+                                    </Text>
                                 </Pressable>
                             </View>
                         )}

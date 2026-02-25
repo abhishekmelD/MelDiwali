@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, FlatList, ImageBackground, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, FlatList, ImageBackground, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
@@ -96,23 +96,26 @@ function CountdownTimer() {
       true
     );
 
-    // Device Motion for Tilt
-    const subscription = DeviceMotion.addListener((event) => {
-      const { rotation } = event;
-      if (rotation) {
-        // Multipliers control sensitivity. 
-        // beta (x-axis tilt) affects rotateX
-        // gamma (y-axis tilt) affects rotateY
-        // Multiplier of 10 converts radians to a visible but subtle tilt
-        tiltX.value = withSpring(rotation.beta * 10, { damping: 10 });
-        tiltY.value = withSpring(rotation.gamma * 30, { damping: 15 });
+    // Device motion can be unavailable on web and some simulators.
+    let subscription: { remove: () => void } | null = null;
+    if (Platform.OS !== 'web') {
+      try {
+        subscription = DeviceMotion.addListener((event) => {
+          const { rotation } = event;
+          if (rotation) {
+            tiltX.value = withSpring(rotation.beta * 10, { damping: 10 });
+            tiltY.value = withSpring(rotation.gamma * 30, { damping: 15 });
+          }
+        });
+        DeviceMotion.setUpdateInterval(50);
+      } catch {
+        subscription = null;
       }
-    });
-    DeviceMotion.setUpdateInterval(50);
+    }
 
     return () => {
       clearInterval(interval);
-      subscription.remove();
+      subscription?.remove();
     };
   }, [glow, tiltX, tiltY]);
 
