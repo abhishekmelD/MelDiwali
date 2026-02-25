@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 
+import { AppBackground } from '@/components/AppBackground';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +17,7 @@ export default function ModalScreen() {
 
   return (
     <ThemedView style={[styles.container, { backgroundColor: palette.background }]}>
+      <AppBackground />
       <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
       <Card variant="elevated" style={[styles.card, { backgroundColor: palette.surface }]}>
         <ThemedText

@@ -1,3 +1,4 @@
+import { AppBackground } from '@/components/AppBackground';
 import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { EVENTS } from '@/constants/EventData';
@@ -179,6 +180,7 @@ export default function EventsScreen() {
 
     return (
         <View style={styles.container}>
+            <AppBackground />
             <ReloadOverlay visible={refreshing} />
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView

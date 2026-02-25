@@ -1,3 +1,4 @@
+import { AppBackground } from '@/components/AppBackground';
 import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
@@ -174,6 +175,7 @@ export default function CommunityScreen() {
 
     return (
         <View style={styles.container}>
+            <AppBackground />
             <ReloadOverlay visible={refreshing} />
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <Text style={styles.header}>Community</Text>

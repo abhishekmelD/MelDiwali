@@ -1,3 +1,4 @@
+import { AppBackground } from '@/components/AppBackground';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
@@ -84,7 +85,7 @@ const QUICK_ACTIONS = [
     key: 'passport',
     label: 'My Passport',
     icon: 'passport',
-    path: '/rewards',
+    path: '/(tabs)/rewards?openPassport=true',
     bgColor: '#2A9D8F',
     borderColor: '#1E7D72',
   },
@@ -291,6 +292,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <AppBackground />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView
           showsVerticalScrollIndicator={false}

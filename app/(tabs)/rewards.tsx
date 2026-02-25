@@ -1,3 +1,4 @@
+import { AppBackground } from '@/components/AppBackground';
 import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -6,6 +7,7 @@ import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -87,6 +89,8 @@ export default function RewardsScreen() {
         : (contentWidth - rewardGap * (rewardColumns - 1)) / rewardColumns;
 
     const isWeb = Platform.OS === 'web';
+    const router = useRouter();
+    const { openPassport } = useLocalSearchParams<{ openPassport?: string | string[] }>();
     const { userName } = useUser();
     const [stamps, setStamps] = useState(0);
     const [totalScannedStamps, setTotalScannedStamps] = useState(0);
@@ -144,6 +148,14 @@ export default function RewardsScreen() {
         })();
     }, [isWeb, permission, requestPermission]);
 
+    useEffect(() => {
+        const openPassportParam = Array.isArray(openPassport) ? openPassport[0] : openPassport;
+        if (openPassportParam === 'true') {
+            setPassportModalVisible(true);
+            router.replace('/(tabs)/rewards');
+        }
+    }, [openPassport, router]);
+
     const handleBarCodeScanned = ({ data }: { data: string }) => {
         if (scanned) return;
         setScanned(true);
@@ -179,6 +191,7 @@ export default function RewardsScreen() {
 
     return (
         <View style={styles.container}>
+            <AppBackground />
             <ReloadOverlay visible={refreshing} />
             <SafeAreaView style={styles.safeArea} edges={['top']}>
                 <ScrollView
