@@ -4,7 +4,6 @@ import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
@@ -220,34 +219,28 @@ function LiveDropCard({
           onPress={onPress}
           style={{ flex: 1 }}
         >
-          <ImageBackground
-            source={item.image}
-            style={styles.dropImageBg}
-            imageStyle={{ borderRadius: 16 }}
-            resizeMode="cover"
-          >
-            <LinearGradient
-              colors={['rgba(255, 255, 255, 0.03)', 'rgba(0, 0, 0, 0.26)', 'rgba(0, 0, 0, 0.62)']}
-              locations={[0, 0.55, 1]}
-              style={styles.dropGradient}
-            >
-              <View style={styles.cardHeader}>
-                <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
-                  <Text style={styles.dropBadgeText}>{item.badge}</Text>
-                </View>
-                <View style={[styles.tintOverlay, { backgroundColor: item.tintColor }]} />
-              </View>
+          <View style={styles.dropCardInner}>
+            <View style={styles.dropImageWrap}>
+              <ImageBackground
+                source={item.image}
+                style={styles.dropImage}
+                imageStyle={styles.dropImageStyle}
+                resizeMode="cover"
+              />
+            </View>
 
-              <View style={styles.dropContent}>
-                <Text style={styles.dropTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.dropDesc} numberOfLines={1}>{item.description}</Text>
-                <View style={styles.dropCta}>
-                  <Text style={styles.dropCtaText}>{item.cta}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={16} color="#FFFFFF" />
-                </View>
+            <View style={styles.dropContent}>
+              <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
+                <Text style={styles.dropBadgeText}>{item.badge}</Text>
               </View>
-            </LinearGradient>
-          </ImageBackground>
+              <Text style={styles.dropTitle} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.dropDesc} numberOfLines={2}>{item.description}</Text>
+              <View style={styles.dropCta}>
+                <Text style={styles.dropCtaText}>{item.cta}</Text>
+                <MaterialCommunityIcons name="arrow-right" size={15} color={Colors.light.accentText} />
+              </View>
+            </View>
+          </View>
         </Pressable>
       </Animated.View>
     </Animated.View>
@@ -273,7 +266,7 @@ export default function HomeScreen() {
   const liveDropWidth = isTablet
     ? (contentWidth - liveDropGap * (liveDropColumns - 1)) / liveDropColumns
     : Math.min(contentWidth * 0.78, 360);
-  const liveDropHeight = isTablet ? 230 : Math.min(viewportHeight * 0.25, 250);
+  const liveDropHeight = isTablet ? 250 : Math.min(viewportHeight * 0.28, 270);
   const detailWidth = Math.min(contentWidth, 700);
 
   const router = useRouter();
@@ -392,17 +385,13 @@ export default function HomeScreen() {
                 style={({ pressed }) => [
                   styles.quickActionButton,
                   index === 1 && styles.quickActionButtonMiddle,
-                  {
-                    backgroundColor: action.bgColor,
-                    borderColor: action.borderColor,
-                    shadowColor: action.borderColor,
-                  },
+                  { borderColor: action.borderColor },
                   pressed && styles.quickActionButtonPressed,
                 ]}
                 onPress={() => handleActionPress(action.path)}
               >
                 <View style={styles.quickActionInner}>
-                  <MaterialCommunityIcons name={action.icon} size={30} color="#FFFFFF" />
+                  <MaterialCommunityIcons name={action.icon} size={26} color="#FF7A00" />
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </View>
               </Pressable>
@@ -439,14 +428,18 @@ export default function HomeScreen() {
                 key={liveDropColumns}
                 numColumns={liveDropColumns}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.modalListContent}
+                contentContainerStyle={[
+                  styles.modalListContent,
+                  liveDropColumns === 1 && styles.modalListSingleColumn,
+                ]}
+                columnWrapperStyle={liveDropColumns > 1 ? styles.modalColumnWrapper : undefined}
                 renderItem={({ item, index }) => (
                   <View
                     style={[
                       styles.modalDropItem,
                       {
                         width: liveDropWidth,
-                        marginRight: (index + 1) % liveDropColumns === 0 ? 0 : liveDropGap,
+                        marginHorizontal: liveDropColumns > 1 ? liveDropGap / 2 : 0,
                       },
                     ]}
                   >
@@ -593,90 +586,95 @@ const styles = StyleSheet.create({
   dropCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: Colors.light.surfaceElevated,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 122, 0, 0.35)',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 122, 0, 0.6)',
     elevation: 5,
     shadowColor: '#FF7A00',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
   },
-  dropImageBg: { width: '100%', height: '100%' },
-  dropGradient: {
-    padding: Spacing.lg,
+  dropCardInner: {
     flex: 1,
-    justifyContent: 'space-between',
+    padding: 14,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  tintOverlay: { width: 4, height: 24, borderRadius: 2, opacity: 0.8 },
+  dropImageWrap: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: Spacing.md,
+  },
+  dropImage: {
+    width: '100%',
+    height: '100%',
+  },
+  dropImageStyle: {
+    borderRadius: 12,
+  },
   dropBadge: { alignSelf: 'flex-start', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   dropBadgeText: { color: Colors.light.text, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
-  dropContent: { marginTop: 'auto' },
+  dropContent: { flex: 1, justifyContent: 'space-between', paddingBottom: Spacing.lg },
   dropTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
+    color: Colors.light.text,
+    fontSize: 18,
     fontFamily: Fonts.bold,
+    marginTop: Spacing.xs,
     marginBottom: 4,
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
   dropDesc: {
-    color: 'rgba(255, 255, 255, 0.92)',
-    fontSize: 14,
+    color: Colors.light.textSecondary,
+    fontSize: 13,
     fontFamily: Fonts.regular,
-    marginBottom: 12,
-    textShadowColor: 'rgba(0, 0, 0, 0.65)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    lineHeight: 18,
+    marginBottom: Spacing.sm,
   },
   dropCta: {
     alignSelf: 'flex-start',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.82)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 122, 0, 0.35)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.32)',
+    backgroundColor: 'rgba(255, 122, 0, 0.12)',
   },
   dropCtaText: {
-    color: '#FFFFFF',
-    fontSize: 13,
+    color: Colors.light.accentText,
+    fontSize: 12,
     fontFamily: Fonts.medium,
-    marginRight: 4,
+    marginRight: 2,
   },
 
   // Quick Actions
   quickActionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Spacing.lg,
     marginBottom: Spacing.lg,
   },
   quickActionButton: {
-    width: '29%',
-    aspectRatio: 1,
-    borderRadius: 999,
+    width: '31%',
+    minHeight: 92,
+    borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#FF7A00',
-    backgroundColor: '#FF7A00',
-    shadowColor: '#FF7A00',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
-    shadowRadius: 6,
-    elevation: 3,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   quickActionButtonMiddle: {
     marginHorizontal: 0,
   },
   quickActionButtonPressed: {
-    transform: [{ scale: 0.96 }],
+    transform: [{ scale: 0.97 }],
     opacity: 0.9,
   },
   quickActionInner: {
@@ -687,12 +685,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   quickActionLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    color: Colors.light.text,
+    fontSize: 12,
     fontFamily: Fonts.medium,
     textAlign: 'center',
     marginTop: Spacing.xs,
-    lineHeight: 14,
+    lineHeight: 16,
   },
 
   // Modal Styles
@@ -734,6 +732,12 @@ const styles = StyleSheet.create({
   },
   modalListContent: {
     paddingBottom: 40,
+  },
+  modalListSingleColumn: {
+    alignItems: 'center',
+  },
+  modalColumnWrapper: {
+    justifyContent: 'center',
   },
   modalDropItem: {
     marginBottom: Spacing.lg,
