@@ -3,20 +3,20 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
 import { FlatList, ImageBackground, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
-    FadeInDown,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withSpring,
-    withTiming
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -40,35 +40,35 @@ const LIVE_DROPS = [
   {
     id: '1',
     badge: 'SPONSOR DROP',
-    badgeColor: '#4F8FC0',
+    badgeColor: '#FF7A00',
     title: 'Sponsor Drop: Rangoli Competition',
     description: 'Enter & share your design to unlock a festival stamp.',
     cta: 'Enter now',
-    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(42, 157, 143, 0.5)'] as const,
+    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
     image: require('@/assets/images/drop_rangoli.png'),
-    tintColor: '#2A9D8F',
+    tintColor: '#FF7A00',
   },
   {
     id: '2',
     badge: 'VENDOR',
-    badgeColor: '#4F8FC0',
+    badgeColor: '#FF7A00',
     title: 'Vendor Spotlight: Curry House',
     description: 'Exclusive tasting menu drop this week. Limited serves.',
     cta: 'View menu',
-    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(42, 157, 143, 0.5)'] as const,
+    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
     image: require('@/assets/images/drop_curry.png'),
-    tintColor: '#2A9D8F',
+    tintColor: '#FF7A00',
   },
   {
     id: '3',
     badge: 'PERFORMER',
-    badgeColor: '#1F3A93',
+    badgeColor: '#000000',
     title: 'Performer Reveal: DJ Karma',
     description: 'Get ready for the main stage! Preview the setlist.',
     cta: 'Listen now',
-    gradient: ['rgba(243, 233, 210, 0.2)', 'rgba(79, 143, 192, 0.5)'] as const,
+    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
     image: require('@/assets/images/drop_dj.png'),
-    tintColor: '#4F8FC0',
+    tintColor: '#FF7A00',
   },
 ];
 
@@ -78,24 +78,24 @@ const QUICK_ACTIONS = [
     label: 'Schedule',
     icon: 'calendar-month',
     path: '/events',
-    bgColor: '#1F3A93',
-    borderColor: '#173070',
+    bgColor: '#FF7A00',
+    borderColor: '#FF7A00',
   },
   {
     key: 'passport',
     label: 'My Passport',
     icon: 'passport',
     path: '/(tabs)/rewards?openPassport=true',
-    bgColor: '#2A9D8F',
-    borderColor: '#1E7D72',
+    bgColor: '#FF7A00',
+    borderColor: '#FF7A00',
   },
   {
     key: 'scan',
     label: 'Scan & Collect',
     icon: 'qrcode-scan',
     path: '/rewards',
-    bgColor: '#2A9D8F',
-    borderColor: '#1E7D72',
+    bgColor: '#FF7A00',
+    borderColor: '#FF7A00',
   },
 ] as const;
 
@@ -126,8 +126,8 @@ function CountdownTimer() {
         subscription = DeviceMotion.addListener((event) => {
           const { rotation } = event;
           if (rotation) {
-            tiltX.value = withSpring(rotation.beta * 10, { damping: 10 });
-            tiltY.value = withSpring(rotation.gamma * 30, { damping: 15 });
+            tiltX.value = withSpring(rotation.beta * 5, { damping: 10 });
+            tiltY.value = withSpring(rotation.gamma * 5, { damping: 15 });
           }
         });
         DeviceMotion.setUpdateInterval(50);
@@ -143,7 +143,7 @@ function CountdownTimer() {
   }, [glow, tiltX, tiltY]);
 
   const animatedGlow = useAnimatedStyle(() => ({
-    borderColor: `rgba(79, 143, 192, ${glow.value})`,
+    borderColor: `rgba(255, 122, 0, ${glow.value})`,
     shadowOpacity: glow.value * 0.4,
   }));
 
@@ -402,7 +402,7 @@ export default function HomeScreen() {
                 onPress={() => handleActionPress(action.path)}
               >
                 <View style={styles.quickActionInner}>
-                  <MaterialCommunityIcons name={action.icon} size={30} color="#F3E9D2" />
+                  <MaterialCommunityIcons name={action.icon} size={30} color="#FFFFFF" />
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </View>
               </Pressable>
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(42, 157, 143, 0.35)',
+    borderColor: 'rgba(255, 122, 0, 0.35)',
     shadowColor: Colors.light.accentText,
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 10,
@@ -595,9 +595,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.light.surfaceElevated,
     borderWidth: 1.5,
-    borderColor: 'rgba(42, 157, 143, 0.35)',
+    borderColor: 'rgba(255, 122, 0, 0.35)',
     elevation: 5,
-    shadowColor: '#2A9D8F',
+    shadowColor: '#FF7A00',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 10,
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: Fonts.bold,
     marginBottom: 4,
-    textShadowColor: 'rgba(23, 48, 112, 0.65)',
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.regular,
     marginBottom: 12,
-    textShadowColor: 'rgba(23, 48, 112, 0.65)',
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(23, 48, 112, 0.32)',
+    backgroundColor: 'rgba(0, 0, 0, 0.32)',
   },
   dropCtaText: {
     color: '#FFFFFF',
@@ -664,9 +664,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#1F3A93',
-    backgroundColor: '#2A9D8F',
-    shadowColor: '#1F3A93',
+    borderColor: '#FF7A00',
+    backgroundColor: '#FF7A00',
+    shadowColor: '#FF7A00',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.16,
     shadowRadius: 6,
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   quickActionLabel: {
-    color: '#F3E9D2',
+    color: '#FFFFFF',
     fontSize: 11,
     fontFamily: Fonts.medium,
     textAlign: 'center',
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(31, 58, 147, 0.35)',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     borderWidth: 1,
-    borderColor: 'rgba(42, 157, 143, 0.35)',
+    borderColor: 'rgba(255, 122, 0, 0.35)',
     padding: Spacing.xl,
     backgroundColor: '#FFFFFF',
   },
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(42, 157, 143, 0.25)',
+    backgroundColor: 'rgba(255, 122, 0, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -750,14 +750,14 @@ const styles = StyleSheet.create({
   },
   detailBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(31, 58, 147, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   detailContent: {
     maxHeight: '70%',
     borderRadius: 32,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(42, 157, 143, 0.35)',
+    borderColor: 'rgba(255, 122, 0, 0.35)',
   },
   detailGradient: {
     padding: Spacing.xl,
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(42, 157, 143, 0.25)',
+    backgroundColor: 'rgba(255, 122, 0, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   detailActionBtn: {
-    backgroundColor: '#4F8FC0',
+    backgroundColor: '#FF7A00',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',

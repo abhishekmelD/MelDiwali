@@ -55,12 +55,12 @@ function EventCard({ event, index, onPress }: { event: typeof EVENTS[0]; index: 
                         <View style={styles.eventMeta}>
                             <View style={[
                                 styles.dateBadge,
-                                isRegistered && { backgroundColor: 'rgba(42, 157, 143, 0.15)' },
+                                isRegistered && { backgroundColor: 'rgba(255, 122, 0, 0.15)' },
                                 isPast && { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
                             ]}>
                                 <Text style={[
                                     styles.dateBadgeText,
-                                    isRegistered && { color: '#2A9D8F' },
+                                    isRegistered && { color: '#FF7A00' },
                                     isPast && { color: Colors.light.textSecondary }
                                 ]}>{event.date}</Text>
                             </View>
@@ -292,7 +292,7 @@ export default function EventsScreen() {
 
                         {filteredEvents.length === 0 ? (
                             <View style={styles.emptyState}>
-                                <IconSymbol name="calendar" size={48} color="rgba(42, 157, 143, 0.1)" />
+                                <IconSymbol name="calendar" size={48} color="rgba(255, 122, 0, 0.1)" />
                                 <Text style={styles.emptyStateText}>
                                     {activeTab === 'Registered' ? "You haven't registered for any events yet." : "No events found in this category."}
                                 </Text>
@@ -351,7 +351,7 @@ export default function EventsScreen() {
                                         >
                                             <Text style={[
                                                 styles.modalActionText,
-                                                registeredEvents.includes(selectedEvent.id) && { color: '#2A9D8F' }
+                                                registeredEvents.includes(selectedEvent.id) && { color: '#FF7A00' }
                                             ]}>
                                                 {registeredEvents.includes(selectedEvent.id) ? 'Registered ✓' : 'Secure my spot'}
                                             </Text>
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     tabContainer: { marginBottom: Spacing.lg },
     tabRow: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(42, 157, 143, 0.15)',
+        backgroundColor: 'rgba(255, 122, 0, 0.15)',
         borderRadius: 16,
         padding: 4,
         borderWidth: 1,
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(79, 143, 192, 0.25)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
         alignItems: 'center',
         justifyContent: 'center'
     },
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     weekDay: {
         flex: 1,
         textAlign: 'center',
-        color: 'rgba(18, 58, 100, 0.45)',
+        color: 'rgba(0, 0, 0, 0.45)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     eventInfo: { flex: 1, marginRight: Spacing.md },
     eventTitle: { color: Colors.light.text, fontSize: 17, fontFamily: Fonts.bold, marginBottom: 8 },
     eventMeta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    dateBadge: { backgroundColor: 'rgba(79, 143, 192, 0.3)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+    dateBadge: { backgroundColor: 'rgba(255, 122, 0, 0.3)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
     dateBadgeText: { color: Colors.light.accentText, fontSize: 12, fontFamily: Fonts.bold },
     eventLocation: { color: Colors.light.textSecondary, fontSize: 13, fontFamily: Fonts.regular },
     registerBtn: {
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     registerBtnActive: {
-        backgroundColor: 'rgba(42, 157, 143, 0.85)',
+        backgroundColor: 'rgba(255, 122, 0, 0.85)',
     },
     registerText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 13 },
     registerTextActive: { color: Colors.light.text },
@@ -545,12 +545,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(243, 233, 210, 0.6)',
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
     },
     pastLabelText: {
-        color: 'rgba(18, 58, 100, 0.35)',
+        color: 'rgba(0, 0, 0, 0.35)',
         fontFamily: Fonts.bold,
         fontSize: 12,
         letterSpacing: 1,
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(18, 58, 100, 0.45)',
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
     },
     modalContent: {
         width: SCREEN_WIDTH * 0.9,
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
         borderRadius: 32,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.5)',
+        borderColor: 'rgba(255, 122, 0, 0.5)',
     },
     modalGradient: {
         padding: Spacing.xl,
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: 'rgba(79, 143, 192, 0.35)',
+        backgroundColor: 'rgba(255, 122, 0, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     modalInfoText: {
-        color: 'rgba(18, 58, 100, 0.65)',
+        color: 'rgba(0, 0, 0, 0.65)',
         fontSize: 15,
         fontFamily: Fonts.medium,
     },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     modalActionBtnActive: {
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: '#2A9D8F',
+        borderColor: '#FF7A00',
     },
     modalActionText: {
         color: Colors.light.text,
@@ -666,10 +666,10 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 20,
-        backgroundColor: 'rgba(243, 233, 210, 0.6)',
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
     },
     modalPastBadgeText: {
-        color: 'rgba(42, 157, 143, 0.3)',
+        color: 'rgba(255, 122, 0, 0.3)',
         fontFamily: Fonts.medium,
         fontSize: 14,
     },
@@ -681,7 +681,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.light.border,
         elevation: 10,
-        shadowColor: '#173070',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 12,

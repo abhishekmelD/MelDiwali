@@ -104,7 +104,7 @@ function ShootingStar() {
     return (
         <Animated.View style={[styles.shootingStar, animatedStyle]}>
             <LinearGradient
-                colors={['#4F8FC0', '#2A9D8F', 'transparent']}
+                colors={['#FF7A00', '#FF7A00', 'transparent']}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}
@@ -164,7 +164,7 @@ function Star({ star }: { star: StarData }) {
         ],
     }));
 
-    const color = star.layer === 3 ? '#4F8FC0' : star.layer === 2 ? '#2A9D8F' : '#FFFFFF';
+    const color = star.layer === 3 ? '#FF7A00' : star.layer === 2 ? '#FF7A00' : '#FFFFFF';
 
     return (
         <Animated.View

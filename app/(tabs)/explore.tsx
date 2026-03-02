@@ -85,7 +85,7 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#1F3A93',
+    color: '#000000',
     bottom: -90,
     left: -35,
     position: 'absolute',

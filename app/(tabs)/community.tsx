@@ -114,9 +114,9 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 
     const categoryColors: Record<string, string> = {
         'Events': Colors.light.gold,
-        'Food': '#2A9D8F', // Lime Green
-        'Culture': '#4F8FC0', // Lavender
-        'All': 'rgba(42, 157, 143, 0.25)'
+        'Food': '#FF7A00', // Lime Green
+        'Culture': '#FF7A00', // Lavender
+        'All': 'rgba(255, 122, 0, 0.25)'
     };
 
     const headerColor = categoryColors[post.category] || categoryColors['All'];
@@ -226,7 +226,7 @@ export default function CommunityScreen() {
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(31, 58, 147, 0.4)' }]}>
+                <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         style={styles.modalContent}
@@ -261,7 +261,7 @@ export default function CommunityScreen() {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="What's happening?"
-                                    placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                    placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                     value={postTitle}
                                     onChangeText={setPostTitle}
                                 />
@@ -270,7 +270,7 @@ export default function CommunityScreen() {
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
                                     placeholder="Tell us more about it..."
-                                    placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                    placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                     value={postDesc}
                                     onChangeText={setPostDesc}
                                     multiline
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     safeArea: { flex: 1 },
     header: {
         fontSize: 32,
-        color: Colors.light.text,
+        color: Colors.light.accentText,
         fontFamily: Fonts.header,
         marginTop: Spacing.md,
         marginBottom: Spacing.md,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         height: 38,
         borderRadius: 19,
-        backgroundColor: 'rgba(243, 233, 210, 0.7)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
         alignItems: 'center',
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
         overflow: 'visible',
     },
-    chipActive: { backgroundColor: '#4F8FC0', borderColor: '#4F8FC0' },
+    chipActive: { backgroundColor: '#FF7A00', borderColor: '#FF7A00' },
     chipText: {
         color: Colors.light.text,
         fontSize: 14,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(79, 143, 192, 0.25)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     userName: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.bold },
     postDate: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular, marginTop: 1 },
     postContent: {
-        color: 'rgba(18, 58, 100, 0.9)',
+        color: 'rgba(0, 0, 0, 0.9)',
         fontSize: 15,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.medium,
     },
 
-    emptyText: { color: 'rgba(31, 58, 147, 0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
+    emptyText: { color: 'rgba(0, 0, 0, 0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
     modalOverlay: { flex: 1, justifyContent: 'flex-end' },
@@ -466,12 +466,12 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(42, 157, 143, 0.35)',
+        backgroundColor: 'rgba(255, 122, 0, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     inputLabel: {
-        color: 'rgba(18, 58, 100, 0.5)',
+        color: 'rgba(0, 0, 0, 0.5)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1.5,
@@ -483,20 +483,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 12,
-        backgroundColor: 'rgba(42, 157, 143, 0.15)',
+        backgroundColor: 'rgba(255, 122, 0, 0.15)',
         borderWidth: 1,
-        borderColor: 'rgba(42, 157, 143, 0.35)',
+        borderColor: 'rgba(255, 122, 0, 0.35)',
         flex: 1,
         alignItems: 'center',
     },
     typeBtnActive: {
-        backgroundColor: '#4F8FC0',
-        borderColor: '#4F8FC0',
+        backgroundColor: '#FF7A00',
+        borderColor: '#FF7A00',
     },
     typeBtnText: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold },
     typeBtnTextActive: { color: Colors.light.text },
     input: {
-        backgroundColor: 'rgba(243, 233, 210, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     },
     postBtnDisabled: {
         opacity: 0.3,
-        backgroundColor: 'rgba(79, 143, 192, 0.25)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
         shadowOpacity: 0,
     },
     postBtnText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.gold,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#173070',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -551,19 +551,19 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: 'rgba(243, 233, 210, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         borderWidth: 1,
-        borderColor: 'rgba(42, 157, 143, 0.45)',
+        borderColor: 'rgba(255, 122, 0, 0.45)',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#173070',
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.25,
         shadowRadius: 6,
         elevation: 6,
     },
     draftsOverlay: {
-        backgroundColor: 'rgba(31, 58, 147, 0.25)',
+        backgroundColor: 'rgba(0, 0, 0, 0.25)',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
     },
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.sm,
     },
     draftsEmptyText: {
-        color: 'rgba(31, 58, 147, 0.5)',
+        color: 'rgba(0, 0, 0, 0.5)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 20,

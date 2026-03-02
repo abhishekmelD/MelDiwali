@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     contentShell: { width: '100%' },
     header: {
         fontSize: 32,
-        color: Colors.light.text,
+        color: Colors.light.accentText,
         fontFamily: Fonts.header,
         marginTop: Spacing.md,
         marginBottom: Spacing.lg,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.surfaceElevated,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.45)',
+        borderColor: 'rgba(255, 122, 0, 0.45)',
         padding: Spacing.lg,
         alignItems: 'center',
         marginBottom: Spacing.lg,
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     },
     cameraOffState: {
         flex: 1,
-        backgroundColor: 'rgba(31, 58, 147, 0.2)',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: Spacing.lg,
@@ -604,11 +604,11 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: 'rgba(31, 58, 147, 0.25)',
+        backgroundColor: 'rgba(0, 0, 0, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.5)',
+        borderColor: 'rgba(255, 122, 0, 0.5)',
     },
     flashBtnActive: {
         backgroundColor: Colors.light.gold,
@@ -620,9 +620,9 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.md,
     },
     scanBtn: {
-        backgroundColor: 'rgba(243, 233, 210, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.45)',
+        borderColor: 'rgba(255, 122, 0, 0.45)',
         borderRadius: 16,
         paddingVertical: 28,
         alignItems: 'center',
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     progressCardPressed: {
         opacity: 0.9,
         transform: [{ scale: 0.99 }],
-        borderColor: 'rgba(79, 143, 192, 0.5)',
+        borderColor: 'rgba(255, 122, 0, 0.5)',
     },
     progressHeader: {
         flexDirection: 'row',
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
     progressBarBg: {
         height: 6,
         borderRadius: 3,
-        backgroundColor: 'rgba(18, 58, 100, 0.12)',
+        backgroundColor: 'rgba(0, 0, 0, 0.12)',
         marginBottom: Spacing.sm,
     },
     progressBarFill: { height: 6, borderRadius: 3, backgroundColor: Colors.light.gold },
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     },
     claimText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 14 },
     claimBtnClaimed: {
-        backgroundColor: 'rgba(42, 157, 143, 0.85)',
+        backgroundColor: 'rgba(255, 122, 0, 0.85)',
     },
     claimTextClaimed: { color: Colors.light.text },
     modalOverlay: {
@@ -729,14 +729,14 @@ const styles = StyleSheet.create({
     },
     modalBackdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(31, 58, 147, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
     modalContainer: {
         width: '88%',
         borderRadius: 24,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.5)',
+        borderColor: 'rgba(255, 122, 0, 0.5)',
     },
     modalCard: {
         padding: Spacing.xl,
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(243, 233, 210, 0.35)',
+        backgroundColor: 'rgba(255, 255, 255, 0.35)',
     },
     modalCloseText: {
         color: Colors.light.text,
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.bold,
     },
     modalActionBtnClaimed: {
-        backgroundColor: 'rgba(42, 157, 143, 0.85)',
+        backgroundColor: 'rgba(255, 122, 0, 0.85)',
     },
     modalActionTextClaimed: { color: Colors.light.text },
 });

@@ -65,19 +65,19 @@ export function Button({
     };
 
     const getGradientColors = (pressed: boolean) => {
-        if (disabled) return ['#F3E9D2', '#F3E9D2']; // Soft neutral for disabled
+        if (disabled) return ['#FFFFFF', '#FFFFFF']; // Soft neutral for disabled
 
         switch (variant) {
             case 'primary':
                 // Bright Orange -> Golden gradient - Vibrant festive colors
                 return pressed
-                    ? ['#2A9D8F', '#2A9D8F']
-                    : ['#2A9D8F', '#4F8FC0', '#4F8FC0'];
+                    ? ['#FF7A00', '#FF7A00']
+                    : ['#FF7A00', '#FF7A00', '#FF7A00'];
             case 'secondary':
                 // Hot Pink -> Lime Green subtle gradient
                 return pressed
-                    ? ['rgba(31, 58, 147, 0.6)', 'rgba(42, 157, 143, 0.5)']
-                    : ['rgba(79, 143, 192, 0.35)', 'rgba(42, 157, 143, 0.25)'];
+                    ? ['rgba(0, 0, 0, 0.6)', 'rgba(255, 122, 0, 0.5)']
+                    : ['rgba(255, 122, 0, 0.35)', 'rgba(255, 122, 0, 0.25)'];
             default:
                 return ['transparent', 'transparent'];
         }
@@ -194,16 +194,16 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.75)', // Highlight at top
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(18, 58, 100, 0.12)', // Soft shadow at bottom
+        borderBottomColor: 'rgba(0, 0, 0, 0.12)', // Soft shadow at bottom
     },
     secondaryBorder: {
         borderWidth: 1,
-        borderColor: 'rgba(18, 58, 100, 0.1)',
+        borderColor: 'rgba(0, 0, 0, 0.1)',
     },
     shadow: {
         ...Platform.select({
             ios: {
-                shadowColor: '#1F3A93', // Deep Purple shadow for new theme
+                shadowColor: '#000000', // Deep Purple shadow for new theme
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 8,

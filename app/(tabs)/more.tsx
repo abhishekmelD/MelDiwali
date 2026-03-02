@@ -11,11 +11,13 @@ import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshContr
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const LINKS = [
-    { id: '1', icon: '📚', title: 'Learn Hub', subtitle: 'Discover the history of Diwali' },
-    { id: '2', icon: '🖼️', title: 'Gallery', subtitle: 'Photos from past festivals' },
-    { id: '3', icon: '🤝', title: 'Volunteer', subtitle: 'Join the festival team' },
-    { id: '4', icon: '📧', title: 'Contact Us', subtitle: 'Get in touch' },
+type MCIconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+const LINKS: { id: string; icon: MCIconName; title: string; subtitle: string }[] = [
+    { id: '1', icon: 'book-open-page-variant-outline', title: 'Learn Hub', subtitle: 'Discover the history of Diwali' },
+    { id: '2', icon: 'image-multiple-outline', title: 'Gallery', subtitle: 'Photos from past festivals' },
+    { id: '3', icon: 'handshake-outline', title: 'Volunteer', subtitle: 'Join the festival team' },
+    { id: '4', icon: 'email-outline', title: 'Contact Us', subtitle: 'Get in touch' },
 ];
 
 const INTERESTS = ['Event Setup', 'Information Desk', 'Food & Drink', 'Cultural Guide', 'Media & Photo'];
@@ -156,7 +158,7 @@ export default function MoreScreen() {
                     {/* Profile */}
                     <View style={styles.profileCard}>
                         <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>👤</Text>
+                            <MaterialCommunityIcons name="account-outline" size={28} color={Colors.light.accentText} />
                         </View>
                         <Text style={styles.profileTitle}>Festival Pass</Text>
                         {/* Sign Up Button or Welcome Message */}
@@ -179,7 +181,7 @@ export default function MoreScreen() {
                             onPress={() => setMenuVisible(!isMenuVisible)}
                             hitSlop={10}
                         >
-                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(31, 58, 147, 0.4)" />
+                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(0, 0, 0, 0.4)" />
                         </Pressable>
 
                         {/* Menu Overlay & Dropdown */}
@@ -204,12 +206,12 @@ export default function MoreScreen() {
                             style={styles.linkCard}
                             onPress={() => handleLinkPress(link.id)}
                         >
-                            <Text style={styles.linkIcon}>{link.icon}</Text>
+                            <MaterialCommunityIcons name={link.icon} size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
                                 <Text style={styles.linkTitle}>{link.title}</Text>
                                 <Text style={styles.linkSubtitle}>{link.subtitle}</Text>
                             </View>
-                            <Text style={styles.chevron}>›</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.light.textSecondary} />
                         </Pressable>
                     ))}
 
@@ -219,12 +221,12 @@ export default function MoreScreen() {
                             style={styles.linkCard}
                             onPress={() => Linking.openURL('https://www.google.com/search?q=vendors')}
                         >
-                            <Text style={styles.linkIcon}>💬</Text>
+                            <MaterialCommunityIcons name="message-text-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
                                 <Text style={styles.linkTitle}>Vendor whatsapp group</Text>
                                 <Text style={styles.linkSubtitle}>Join the vendor community chat</Text>
                             </View>
-                            <Text style={styles.chevron}>›</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.light.textSecondary} />
                         </Pressable>
                     )}
 
@@ -234,12 +236,12 @@ export default function MoreScreen() {
                             style={styles.linkCard}
                             onPress={() => Linking.openURL('https://chat.whatsapp.com/FGZo1aXlcpUB88DIZXw8Ub?mode=gi_t')}
                         >
-                            <Text style={styles.linkIcon}>🎭</Text>
+                            <MaterialCommunityIcons name="account-music-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
                                 <Text style={styles.linkTitle}>Performer whatsapp group</Text>
                                 <Text style={styles.linkSubtitle}>Connect with performers and stage managers</Text>
                             </View>
-                            <Text style={styles.chevron}>›</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.light.textSecondary} />
                         </Pressable>
                     )}
 
@@ -256,7 +258,7 @@ export default function MoreScreen() {
                                 }
                             }}
                         >
-                            <Text style={styles.linkIcon}>🎬</Text>
+                            <MaterialCommunityIcons name="movie-open-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
                                 <Text style={styles.linkTitle}>
                                     {userRole === 'Admin' ? 'Review BTS submissions' : 'Submit BTS Clip'}
@@ -265,18 +267,9 @@ export default function MoreScreen() {
                                     {userRole === 'Admin' ? 'Approve or reject community submissions' : 'Share behind-the-scenes moments'}
                                 </Text>
                             </View>
-                            <Text style={styles.chevron}>›</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.light.textSecondary} />
                         </Pressable>
                     )}
-
-                    {/* Data Management */}
-                    <Text style={styles.sectionTitle}>Data</Text>
-                    <Pressable style={styles.dangerCard}>
-                        <Text style={styles.dangerText}>Reset passport stamps</Text>
-                    </Pressable>
-                    <Pressable style={styles.dangerCard} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)}>
-                        <Text style={styles.dangerText}>Clear event registrations</Text>
-                    </Pressable>
 
                     <View style={styles.ackCard}>
                         <MaterialCommunityIcons name="dharmachakra" size={24} color={Colors.light.gold} style={styles.ackIcon} />
@@ -305,19 +298,19 @@ export default function MoreScreen() {
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <Text style={styles.modalIntro}>Become a part of the Melbourne Diwali family! Tell us how you&apos;d like to help spread the light.</Text>
                                 <Text style={styles.inputLabel}>FULL NAME</Text>
-                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(31, 58, 147, 0.25)" value={volName} onChangeText={setVolName} />
+                                <TextInput style={styles.input} placeholder="e.g. Alexis Smith" placeholderTextColor="rgba(0, 0, 0, 0.25)" value={volName} onChangeText={setVolName} />
                                 <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
-                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(31, 58, 147, 0.25)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
+                                <TextInput style={[styles.input, volEmail && !isEmailValid && styles.inputError]} placeholder="alexis@example.com" placeholderTextColor="rgba(0, 0, 0, 0.25)" keyboardType="email-address" autoCapitalize="none" value={volEmail} onChangeText={setVolEmail} />
                                 {volEmail && !isEmailValid && <Text style={styles.errorText}>Invalid email address</Text>}
                                 <Text style={styles.inputLabel}>PHONE NUMBER</Text>
-                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(31, 58, 147, 0.25)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
+                                <TextInput style={[styles.input, volPhone && !isPhoneValid && styles.inputError]} placeholder="e.g. 0400 000 000" placeholderTextColor="rgba(0, 0, 0, 0.25)" keyboardType="phone-pad" value={volPhone} onChangeText={setVolPhone} />
                                 {volPhone && !isPhoneValid && <Text style={styles.errorText}>Invalid AU phone number</Text>}
                                 <Text style={styles.inputLabel}>INTEREST AREAS</Text>
                                 <View style={styles.chipRow}>{INTERESTS.map(i => <SelectChip key={i} label={i} active={selectedInterests.includes(i)} onPress={() => toggleInterest(i)} />)}</View>
                                 <Text style={styles.inputLabel}>AVAILABILITY (DAYS)</Text>
                                 <View style={styles.chipRow}>{DAYS.map(d => <SelectChip key={d} label={d} active={selectedDays.includes(d)} onPress={() => toggleDay(d)} />)}</View>
                                 <Text style={styles.inputLabel}>WHY DO YOU WANT TO JOIN?</Text>
-                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(18, 58, 100, 0.35)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
+                                <TextInput style={[styles.input, styles.textArea]} placeholder="Your motivation..." placeholderTextColor="rgba(0, 0, 0, 0.35)" multiline numberOfLines={4} value={volStatement} onChangeText={setVolStatement} />
                                 <Pressable style={[styles.submitBtn, !isFormValid && styles.submitBtnDisabled]} onPress={handleVolunteerSubmit} disabled={!isFormValid}>
                                     <Text style={styles.submitText}>Submit Application</Text>
                                 </Pressable>
@@ -397,18 +390,18 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
         setLoading(true);
 
         console.log('\n\n' + '='.repeat(50));
-        console.log(`🎬  NEW BTS CLIP SUBMISSION`);
+        console.log(`NEW BTS CLIP SUBMISSION`);
         console.log('='.repeat(50));
-        console.log(`👤  User:  ${userName}`);
-        console.log(`🎖️  Role:  ${userRole}`);
-        console.log(`🔗  Link:  ${link}`);
+        console.log(`User:  ${userName}`);
+        console.log(`Role:  ${userRole}`);
+        console.log(`Link:  ${link}`);
         console.log('-'.repeat(50) + '\n');
 
         // Simulate upload/save
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        alert(`✨ Thank you! Your BTS clip has been submitted for review.`);
+        alert(`Thank you. Your BTS clip has been submitted for review.`);
 
         setLoading(false);
         setLink('');
@@ -433,7 +426,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
                             <TextInput
                                 style={styles.input}
                                 placeholder="https://photos.google.com/..."
-                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                 value={link}
                                 onChangeText={setLink}
                                 autoCapitalize="none"
@@ -488,12 +481,12 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
         setLoading(true);
 
         console.log('\n\n' + '='.repeat(50));
-        console.log(`📢  NEW SIGNUP REQUEST RECEIVED`);
+        console.log(`NEW SIGNUP REQUEST RECEIVED`);
         console.log('='.repeat(50));
-        console.log(`👤  User:  ${userName}`);
-        console.log(`📧  Email: ${email}`);
-        console.log(`🔑  Pass:  ${password}`);
-        console.log(`🎖️  Role:  ${selectedRole}`);
+        console.log(`User:  ${userName}`);
+        console.log(`Email: ${email}`);
+        console.log(`Pass:  ${password}`);
+        console.log(`Role:  ${selectedRole}`);
         console.log('-'.repeat(50) + '\n');
 
         // Simulate API call
@@ -501,7 +494,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
 
         setUserRole(selectedRole);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        alert(`🎉 Approved! You are now a ${selectedRole}.`);
+        alert(`Approved. You are now a ${selectedRole}.`);
 
         setLoading(false);
         onClose();
@@ -525,7 +518,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="e.g. Alexis"
-                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                 value={userName}
                                 onChangeText={setUserName}
                                 maxLength={20}
@@ -535,7 +528,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={[styles.input, email && !validateEmail(email) && styles.inputError]}
                                 placeholder="you@example.com"
-                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -547,7 +540,7 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
                             <TextInput
                                 style={styles.input}
                                 placeholder="Set a password"
-                                placeholderTextColor="rgba(18, 58, 100, 0.35)"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
@@ -586,7 +579,7 @@ function ContactCard({ icon, title, value, onPress }: { icon: any; title: string
             <View style={styles.contactCard}>
                 <View style={styles.iconCircle}><MaterialCommunityIcons name={icon} size={24} color={Colors.light.gold} /></View>
                 <View style={styles.contactInfo}><Text style={styles.contactLabel}>{title}</Text><Text style={styles.contactValue}>{value}</Text></View>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(31, 58, 147, 0.2)" />
+                <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(0, 0, 0, 0.2)" />
             </View>
         </Pressable>
     );
@@ -595,15 +588,14 @@ function ContactCard({ icon, title, value, onPress }: { icon: any; title: string
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1, paddingHorizontal: Spacing.lg },
-    header: { fontSize: 32, fontFamily: Fonts.header, color: Colors.light.text, marginTop: Spacing.md, marginBottom: Spacing.lg },
+    header: { fontSize: 32, fontFamily: Fonts.header, color: Colors.light.accentText, marginTop: Spacing.md, marginBottom: Spacing.lg },
     profileCard: {
         backgroundColor: Colors.light.surfaceElevated, borderRadius: 20,
         borderWidth: 1, borderColor: Colors.light.borderSubtle,
         padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.lg,
         position: 'relative', // For absolute positioning of menu
     },
-    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(79, 143, 192, 0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
-    avatarText: { fontSize: 28 },
+    avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255, 122, 0, 0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
     profileTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
     signUpBtn: {
         backgroundColor: Colors.light.gold,
@@ -622,10 +614,10 @@ const styles = StyleSheet.create({
         marginTop: Spacing.sm,
     },
     nameInputContainer: { width: '100%', marginTop: Spacing.xl, alignItems: 'center' },
-    nameInputLabel: { color: 'rgba(31, 58, 147, 0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
+    nameInputLabel: { color: 'rgba(0, 0, 0, 0.4)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1.5, marginBottom: Spacing.sm },
     nameInput: {
         width: '100%',
-        backgroundColor: 'rgba(243, 233, 210, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -637,7 +629,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.light.borderSubtle,
     },
     roleDisplay: {
-        color: 'rgba(31, 58, 147, 0.45)',
+        color: 'rgba(0, 0, 0, 0.45)',
         fontSize: 13,
         fontFamily: Fonts.medium,
         marginTop: Spacing.md,
@@ -652,18 +644,17 @@ const styles = StyleSheet.create({
     linkInfo: { flex: 1 },
     linkTitle: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold, marginBottom: 2 },
     linkSubtitle: { color: Colors.light.textSecondary, fontSize: 13, fontFamily: Fonts.regular },
-    chevron: { color: Colors.light.textSecondary, fontSize: 24 },
     sectionTitle: { color: Colors.light.text, fontSize: 24, fontFamily: Fonts.header, marginTop: Spacing.md, marginBottom: Spacing.md },
     dangerCard: {
-        backgroundColor: 'rgba(79, 143, 192, 0.2)', borderRadius: 16,
-        borderWidth: 1, borderColor: 'rgba(79, 143, 192, 0.5)',
+        backgroundColor: 'rgba(255, 122, 0, 0.2)', borderRadius: 16,
+        borderWidth: 1, borderColor: 'rgba(255, 122, 0, 0.5)',
         padding: Spacing.lg, marginBottom: Spacing.md,
     },
     dangerText: { color: Colors.light.peach, fontSize: 15, fontFamily: Fonts.medium },
-    version: { color: 'rgba(31, 58, 147, 0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
+    version: { color: 'rgba(0, 0, 0, 0.2)', fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', marginTop: Spacing.xl },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(31, 58, 147, 0.35)', justifyContent: 'flex-end' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.35)', justifyContent: 'flex-end' },
     modalContent: { height: '85%' },
     modalCard: {
         flex: 1,
@@ -685,12 +676,12 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(79, 143, 192, 0.35)',
+        backgroundColor: 'rgba(255, 122, 0, 0.35)',
         alignItems: 'center',
         justifyContent: 'center',
     },
     modalIntro: {
-        color: 'rgba(31, 58, 147, 0.5)',
+        color: 'rgba(0, 0, 0, 0.5)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         lineHeight: 22,
@@ -704,7 +695,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     inputLabel: {
-        color: 'rgba(18, 58, 100, 0.5)',
+        color: 'rgba(0, 0, 0, 0.5)',
         fontSize: 11,
         fontFamily: Fonts.bold,
         letterSpacing: 1.5,
@@ -712,7 +703,7 @@ const styles = StyleSheet.create({
         marginTop: Spacing.lg,
     },
     input: {
-        backgroundColor: 'rgba(243, 233, 210, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -721,7 +712,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
     },
-    inputError: { borderColor: 'rgba(79, 143, 192, 0.7)', backgroundColor: 'rgba(79, 143, 192, 0.2)' },
+    inputError: { borderColor: 'rgba(255, 122, 0, 0.7)', backgroundColor: 'rgba(255, 122, 0, 0.2)' },
     errorText: { color: Colors.light.peach, fontSize: 12, fontFamily: Fonts.regular, marginTop: 4 },
     textArea: { minHeight: 100, textAlignVertical: 'top', paddingTop: 16 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
@@ -729,12 +720,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(243, 233, 210, 0.7)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
     },
     chipActive: { backgroundColor: Colors.light.gold, borderColor: Colors.light.gold },
-    chipText: { color: 'rgba(31, 58, 147, 0.5)', fontSize: 13, fontFamily: Fonts.medium },
+    chipText: { color: 'rgba(0, 0, 0, 0.5)', fontSize: 13, fontFamily: Fonts.medium },
     chipTextActive: { color: Colors.light.text },
     submitBtn: {
         backgroundColor: Colors.light.gold,
@@ -743,7 +734,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: Spacing.xl,
     },
-    submitBtnDisabled: { opacity: 0.5, backgroundColor: 'rgba(79, 143, 192, 0.25)' },
+    submitBtnDisabled: { opacity: 0.5, backgroundColor: 'rgba(255, 122, 0, 0.25)' },
     submitText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
 
     // Contact Card
@@ -761,22 +752,22 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(79, 143, 192, 0.25)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
     },
     contactInfo: { flex: 1 },
-    contactLabel: { color: 'rgba(31, 58, 147, 0.35)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
+    contactLabel: { color: 'rgba(0, 0, 0, 0.35)', fontSize: 11, fontFamily: Fonts.bold, textTransform: 'uppercase', letterSpacing: 1 },
     contactValue: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.medium },
     ackTitle: { color: Colors.light.accentText, fontSize: 13, fontFamily: Fonts.bold, marginBottom: 8, textAlign: 'center' },
-    ackText: { color: 'rgba(31, 58, 147, 0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
-    copyright: { color: 'rgba(31, 58, 147, 0.2)', fontSize: 11, fontFamily: Fonts.regular },
+    ackText: { color: 'rgba(0, 0, 0, 0.4)', fontSize: 11, fontFamily: Fonts.regular, lineHeight: 18, textAlign: 'center' },
+    copyright: { color: 'rgba(0, 0, 0, 0.2)', fontSize: 11, fontFamily: Fonts.regular },
 
     // Success Overlay Styles
     successOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(31, 58, 147, 0.6)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 32,
@@ -791,7 +782,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     successSubtext: {
-        color: 'rgba(18, 58, 100, 0.6)',
+        color: 'rgba(0, 0, 0, 0.6)',
         fontSize: 14,
         fontFamily: Fonts.regular,
         marginTop: 8,
@@ -802,7 +793,7 @@ const styles = StyleSheet.create({
         padding: Spacing.xl,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: 'rgba(79, 143, 192, 0.35)',
+        borderColor: 'rgba(255, 122, 0, 0.35)',
         alignItems: 'center',
         marginVertical: Spacing.xl,
         backgroundColor: Colors.light.surfaceElevated,
@@ -843,7 +834,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         zIndex: 30, // Higher than overlay
-        shadowColor: "#173070",
+        shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 4.65,
