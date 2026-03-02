@@ -266,7 +266,7 @@ export default function HomeScreen() {
   const liveDropWidth = isTablet
     ? (contentWidth - liveDropGap * (liveDropColumns - 1)) / liveDropColumns
     : Math.min(contentWidth * 0.78, 360);
-  const liveDropHeight = isTablet ? 250 : Math.min(viewportHeight * 0.28, 270);
+  const liveDropHeight = isTablet ? 320 : Math.min(viewportHeight * 0.42, 352);
   const detailWidth = Math.min(contentWidth, 700);
 
   const router = useRouter();
