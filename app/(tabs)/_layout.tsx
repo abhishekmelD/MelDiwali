@@ -4,6 +4,7 @@ import { Text, useWindowDimensions } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 
 export default function TabLayout() {
@@ -21,8 +22,8 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#FF7A00',
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#FFFFFF',
+          backgroundColor: Colors.light.background,
+          borderTopColor: Colors.light.background,
           borderTopWidth: 1,
           height: 66,
           paddingBottom: 12,

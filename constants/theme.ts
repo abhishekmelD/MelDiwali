@@ -8,7 +8,7 @@ export const Colors = {
   light: {
     text: '#000000',
     textSecondary: '#000000',
-    background: '#FFFFFF',
+    background: '#F6F7F8',
     tint: '#FF7A00',
     icon: '#FF7A00',
     tabIconDefault: '#000000',
@@ -37,7 +37,7 @@ export const Colors = {
   dark: {
     text: '#000000',
     textSecondary: '#000000',
-    background: '#FFFFFF',
+    background: '#F6F7F8',
     tint: '#FF7A00',
     icon: '#FF7A00',
     tabIconDefault: '#000000',
