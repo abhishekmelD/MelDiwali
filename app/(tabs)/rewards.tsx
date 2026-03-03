@@ -215,7 +215,7 @@ export default function RewardsScreen() {
 
                     {/* Passport Card */}
                     <View style={styles.passportCard}>
-                        {!isWeb && permission?.granted && isFocused ? (
+                        {permission?.granted && (isWeb || isFocused) ? (
                             <View style={styles.cameraContainer}>
                                 {cameraEnabled ? (
                                     <CameraView
@@ -277,7 +277,6 @@ export default function RewardsScreen() {
                                 <Pressable
                                     style={styles.scanBtn}
                                     onPress={async () => {
-                                        if (isWeb) return;
                                         try {
                                             await requestPermission();
                                         } catch (error) {
@@ -286,9 +285,11 @@ export default function RewardsScreen() {
                                     }}
                                 >
                                     <Text style={styles.scanIcon}>📷</Text>
-                                    <Text style={styles.scanBtnText}>{isWeb ? 'Camera unavailable on web' : 'Enable Camera'}</Text>
+                                    <Text style={styles.scanBtnText}>Enable Camera</Text>
                                     <Text style={styles.scanHint}>
-                                        {isWeb ? 'QR scanning works on mobile app builds.' : 'Camera permission required'}
+                                        {isWeb
+                                            ? 'Open over HTTPS and allow camera access in your browser.'
+                                            : 'Camera permission required'}
                                     </Text>
                                 </Pressable>
                             </View>
