@@ -64,7 +64,7 @@ export function Button({
         props.onPressOut?.(ev);
     };
 
-    const getGradientColors = (pressed: boolean) => {
+    const getGradientColors = (pressed: boolean): readonly [string, string, ...string[]] => {
         if (disabled) return ['#FFFFFF', '#FFFFFF']; // Soft neutral for disabled
 
         switch (variant) {
@@ -205,11 +205,11 @@ const styles = StyleSheet.create({
             ios: {
                 shadowColor: '#000000', // Deep Purple shadow for new theme
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 8,
+                shadowOpacity: 0.05,
+                shadowRadius: 5,
             },
             android: {
-                elevation: 6,
+                elevation: 4,
             },
         }),
     }

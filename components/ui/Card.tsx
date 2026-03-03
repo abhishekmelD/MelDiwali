@@ -13,7 +13,7 @@ export function Card({ style, variant = 'elevated', children, ...props }: CardPr
     const palette = Colors[theme];
 
     const getBorderColor = () => {
-        return 'rgba(0, 0, 0, 0.15)'; // Subtle purple border matching new theme
+        return 'transparent';
     };
 
     if (variant === 'elevated') {
@@ -68,13 +68,13 @@ const styles = StyleSheet.create({
     shadowContainer: {
         ...Platform.select({
             ios: {
-                shadowColor: '#000000', // Deep Purple shadow for new theme
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.25,
-                shadowRadius: 18,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.05,
+                shadowRadius: 5,
             },
             android: {
-                elevation: 7,
+                elevation: 4,
             },
         }),
     },

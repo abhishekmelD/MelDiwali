@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 2. Create an "OAuth client ID" of type "Web application"
     // 3. Add the Redirect URI logged above to the list
     // 4. Paste the Client ID below:
-    const [request, response, promptAsync] = Google.useAuthRequest({
+    const [, response, promptAsync] = Google.useAuthRequest({
         androidClientId: "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
         iosClientId: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
         webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",

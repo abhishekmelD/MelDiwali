@@ -143,7 +143,7 @@ function CountdownTimer() {
 
   const animatedGlow = useAnimatedStyle(() => ({
     borderColor: `rgba(255, 122, 0, ${glow.value})`,
-    shadowOpacity: glow.value * 0.4,
+    shadowOpacity: 0.05,
   }));
 
   const animatedTilt = useAnimatedStyle(() => ({
@@ -167,7 +167,7 @@ function CountdownTimer() {
       <View style={styles.countdownContent}>
         <Text style={styles.countdownLabel}>FESTIVAL STARTS IN</Text>
         <View style={styles.countdownRow}>
-          {blocks.map((b, i) => (
+          {blocks.map((b) => (
             <View key={b.label} style={styles.countdownBlock}>
               <Text style={styles.countdownValue}>{String(b.value).padStart(2, '0')}</Text>
               <Text style={styles.countdownUnit}>{b.label}</Text>
@@ -212,36 +212,38 @@ function LiveDropCard({
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 150).springify()}>
-      <Animated.View style={[styles.dropCard, { width, height, marginRight }, animatedStyle]}>
-        <Pressable
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          onPress={onPress}
-          style={{ flex: 1 }}
-        >
-          <View style={styles.dropCardInner}>
-            <View style={styles.dropImageWrap}>
-              <ImageBackground
-                source={item.image}
-                style={styles.dropImage}
-                imageStyle={styles.dropImageStyle}
-                resizeMode="cover"
-              />
-            </View>
+      <Animated.View style={[styles.dropCardShadow, { width, height, marginRight }, animatedStyle]}>
+        <View style={styles.dropCard}>
+          <Pressable
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={onPress}
+            style={{ flex: 1 }}
+          >
+            <View style={styles.dropCardInner}>
+              <View style={styles.dropImageWrap}>
+                <ImageBackground
+                  source={item.image}
+                  style={styles.dropImage}
+                  imageStyle={styles.dropImageStyle}
+                  resizeMode="cover"
+                />
+              </View>
 
-            <View style={styles.dropContent}>
-              <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
-                <Text style={styles.dropBadgeText}>{item.badge}</Text>
-              </View>
-              <Text style={styles.dropTitle} numberOfLines={1}>{item.title}</Text>
-              <Text style={styles.dropDesc} numberOfLines={2}>{item.description}</Text>
-              <View style={styles.dropCta}>
-                <Text style={styles.dropCtaText}>{item.cta}</Text>
-                <MaterialCommunityIcons name="arrow-right" size={15} color={Colors.light.accentText} />
+              <View style={styles.dropContent}>
+                <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
+                  <Text style={styles.dropBadgeText}>{item.badge}</Text>
+                </View>
+                <Text style={styles.dropTitle} numberOfLines={1}>{item.title}</Text>
+                <Text style={styles.dropDesc} numberOfLines={2}>{item.description}</Text>
+                <View style={styles.dropCta}>
+                  <Text style={styles.dropCtaText}>{item.cta}</Text>
+                  <MaterialCommunityIcons name="arrow-right" size={15} color={Colors.light.accentText} />
+                </View>
               </View>
             </View>
-          </View>
-        </Pressable>
+          </Pressable>
+        </View>
       </Animated.View>
     </Animated.View>
   );
@@ -265,7 +267,7 @@ export default function HomeScreen() {
   const liveDropGap = Spacing.md;
   const liveDropWidth = isTablet
     ? (contentWidth - liveDropGap * (liveDropColumns - 1)) / liveDropColumns
-    : Math.min(contentWidth * 0.78, 360);
+    : Math.min(contentWidth * 0.88, 400);
   const liveDropHeight = isTablet ? 320 : Math.min(viewportHeight * 0.42, 352);
   const detailWidth = Math.min(contentWidth, 700);
 
@@ -544,7 +546,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 122, 0, 0.35)',
     shadowColor: Colors.light.accentText,
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 10,
+    shadowRadius: 5,
   },
   countdownContent: {
     padding: Spacing.lg,
@@ -583,15 +585,20 @@ const styles = StyleSheet.create({
   liveDropGridItem: {
     marginBottom: Spacing.md,
   },
+  dropCardShadow: {
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    elevation: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+  },
   dropCard: {
+    flex: 1,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
-    elevation: 7,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
   },
   dropCardInner: {
     flex: 1,
@@ -664,9 +671,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 4,
   },
   quickActionButtonMiddle: {
     marginHorizontal: 0,
