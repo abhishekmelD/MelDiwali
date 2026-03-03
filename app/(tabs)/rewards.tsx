@@ -82,12 +82,8 @@ export default function RewardsScreen() {
         ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
         : viewportWidth;
     const isTablet = appFrameWidth >= 768;
-    const sidePadding = isExpanded ? Spacing.xl * 2 : isTablet ? Spacing.xl : Spacing.lg;
-    const maxContentWidth = isExpanded ? 1120 : isTablet ? 920 : 720;
-    const contentWidth = isExpanded
-        ? Math.max(280, appFrameWidth - sidePadding * 2)
-        : Math.min(maxContentWidth, Math.max(appFrameWidth - sidePadding * 2, 280));
-    const rewardColumns = appFrameWidth >= 1200 ? 3 : isTablet ? 2 : 1;
+    const contentWidth = Math.max(appFrameWidth - Spacing.lg * 2, 280);
+    const rewardColumns = isTablet ? 2 : 1;
     const rewardGap = Spacing.md;
     const rewardCardWidth = rewardColumns === 1
         ? contentWidth
@@ -198,13 +194,13 @@ export default function RewardsScreen() {
         <View style={styles.container}>
             <AppBackground />
             <ReloadOverlay visible={refreshing} />
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <SafeAreaView
+                style={[styles.safeArea, isExpanded && { width: appFrameWidth, alignSelf: 'center' }]}
+                edges={['top']}
+            >
                 <ScrollView
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={[
-                        styles.scrollContent,
-                        { paddingHorizontal: sidePadding, alignItems: 'center' },
-                    ]}
+                    contentContainerStyle={styles.scrollContent}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -214,7 +210,7 @@ export default function RewardsScreen() {
                         />
                     }
                 >
-                    <View style={[styles.contentShell, { width: contentWidth }]}>
+                    <View style={styles.contentShell}>
                     <Text style={styles.header}>Rewards</Text>
 
                     {/* Passport Card */}
@@ -483,7 +479,7 @@ export default function RewardsScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.light.background },
     safeArea: { flex: 1 },
-    scrollContent: { paddingHorizontal: Spacing.lg },
+    scrollContent: { paddingHorizontal: Spacing.lg, paddingBottom: 40 },
     contentShell: { width: '100%' },
     header: {
         fontSize: 32,
