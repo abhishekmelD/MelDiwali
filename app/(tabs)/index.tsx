@@ -2,6 +2,7 @@ import { AppBackground } from '@/components/AppBackground';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -280,6 +281,54 @@ export default function HomeScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUsersPreview = async () => {
+      if (!supabase) {
+        console.warn('[Supabase] Client not initialized. Check your .env.local variables.');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('Users')
+        .select('*')
+        .limit(5);
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error('[Supabase] Failed to fetch Users rows:', error.message);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('[Supabase] Users table is reachable, but no rows were found.');
+        return;
+      }
+
+      console.log('\n[Supabase] First 5 Users entries');
+      console.log('--------------------------------');
+      data.forEach((row, index) => {
+        const name = row.Name ?? 'N/A';
+        const email = row['E-mail'] ?? 'N/A';
+        const role = row.Role ?? 'N/A';
+        const createdAt = row.created_at ?? 'N/A';
+
+        console.log(
+          `${index + 1}. Name: ${name} | E-mail: ${email} | Role: ${role} | created_at: ${createdAt}`
+        );
+      });
+      console.log('--------------------------------\n');
+    };
+
+    fetchUsersPreview();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleActionPress = (path: any) => {
     Haptics.selectionAsync();
