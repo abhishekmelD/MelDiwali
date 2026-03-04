@@ -13,7 +13,8 @@ export default function TabLayout() {
   const appFrameWidth = isExpanded
     ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
     : undefined;
-  const { userRole } = useUser();
+  const { userRole, isAuthenticated } = useUser();
+  const canAccessProtectedTabs = isAuthenticated || Boolean(userRole);
   const router = useRouter();
 
   return (
@@ -63,7 +64,7 @@ export default function TabLayout() {
         name="community"
         listeners={{
           tabPress: (e) => {
-            if (!userRole) {
+            if (!canAccessProtectedTabs) {
               e.preventDefault();
               router.push('/(tabs)/more?openSignup=true');
             }
@@ -78,7 +79,7 @@ export default function TabLayout() {
         name="events"
         listeners={{
           tabPress: (e) => {
-            if (!userRole) {
+            if (!canAccessProtectedTabs) {
               e.preventDefault();
               router.push('/(tabs)/more?openSignup=true');
             }
@@ -93,7 +94,7 @@ export default function TabLayout() {
         name="rewards"
         listeners={{
           tabPress: (e) => {
-            if (!userRole) {
+            if (!canAccessProtectedTabs) {
               e.preventDefault();
               router.push('/(tabs)/more?openSignup=true');
             }

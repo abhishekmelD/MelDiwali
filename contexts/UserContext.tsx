@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface UserContextType {
+    isAuthenticated: boolean;
     userName: string;
     setUserName: (name: string) => Promise<void>;
     userAvatarUrl: string;
@@ -44,6 +45,7 @@ function logGoogleMetadata(user: {
 }
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userName, setUserNameState] = useState('');
     const [userAvatarUrl, setUserAvatarUrlState] = useState('');
     const [userRole, setUserRoleState] = useState('');
@@ -64,7 +66,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 data: { session },
             } = await supabase.auth.getSession();
 
-            if (!session?.user) return;
+            if (!session?.user) {
+                setIsAuthenticated(false);
+                return;
+            }
+            setIsAuthenticated(true);
             logGoogleMetadata(session.user);
 
             const metadataName = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name;
@@ -93,7 +99,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         applySessionUser().catch((e) => console.error('Failed to hydrate Supabase session', e));
 
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session?.user) return;
+            if (!session?.user) {
+                setIsAuthenticated(false);
+                return;
+            }
+            setIsAuthenticated(true);
             logGoogleMetadata(session.user);
 
             const metadataName = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name;
@@ -218,6 +228,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUserNameState('');
         setUserAvatarUrlState('');
         setUserRoleState('');
+        setIsAuthenticated(false);
         setRegisteredEvents([]);
         try {
             await AsyncStorage.multiRemove([
@@ -232,7 +243,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <UserContext.Provider value={{ userName, setUserName, userAvatarUrl, userRole, setUserRole, registeredEvents, toggleEventRegistration, logout }}>
+        <UserContext.Provider
+            value={{
+                isAuthenticated,
+                userName,
+                setUserName,
+                userAvatarUrl,
+                userRole,
+                setUserRole,
+                registeredEvents,
+                toggleEventRegistration,
+                logout,
+            }}
+        >
             {children}
         </UserContext.Provider>
     );

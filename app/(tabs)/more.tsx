@@ -151,15 +151,17 @@ export default function MoreScreen() {
         setGoogleLoading(true);
         try {
             const isWeb = Platform.OS === 'web';
-            const webBaseUrl =
-                configuredWebUrl ||
-                (typeof window !== 'undefined' ? window.location.origin : undefined);
+            const runtimeWebOrigin = isWeb && typeof window !== 'undefined'
+                ? window.location.origin?.replace(/\/+$/, '')
+                : undefined;
+            const webBaseUrl = configuredWebUrl || runtimeWebOrigin;
             const redirectTo =
                 isWeb && webBaseUrl
                     ? `${webBaseUrl}/more`
                     : AuthSession.makeRedirectUri({
                         scheme: 'saras',
                         path: 'more',
+                        preferLocalhost: false,
                     });
             console.log('[Google OAuth] redirectTo:', redirectTo);
             const { data, error } = await supabase.auth.signInWithOAuth({
