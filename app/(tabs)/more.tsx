@@ -149,17 +149,21 @@ export default function MoreScreen() {
 
         setGoogleLoading(true);
         try {
-            const redirectTo = AuthSession.makeRedirectUri({
-                scheme: 'saras',
-                path: 'more',
-                preferLocalhost: true,
-            });
+            const isWeb = Platform.OS === 'web';
+            const redirectTo =
+                isWeb && typeof window !== 'undefined'
+                    ? `${window.location.origin}/more`
+                    : AuthSession.makeRedirectUri({
+                        scheme: 'saras',
+                        path: 'more',
+                    });
             console.log('[Google OAuth] redirectTo:', redirectTo);
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo,
-                    skipBrowserRedirect: true,
+                    // On web, let Supabase handle full-page redirect directly.
+                    skipBrowserRedirect: !isWeb,
                 },
             });
 
@@ -167,13 +171,12 @@ export default function MoreScreen() {
                 throw error;
             }
 
-            if (!data?.url) {
-                throw new Error('Missing OAuth redirect URL from Supabase.');
+            if (isWeb) {
+                return;
             }
 
-            if (Platform.OS === 'web') {
-                await Linking.openURL(data.url);
-                return;
+            if (!data?.url) {
+                throw new Error('Missing OAuth redirect URL from Supabase.');
             }
 
             const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
