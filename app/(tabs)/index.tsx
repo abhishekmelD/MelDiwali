@@ -274,6 +274,7 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const { userName, userRole } = useUser();
+  const firstName = userName?.trim() ? userName.trim().split(/\s+/)[0] : '';
   const [isDropsModalVisible, setIsDropsModalVisible] = useState(false);
   const [selectedDrop, setSelectedDrop] = useState<typeof LIVE_DROPS[0] | null>(null);
   const { refreshing, onRefresh } = useReloadOnRefresh({
@@ -362,7 +363,7 @@ export default function HomeScreen() {
           {/* Namaste */}
           <Animated.View entering={FadeInDown.delay(200).duration(800)}>
             <Text style={[styles.namaste, isTablet && styles.namasteTablet]}>
-              Namaste{userName ? `, ${userName}` : ''}!
+              Namaste{firstName ? `, ${firstName}` : ''}!
             </Text>
           </Animated.View>
 

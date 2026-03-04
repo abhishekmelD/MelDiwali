@@ -3,11 +3,15 @@ import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as AuthSession from 'expo-auth-session';
+import * as ExpoLinking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -24,6 +28,8 @@ const INTERESTS = ['Event Setup', 'Information Desk', 'Food & Drink', 'Cultural 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const ROLES = ['Admin', 'Vendor', 'Stage Manager', 'Performer', 'Guest'];
 const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+
+WebBrowser.maybeCompleteAuthSession();
 
 function SelectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
     const scale = useSharedValue(1);
@@ -48,7 +54,7 @@ export default function MoreScreen() {
     const appFrameWidth = isExpanded
         ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
         : viewportWidth;
-    const { userName, userRole, logout } = useUser();
+    const { userName, userAvatarUrl, userRole, logout } = useUser();
     const { openSignup } = useLocalSearchParams();
 
     // Modal States
@@ -59,6 +65,7 @@ export default function MoreScreen() {
     const [isMenuVisible, setMenuVisible] = useState(false);
     const [isBTSVisible, setBTSVisible] = useState(false);
     const [isBTSReviewVisible, setBTSReviewVisible] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
     const BTS_ALLOWED_ROLES = ['Admin', 'Vendor', 'Stage Manager', 'Performer'];
@@ -134,6 +141,94 @@ export default function MoreScreen() {
         Linking.openURL(url!);
     };
 
+    const handleGoogleSignIn = async () => {
+        if (!supabase) {
+            Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
+            return;
+        }
+
+        setGoogleLoading(true);
+        try {
+            const redirectTo = AuthSession.makeRedirectUri({
+                scheme: 'saras',
+                path: 'more',
+                preferLocalhost: true,
+            });
+            console.log('[Google OAuth] redirectTo:', redirectTo);
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo,
+                    skipBrowserRedirect: true,
+                },
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data?.url) {
+                throw new Error('Missing OAuth redirect URL from Supabase.');
+            }
+
+            if (Platform.OS === 'web') {
+                await Linking.openURL(data.url);
+                return;
+            }
+
+            const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+            console.log('[Google OAuth] authSession result:', result.type);
+            if (result.type !== 'success' || !result.url) {
+                if (result.type !== 'cancel' && result.type !== 'dismiss') {
+                    throw new Error(`Google auth did not complete (result: ${result.type}).`);
+                }
+                return;
+            }
+            console.log('[Google OAuth] callback URL:', result.url);
+
+            const { queryParams } = ExpoLinking.parse(result.url);
+            const hashFragment = result.url.includes('#') ? result.url.split('#')[1] : '';
+            const hashParams = new URLSearchParams(hashFragment);
+            const queryAccessToken =
+                typeof queryParams?.access_token === 'string' ? queryParams.access_token : undefined;
+            const queryRefreshToken =
+                typeof queryParams?.refresh_token === 'string' ? queryParams.refresh_token : undefined;
+            const codeParam = typeof queryParams?.code === 'string' ? queryParams.code : undefined;
+            const hashCode = hashParams.get('code') ?? undefined;
+            const accessToken = hashParams.get('access_token') ?? queryAccessToken;
+            const refreshToken = hashParams.get('refresh_token') ?? queryRefreshToken;
+            const authCode = hashCode ?? codeParam;
+
+            if (authCode) {
+                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
+                if (exchangeError) {
+                    throw exchangeError;
+                }
+                return;
+            }
+
+            if (accessToken && refreshToken) {
+                const { error: setSessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+                if (setSessionError) {
+                    throw setSessionError;
+                }
+                return;
+            }
+
+            throw new Error('Google sign-in callback did not include a code or session tokens.');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to start Google sign-in.';
+            Alert.alert('Google sign-in failed', message);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
+    const firstName = userName?.trim() ? userName.trim().split(/\s+/)[0] : 'Guest';
+
     return (
         <View style={styles.container}>
             <AppBackground />
@@ -158,16 +253,30 @@ export default function MoreScreen() {
                     {/* Profile */}
                     <View style={styles.profileCard}>
                         <View style={styles.avatar}>
-                            <MaterialCommunityIcons name="account-outline" size={28} color={Colors.light.accentText} />
+                            {userAvatarUrl ? (
+                                <Image source={{ uri: userAvatarUrl }} style={styles.avatarImage} />
+                            ) : (
+                                <MaterialCommunityIcons name="account-outline" size={28} color={Colors.light.accentText} />
+                            )}
                         </View>
                         <Text style={styles.profileTitle}>Festival Pass</Text>
                         {/* Sign Up Button or Welcome Message */}
                         {userRole ? (
-                            <Text style={styles.welcomeText}>Welcome, {userName || 'Guest'}</Text>
+                            <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
                         ) : (
-                            <Pressable style={styles.signUpBtn} onPress={() => setSignUpVisible(true)}>
-                                <Text style={styles.signUpBtnText}>Sign Up / Log In</Text>
-                            </Pressable>
+                            <View style={styles.authButtonsRow}>
+                                <Pressable style={styles.signUpBtn} onPress={() => setSignUpVisible(true)}>
+                                    <Text style={styles.signUpBtnText}>Sign Up / Log In</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={[styles.googleBtn, googleLoading && styles.submitBtnDisabled]}
+                                    onPress={handleGoogleSignIn}
+                                    disabled={googleLoading}
+                                >
+                                    <MaterialCommunityIcons name="google" size={18} color={Colors.light.accentText} />
+                                    <Text style={styles.googleBtnText}>{googleLoading ? 'Opening...' : 'Google'}</Text>
+                                </Pressable>
+                            </View>
                         )}
 
                         {/* Name Input */}
@@ -603,7 +712,18 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255, 122, 0, 0.25)', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 32,
+    },
     profileTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
+    authButtonsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
+        marginTop: Spacing.sm,
+    },
     signUpBtn: {
         backgroundColor: Colors.light.gold,
         borderRadius: 12,
@@ -611,9 +731,20 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: Spacing.sm,
     },
     signUpBtnText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 16 },
+    googleBtn: {
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 122, 0, 0.4)',
+        backgroundColor: Colors.light.surface,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    googleBtnText: { color: Colors.light.accentText, fontFamily: Fonts.bold, fontSize: 15 },
     welcomeText: {
         color: Colors.light.text,
         fontFamily: Fonts.bold,
