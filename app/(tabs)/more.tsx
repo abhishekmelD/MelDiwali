@@ -30,6 +30,7 @@ const ROLES = ['Admin', 'Vendor', 'Stage Manager', 'Performer', 'Guest'];
 const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
 WebBrowser.maybeCompleteAuthSession();
+const configuredWebUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/+$/, '');
 
 function SelectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
     const scale = useSharedValue(1);
@@ -150,9 +151,12 @@ export default function MoreScreen() {
         setGoogleLoading(true);
         try {
             const isWeb = Platform.OS === 'web';
+            const webBaseUrl =
+                configuredWebUrl ||
+                (typeof window !== 'undefined' ? window.location.origin : undefined);
             const redirectTo =
-                isWeb && typeof window !== 'undefined'
-                    ? `${window.location.origin}/more`
+                isWeb && webBaseUrl
+                    ? `${webBaseUrl}/more`
                     : AuthSession.makeRedirectUri({
                         scheme: 'saras',
                         path: 'more',
