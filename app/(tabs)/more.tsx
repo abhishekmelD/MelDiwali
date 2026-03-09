@@ -75,14 +75,26 @@ export default function MoreScreen() {
     const isPerformerOrStageManager = userRole === 'Performer' || userRole === 'Stage Manager';
 
     const router = useRouter(); // Create local router instance
+    const suppressSignupFromParamsRef = React.useRef(false);
 
     React.useEffect(() => {
         if (openSignup === 'true') {
+            if (suppressSignupFromParamsRef.current || !!userRole) {
+                setSignUpVisible(false);
+                router.replace('/(tabs)/more');
+                return;
+            }
             setSignUpVisible(true);
-            // Reset the param so it can be triggered again
-            router.setParams({ openSignup: undefined });
+            // Clear query params after first open to prevent modal reopening loops.
+            router.replace('/(tabs)/more');
         }
-    }, [openSignup, router]);
+    }, [openSignup, router, userRole]);
+
+    React.useEffect(() => {
+        if (userRole && isSignUpVisible) {
+            setSignUpVisible(false);
+        }
+    }, [userRole, isSignUpVisible]);
 
     // Volunteer Form State
     const [volName, setVolName] = useState('');
@@ -147,6 +159,12 @@ export default function MoreScreen() {
             Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
         }
+
+        const handleAuthSuccess = () => {
+            suppressSignupFromParamsRef.current = true;
+            setSignUpVisible(false);
+            router.replace('/(tabs)/more');
+        };
 
         setGoogleLoading(true);
         try {
@@ -213,6 +231,7 @@ export default function MoreScreen() {
                 if (exchangeError) {
                     throw exchangeError;
                 }
+                handleAuthSuccess();
                 return;
             }
 
@@ -224,6 +243,7 @@ export default function MoreScreen() {
                 if (setSessionError) {
                     throw setSessionError;
                 }
+                handleAuthSuccess();
                 return;
             }
 
@@ -275,15 +295,8 @@ export default function MoreScreen() {
                         ) : (
                             <View style={styles.authButtonsRow}>
                                 <Pressable style={styles.signUpBtn} onPress={() => setSignUpVisible(true)}>
+                                    <MaterialCommunityIcons name="account-plus-outline" size={18} color={Colors.light.text} />
                                     <Text style={styles.signUpBtnText}>Sign Up / Log In</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={[styles.googleBtn, googleLoading && styles.submitBtnDisabled]}
-                                    onPress={handleGoogleSignIn}
-                                    disabled={googleLoading}
-                                >
-                                    <MaterialCommunityIcons name="google" size={18} color={Colors.light.accentText} />
-                                    <Text style={styles.googleBtnText}>{googleLoading ? 'Opening...' : 'Google'}</Text>
                                 </Pressable>
                             </View>
                         )}
@@ -308,7 +321,7 @@ export default function MoreScreen() {
                                 <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)} />
                                 <Pressable style={styles.menuDropdown} onPress={() => {
                                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                    logout();
+                                    logout().catch((e) => console.warn('Logout cleanup failed', e));
                                     setMenuVisible(false);
                                 }}>
                                     <MaterialCommunityIcons name="logout" size={18} color={Colors.light.peach} />
@@ -481,6 +494,8 @@ export default function MoreScreen() {
             <SignUpModal
                 visible={isSignUpVisible}
                 onClose={() => setSignUpVisible(false)}
+                onGooglePress={handleGoogleSignIn}
+                googleLoading={googleLoading}
             />
 
             {/* BTS Submission Modal */}
@@ -588,7 +603,17 @@ function BTSReviewModal({ visible, onClose }: { visible: boolean; onClose: () =>
     );
 }
 
-function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+function SignUpModal({
+    visible,
+    onClose,
+    onGooglePress,
+    googleLoading,
+}: {
+    visible: boolean;
+    onClose: () => void;
+    onGooglePress: () => void;
+    googleLoading: boolean;
+}) {
     const { setUserRole, setUserName, userName } = useUser();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -622,15 +647,30 @@ function SignUpModal({ visible, onClose }: { visible: boolean; onClose: () => vo
         <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View style={styles.modalOverlay}>
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
-                    <View style={styles.modalCard}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Sign Up</Text>
-                            <Pressable onPress={onClose}>
-                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
-                            </Pressable>
-                        </View>
+                        <View style={styles.modalCard}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Sign Up / Log In</Text>
+                                <Pressable onPress={onClose}>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
+                                </Pressable>
+                            </View>
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            <Text style={styles.modalIntro}>Create an account to unlock more features.</Text>
+                            <Text style={styles.modalIntro}>Continue with Google for faster access, or create an account with email.</Text>
+
+                            <Pressable
+                                style={[styles.googleAuthBtn, googleLoading && styles.submitBtnDisabled]}
+                                onPress={onGooglePress}
+                                disabled={googleLoading}
+                            >
+                                <MaterialCommunityIcons name="google" size={18} color={Colors.light.accentText} />
+                                <Text style={styles.googleAuthBtnText}>{googleLoading ? 'Opening Google...' : 'Continue with Google'}</Text>
+                            </Pressable>
+
+                            <View style={styles.authDividerRow}>
+                                <View style={styles.authDividerLine} />
+                                <Text style={styles.authDividerText}>or use email</Text>
+                                <View style={styles.authDividerLine} />
+                            </View>
 
                             <Text style={styles.inputLabel}>DISPLAY NAME</Text>
                             <TextInput
@@ -728,9 +768,8 @@ const styles = StyleSheet.create({
     },
     profileTitle: { color: Colors.light.accentText, fontSize: 18, fontFamily: Fonts.bold, marginBottom: Spacing.md },
     authButtonsRow: {
-        flexDirection: 'row',
+        width: '100%',
         alignItems: 'center',
-        gap: Spacing.sm,
         marginTop: Spacing.sm,
     },
     signUpBtn: {
@@ -740,20 +779,42 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        gap: 8,
     },
     signUpBtnText: { color: Colors.light.text, fontFamily: Fonts.bold, fontSize: 16 },
-    googleBtn: {
+    googleAuthBtn: {
         borderRadius: 12,
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingVertical: 14,
         borderWidth: 1,
         borderColor: 'rgba(255, 122, 0, 0.4)',
         backgroundColor: Colors.light.surface,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 6,
     },
-    googleBtnText: { color: Colors.light.accentText, fontFamily: Fonts.bold, fontSize: 15 },
+    googleAuthBtnText: { color: Colors.light.accentText, fontFamily: Fonts.bold, fontSize: 15 },
+    authDividerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: Spacing.lg,
+    },
+    authDividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.light.borderSubtle,
+    },
+    authDividerText: {
+        marginHorizontal: Spacing.md,
+        color: 'rgba(0, 0, 0, 0.45)',
+        fontSize: 12,
+        fontFamily: Fonts.medium,
+        textTransform: 'uppercase',
+        letterSpacing: 0.8,
+    },
     welcomeText: {
         color: Colors.light.text,
         fontFamily: Fonts.bold,

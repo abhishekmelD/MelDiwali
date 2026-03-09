@@ -59,12 +59,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     useEffect(() => {
-        if (!supabase) return;
+        const sb = supabase;
+        if (!sb) return;
 
         const applySessionUser = async () => {
             const {
                 data: { session },
-            } = await supabase.auth.getSession();
+            } = await sb.auth.getSession();
 
             if (!session?.user) {
                 setIsAuthenticated(false);
@@ -98,7 +99,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
         applySessionUser().catch((e) => console.error('Failed to hydrate Supabase session', e));
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: authListener } = sb.auth.onAuthStateChange((_event, session) => {
             if (!session?.user) {
                 setIsAuthenticated(false);
                 return;
@@ -221,7 +222,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             try {
                 await supabase.auth.signOut();
             } catch (e) {
-                console.error('Failed to sign out from Supabase', e);
+                // Network failures during remote sign-out should not block local logout.
+                console.warn('Remote sign-out failed; clearing local session instead.');
+                try {
+                    await supabase.auth.signOut({ scope: 'local' });
+                } catch {
+                    // Ignore: we'll still clear app state below.
+                }
             }
         }
 
