@@ -63,12 +63,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         if (!sb) return;
 
         const applySessionUser = async () => {
-            const {
-                data: { session },
-            } = await sb.auth.getSession();
+            let session: Awaited<ReturnType<typeof sb.auth.getSession>>['data']['session'] | null = null;
+            try {
+                const result = await sb.auth.getSession();
+                session = result.data.session;
+            } catch (e) {
+                const message = e instanceof Error ? e.message : String(e);
+                if (message.includes('Invalid Refresh Token')) {
+                    // Token persisted on device is stale; clear local session state silently.
+                    await sb.auth.signOut({ scope: 'local' }).catch(() => undefined);
+                    setIsAuthenticated(false);
+                    setUserNameState('');
+                    setUserAvatarUrlState('');
+                    setUserRoleState('');
+                    return;
+                }
+                throw e;
+            }
 
             if (!session?.user) {
                 setIsAuthenticated(false);
+                setUserNameState('');
+                setUserAvatarUrlState('');
+                setUserRoleState('');
                 return;
             }
             setIsAuthenticated(true);
@@ -102,6 +119,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const { data: authListener } = sb.auth.onAuthStateChange((_event, session) => {
             if (!session?.user) {
                 setIsAuthenticated(false);
+                setUserNameState('');
+                setUserAvatarUrlState('');
+                setUserRoleState('');
                 return;
             }
             setIsAuthenticated(true);

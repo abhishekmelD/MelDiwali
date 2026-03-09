@@ -5,13 +5,13 @@ import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import * as AuthSession from 'expo-auth-session';
+import * as Haptics from 'expo-haptics';
 import * as ExpoLinking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Linking, Modal, PanResponder, Platform, Pressable, Animated as RNAnimated, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,8 +26,19 @@ const LINKS: { id: string; icon: MCIconName; title: string; subtitle: string }[]
 
 const INTERESTS = ['Event Setup', 'Information Desk', 'Food & Drink', 'Cultural Guide', 'Media & Photo'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const ROLES = ['Admin', 'Vendor', 'Stage Manager', 'Performer', 'Guest'];
+const ROLE_REQUEST_OPTIONS: { role: string; icon: MCIconName; subtitle: string }[] = [
+    { role: 'Vendor', icon: 'storefront-outline', subtitle: 'Manage stalls, offers, and vendor tools' },
+    { role: 'Stage Manager', icon: 'clipboard-text-outline', subtitle: 'Coordinate stage schedules and flow' },
+    { role: 'Performer', icon: 'microphone-variant', subtitle: 'Access performer updates and set details' },
+];
 const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+const validatePassword = (password: string) => /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+const getPasswordRequirements = (password: string) => {
+    const hasMinLength = password.length >= 8;
+    const hasLetter = /[A-Za-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    return { hasMinLength, hasLetter, hasNumber };
+};
 
 WebBrowser.maybeCompleteAuthSession();
 const configuredWebUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/+$/, '');
@@ -47,6 +58,169 @@ function SelectChip({ label, active, onPress }: { label: string; active: boolean
     );
 }
 
+function SwipeToConfirm({
+    label,
+    onConfirm,
+    disabled,
+    loading,
+}: {
+    label: string;
+    onConfirm: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+}) {
+    const knobSize = 72;
+    const horizontalPadding = 5;
+    const thumbX = React.useRef(new RNAnimated.Value(0)).current;
+    const hintShift = React.useRef(new RNAnimated.Value(0)).current;
+    const hintOpacity = React.useRef(new RNAnimated.Value(0.58)).current;
+    const dragStartXRef = React.useRef(0);
+    const [trackWidth, setTrackWidth] = useState(0);
+    const [confirmed, setConfirmed] = useState(false);
+    const maxTranslate = Math.max(trackWidth - knobSize - horizontalPadding * 2, 0);
+    const completionThreshold = maxTranslate * 0.86;
+
+    React.useEffect(() => {
+        const shiftLoop = RNAnimated.loop(
+            RNAnimated.sequence([
+                RNAnimated.timing(hintShift, {
+                    toValue: 4,
+                    duration: 1200,
+                    useNativeDriver: true,
+                }),
+                RNAnimated.timing(hintShift, {
+                    toValue: 0,
+                    duration: 1200,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        const opacityLoop = RNAnimated.loop(
+            RNAnimated.sequence([
+                RNAnimated.timing(hintOpacity, {
+                    toValue: 0.72,
+                    duration: 1200,
+                    useNativeDriver: true,
+                }),
+                RNAnimated.timing(hintOpacity, {
+                    toValue: 0.58,
+                    duration: 1200,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+
+        if (!disabled && !loading && !confirmed) {
+            shiftLoop.start();
+            opacityLoop.start();
+        } else {
+            shiftLoop.stop();
+            opacityLoop.stop();
+            hintShift.setValue(0);
+            hintOpacity.setValue(0.58);
+        }
+
+        return () => {
+            shiftLoop.stop();
+            opacityLoop.stop();
+        };
+    }, [confirmed, disabled, hintOpacity, hintShift, loading]);
+
+    React.useEffect(() => {
+        if (disabled || !trackWidth) {
+            setConfirmed(false);
+            thumbX.setValue(0);
+            dragStartXRef.current = 0;
+        }
+    }, [disabled, trackWidth, thumbX]);
+
+    const panResponder = React.useMemo(
+        () =>
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => !disabled && !loading && !confirmed && maxTranslate > 0,
+            onMoveShouldSetPanResponder: (_, gestureState) =>
+                !disabled && !loading && !confirmed && maxTranslate > 0 && Math.abs(gestureState.dx) > 2,
+            onPanResponderGrant: () => {
+                thumbX.stopAnimation((value: number) => {
+                    dragStartXRef.current = value;
+                });
+            },
+            onPanResponderMove: (_, gestureState) => {
+                const nextX = Math.min(Math.max(dragStartXRef.current + gestureState.dx, 0), maxTranslate);
+                thumbX.setValue(nextX);
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (disabled || loading || confirmed) return;
+
+                const finalX = Math.min(Math.max(dragStartXRef.current + gestureState.dx, 0), maxTranslate);
+                if (finalX >= completionThreshold && maxTranslate > 0) {
+                    RNAnimated.timing(thumbX, {
+                        toValue: maxTranslate,
+                        duration: 130,
+                        useNativeDriver: true,
+                    }).start(() => {
+                        setConfirmed(true);
+                        onConfirm();
+                    });
+                    return;
+                }
+
+                RNAnimated.spring(thumbX, {
+                    toValue: 0,
+                    useNativeDriver: true,
+                    bounciness: 3,
+                }).start();
+                dragStartXRef.current = 0;
+            },
+        }),
+        [completionThreshold, confirmed, disabled, loading, maxTranslate, onConfirm, thumbX]
+    );
+
+    return (
+        <View
+            style={[styles.swipeTrack, (disabled || loading) && styles.swipeTrackDisabled]}
+            onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
+        >
+            <RNAnimated.View
+                style={[
+                    styles.swipeHintRow,
+                    {
+                        transform: [{ translateX: hintShift }],
+                        opacity: hintOpacity,
+                    },
+                ]}
+                pointerEvents="none"
+            >
+                <MaterialCommunityIcons name="chevron-right" size={18} color="rgba(255, 122, 0, 0.85)" />
+                <MaterialCommunityIcons name="chevron-right" size={18} color="rgba(255, 122, 0, 0.7)" />
+                <MaterialCommunityIcons name="chevron-right" size={18} color="rgba(255, 122, 0, 0.5)" />
+                <Text style={styles.swipeLabel}>
+                    {loading ? 'Sending request...' : confirmed ? 'Request sent' : label}
+                </Text>
+            </RNAnimated.View>
+            <RNAnimated.View
+                {...panResponder.panHandlers}
+                style={[
+                    styles.swipeKnob,
+                    {
+                        width: knobSize,
+                        height: knobSize,
+                        borderRadius: knobSize / 2,
+                        left: horizontalPadding,
+                        transform: [{ translateX: thumbX }],
+                    },
+                ]}
+            >
+                <MaterialCommunityIcons
+                    name={loading ? 'loading' : confirmed ? 'check' : 'chevron-double-right'}
+                    size={20}
+                    color={Colors.light.text}
+                />
+            </RNAnimated.View>
+        </View>
+    );
+}
+
 
 
 export default function MoreScreen() {
@@ -55,13 +229,18 @@ export default function MoreScreen() {
     const appFrameWidth = isExpanded
         ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
         : viewportWidth;
-    const { userName, userAvatarUrl, userRole, logout } = useUser();
+    const { isAuthenticated, userName, userAvatarUrl, userRole, logout } = useUser();
     const { openSignup } = useLocalSearchParams();
 
     // Modal States
     const [isVolunteerVisible, setVolunteerVisible] = useState(false);
     const [isContactVisible, setContactVisible] = useState(false);
+    const [isLoginVisible, setLoginVisible] = useState(false);
     const [isSignUpVisible, setSignUpVisible] = useState(false);
+    const [isRoleRequestVisible, setRoleRequestVisible] = useState(false);
+    const [roleRequestStep, setRoleRequestStep] = useState<'select' | 'confirm'>('select');
+    const [requestedRole, setRequestedRole] = useState('');
+    const [requestSending, setRequestSending] = useState(false);
     const [isSuccessVisible, setSuccessVisible] = useState(false);
     const [isMenuVisible, setMenuVisible] = useState(false);
     const [isBTSVisible, setBTSVisible] = useState(false);
@@ -75,26 +254,28 @@ export default function MoreScreen() {
     const isPerformerOrStageManager = userRole === 'Performer' || userRole === 'Stage Manager';
 
     const router = useRouter(); // Create local router instance
-    const suppressSignupFromParamsRef = React.useRef(false);
+    const suppressAuthFromParamsRef = React.useRef(false);
 
     React.useEffect(() => {
         if (openSignup === 'true') {
-            if (suppressSignupFromParamsRef.current || !!userRole) {
+            if (suppressAuthFromParamsRef.current || !!userRole) {
+                setLoginVisible(false);
                 setSignUpVisible(false);
                 router.replace('/(tabs)/more');
                 return;
             }
-            setSignUpVisible(true);
+            setLoginVisible(true);
             // Clear query params after first open to prevent modal reopening loops.
             router.replace('/(tabs)/more');
         }
     }, [openSignup, router, userRole]);
 
     React.useEffect(() => {
-        if (userRole && isSignUpVisible) {
+        if (userRole && (isLoginVisible || isSignUpVisible)) {
+            setLoginVisible(false);
             setSignUpVisible(false);
         }
-    }, [userRole, isSignUpVisible]);
+    }, [userRole, isLoginVisible, isSignUpVisible]);
 
     // Volunteer Form State
     const [volName, setVolName] = useState('');
@@ -143,6 +324,65 @@ export default function MoreScreen() {
         else if (id === '4') setContactVisible(true);
     };
 
+    const handleOpenRoleRequest = () => {
+        setMenuVisible(false);
+        setRoleRequestStep('select');
+        setRoleRequestVisible(true);
+    };
+
+    const handleContinueRoleRequest = () => {
+        if (!requestedRole) return;
+        setRoleRequestStep('confirm');
+    };
+
+    const handleSendRoleRequest = async () => {
+        if (!requestedRole || requestSending) return;
+        if (!supabase) {
+            Alert.alert('Request unavailable', 'Supabase is not configured. Check your .env.local values.');
+            return;
+        }
+
+        setRequestSending(true);
+        try {
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            if (userError) {
+                throw userError;
+            }
+
+            const authUser = userData.user;
+            if (!authUser) {
+                throw new Error('You must be logged in to request a role.');
+            }
+
+            const { error: insertError } = await supabase.from('role_requests').insert({
+                user_id: authUser.id,
+                user_email: authUser.email ?? null,
+                current_role: userRole || 'Guest',
+                requested_role: requestedRole,
+                status: 'pending',
+            });
+
+            if (insertError) {
+                throw insertError;
+            }
+
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Alert.alert(
+                'Request sent',
+                `Your request for ${requestedRole} access has been sent to the admin.`
+            );
+            setRoleRequestVisible(false);
+            setRoleRequestStep('select');
+            setRequestedRole('');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to submit role request.';
+            Alert.alert('Request failed', message);
+        } finally {
+            setRequestSending(false);
+        }
+    };
+    const selectedRoleOption = ROLE_REQUEST_OPTIONS.find((item) => item.role === requestedRole);
+
     // Contact Actions
     const handleMap = () => {
         const address = '2 Wharf St, Docklands VIC 3008';
@@ -161,7 +401,8 @@ export default function MoreScreen() {
         }
 
         const handleAuthSuccess = () => {
-            suppressSignupFromParamsRef.current = true;
+            suppressAuthFromParamsRef.current = true;
+            setLoginVisible(false);
             setSignUpVisible(false);
             router.replace('/(tabs)/more');
         };
@@ -290,13 +531,13 @@ export default function MoreScreen() {
                         </View>
                         <Text style={styles.profileTitle}>Festival Pass</Text>
                         {/* Sign Up Button or Welcome Message */}
-                        {userRole ? (
+                        {isAuthenticated ? (
                             <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
                         ) : (
                             <View style={styles.authButtonsRow}>
-                                <Pressable style={styles.signUpBtn} onPress={() => setSignUpVisible(true)}>
+                                <Pressable style={styles.signUpBtn} onPress={() => setLoginVisible(true)}>
                                     <MaterialCommunityIcons name="account-plus-outline" size={18} color={Colors.light.text} />
-                                    <Text style={styles.signUpBtnText}>Sign Up / Log In</Text>
+                                    <Text style={styles.signUpBtnText}>Log In / Sign Up</Text>
                                 </Pressable>
                             </View>
                         )}
@@ -307,26 +548,36 @@ export default function MoreScreen() {
                         <Text style={styles.roleDisplay}>Role: <Text style={{ color: Colors.light.accentText }}>{userRole || 'Guest'}</Text></Text>
 
                         {/* Top Right Menu Button */}
-                        <Pressable
-                            style={styles.menuBtn}
-                            onPress={() => setMenuVisible(!isMenuVisible)}
-                            hitSlop={10}
-                        >
-                            <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(0, 0, 0, 0.4)" />
-                        </Pressable>
-
-                        {/* Menu Overlay & Dropdown */}
-                        {isMenuVisible && (
+                        {isAuthenticated && (
                             <>
-                                <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)} />
-                                <Pressable style={styles.menuDropdown} onPress={() => {
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                                    logout().catch((e) => console.warn('Logout cleanup failed', e));
-                                    setMenuVisible(false);
-                                }}>
-                                    <MaterialCommunityIcons name="logout" size={18} color={Colors.light.peach} />
-                                    <Text style={styles.menuText}>Logout</Text>
+                                <Pressable
+                                    style={styles.menuBtn}
+                                    onPress={() => setMenuVisible(!isMenuVisible)}
+                                    hitSlop={10}
+                                >
+                                    <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(0, 0, 0, 0.4)" />
                                 </Pressable>
+
+                                {/* Menu Overlay & Dropdown */}
+                                {isMenuVisible && (
+                                    <>
+                                        <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)} />
+                                        <View style={styles.menuDropdown}>
+                                            <Pressable style={styles.menuItem} onPress={handleOpenRoleRequest}>
+                                                <MaterialCommunityIcons name="account-cog-outline" size={18} color={Colors.light.accentText} />
+                                                <Text style={[styles.menuText, styles.menuRequestText]}>Request role</Text>
+                                            </Pressable>
+                                            <Pressable style={styles.menuItem} onPress={() => {
+                                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                                logout().catch((e) => console.warn('Logout cleanup failed', e));
+                                                setMenuVisible(false);
+                                            }}>
+                                                <MaterialCommunityIcons name="logout" size={18} color={Colors.light.peach} />
+                                                <Text style={styles.menuText}>Logout</Text>
+                                            </Pressable>
+                                        </View>
+                                    </>
+                                )}
                             </>
                         )}
                     </View>
@@ -490,10 +741,128 @@ export default function MoreScreen() {
                 </View>
             </Modal>
 
+            {/* Request Role Modal */}
+            <Modal
+                visible={isRoleRequestVisible}
+                animationType="none"
+                transparent={true}
+                onRequestClose={() => {
+                    setRoleRequestVisible(false);
+                    setRoleRequestStep('select');
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
+                        <View style={styles.modalCard}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>
+                                    {roleRequestStep === 'select' ? 'Request Role' : 'Confirm Request'}
+                                </Text>
+                                <Pressable onPress={() => {
+                                    setRoleRequestVisible(false);
+                                    setRoleRequestStep('select');
+                                }}>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
+                                </Pressable>
+                            </View>
+                            {roleRequestStep === 'select' ? (
+                                <ScrollView showsVerticalScrollIndicator={false}>
+                                    <Text style={styles.modalIntro}>Select the utility role you want to request from admin.</Text>
+                                    <View style={styles.roleRequestCards}>
+                                        {ROLE_REQUEST_OPTIONS.map((roleOption) => (
+                                            <Pressable
+                                                key={roleOption.role}
+                                                style={[
+                                                    styles.roleRequestCard,
+                                                    requestedRole === roleOption.role && styles.roleRequestCardActive,
+                                                ]}
+                                                onPress={() => setRequestedRole(roleOption.role)}
+                                            >
+                                                <View style={styles.roleRequestIconWrap}>
+                                                    <MaterialCommunityIcons
+                                                        name={roleOption.icon}
+                                                        size={24}
+                                                        color={Colors.light.gold}
+                                                    />
+                                                </View>
+                                                <View style={styles.roleRequestContent}>
+                                                    <Text style={styles.roleRequestTitle}>{roleOption.role}</Text>
+                                                    <Text style={styles.roleRequestSubtitle}>{roleOption.subtitle}</Text>
+                                                </View>
+                                                <MaterialCommunityIcons
+                                                    name={requestedRole === roleOption.role ? 'check-circle' : 'check-circle-outline'}
+                                                    size={20}
+                                                    color={Colors.light.gold}
+                                                />
+                                            </Pressable>
+                                        ))}
+                                    </View>
+
+                                    <Pressable
+                                        style={[styles.submitBtn, !requestedRole && styles.submitBtnDisabled]}
+                                        onPress={handleContinueRoleRequest}
+                                        disabled={!requestedRole}
+                                    >
+                                        <Text style={styles.submitText}>Continue</Text>
+                                    </Pressable>
+                                </ScrollView>
+                            ) : (
+                                <>
+                                    <View style={styles.confirmBody}>
+                                        <Text style={styles.confirmHeading}>Review Your Request</Text>
+                                        <Text style={styles.confirmSubheading}>
+                                            Confirm that you want to request admin access for this role utility.
+                                        </Text>
+
+                                        <View style={styles.confirmRoleCard}>
+                                            <View style={styles.confirmRoleIconWrap}>
+                                                <MaterialCommunityIcons
+                                                    name={selectedRoleOption?.icon ?? 'account-cog-outline'}
+                                                    size={34}
+                                                    color={Colors.light.gold}
+                                                />
+                                            </View>
+                                            <Text style={styles.confirmRoleLabel}>{requestedRole || 'Selected role'}</Text>
+                                            <Text style={styles.confirmRoleDescription}>
+                                                {selectedRoleOption?.subtitle ?? 'Role utility access request'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.confirmFooter}>
+                                        <SwipeToConfirm
+                                            label="Slide to confirm"
+                                            onConfirm={handleSendRoleRequest}
+                                            disabled={!requestedRole}
+                                            loading={requestSending}
+                                        />
+                                    </View>
+                                </>
+                            )}
+                        </View>
+                    </KeyboardAvoidingView>
+                </View>
+            </Modal>
+
+            {/* Login Modal */}
+            <LoginModal
+                visible={isLoginVisible}
+                onClose={() => setLoginVisible(false)}
+                onOpenSignUp={() => {
+                    setLoginVisible(false);
+                    setSignUpVisible(true);
+                }}
+                onGooglePress={handleGoogleSignIn}
+                googleLoading={googleLoading}
+            />
+
             {/* Sign Up Modal */}
             <SignUpModal
                 visible={isSignUpVisible}
                 onClose={() => setSignUpVisible(false)}
+                onOpenLogin={() => {
+                    setSignUpVisible(false);
+                    setLoginVisible(true);
+                }}
                 onGooglePress={handleGoogleSignIn}
                 googleLoading={googleLoading}
             />
@@ -603,59 +972,75 @@ function BTSReviewModal({ visible, onClose }: { visible: boolean; onClose: () =>
     );
 }
 
-function SignUpModal({
+function LoginModal({
     visible,
     onClose,
+    onOpenSignUp,
     onGooglePress,
     googleLoading,
 }: {
     visible: boolean;
     onClose: () => void;
+    onOpenSignUp: () => void;
     onGooglePress: () => void;
     googleLoading: boolean;
 }) {
-    const { setUserRole, setUserName, userName } = useUser();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedRole, setSelectedRole] = useState('Guest');
     const [loading, setLoading] = useState(false);
 
-    const handleSignUp = async () => {
+    const handleLogin = async () => {
+        if (!supabase) {
+            Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            Alert.alert('Invalid email', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (!password) {
+            Alert.alert('Missing password', 'Please enter your password.');
+            return;
+        }
+
         setLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email.trim(),
+                password,
+            });
 
-        console.log('\n\n' + '='.repeat(50));
-        console.log(`NEW SIGNUP REQUEST RECEIVED`);
-        console.log('='.repeat(50));
-        console.log(`User:  ${userName}`);
-        console.log(`Email: ${email}`);
-        console.log(`Pass:  ${password}`);
-        console.log(`Role:  ${selectedRole}`);
-        console.log('-'.repeat(50) + '\n');
+            if (error) {
+                throw error;
+            }
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setUserRole(selectedRole);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        alert(`Approved. You are now a ${selectedRole}.`);
-
-        setLoading(false);
-        onClose();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setEmail('');
+            setPassword('');
+            onClose();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to log in with email/password.';
+            Alert.alert('Login failed', message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View style={styles.modalOverlay}>
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
-                        <View style={styles.modalCard}>
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Sign Up / Log In</Text>
-                                <Pressable onPress={onClose}>
-                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
-                                </Pressable>
-                            </View>
+                    <View style={styles.modalCard}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Login</Text>
+                            <Pressable onPress={onClose}>
+                                <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
+                            </Pressable>
+                        </View>
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            <Text style={styles.modalIntro}>Continue with Google for faster access, or create an account with email.</Text>
+                            <Text style={styles.modalIntro}>Continue with Google, or log in with your email and password.</Text>
 
                             <Pressable
                                 style={[styles.googleAuthBtn, googleLoading && styles.submitBtnDisabled]}
@@ -672,14 +1057,171 @@ function SignUpModal({
                                 <View style={styles.authDividerLine} />
                             </View>
 
-                            <Text style={styles.inputLabel}>DISPLAY NAME</Text>
+                            <Text style={styles.inputLabel}>EMAIL</Text>
+                            <TextInput
+                                style={[styles.input, email && !validateEmail(email) && styles.inputError]}
+                                placeholder="you@example.com"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                            {email && !validateEmail(email) && <Text style={styles.errorText}>Invalid email address</Text>}
+
+                            <Text style={styles.inputLabel}>PASSWORD</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Your password"
+                                placeholderTextColor="rgba(0, 0, 0, 0.35)"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+
+                            <Pressable
+                                style={[styles.submitBtn, (!email || !validateEmail(email) || !password || loading) && styles.submitBtnDisabled]}
+                                onPress={handleLogin}
+                                disabled={!email || !validateEmail(email) || !password || loading}
+                            >
+                                <Text style={styles.submitText}>{loading ? 'Logging in...' : 'Log In'}</Text>
+                            </Pressable>
+
+                            <Pressable onPress={onOpenSignUp} style={styles.authSwitchBtn}>
+                                <Text style={styles.authSwitchText}>
+                                    Not registered? <Text style={styles.authSwitchEmphasis}>Sign Up</Text>
+                                </Text>
+                            </Pressable>
+                        </ScrollView>
+                    </View>
+                </KeyboardAvoidingView>
+            </View>
+        </Modal>
+    );
+}
+
+function SignUpModal({
+    visible,
+    onClose,
+    onOpenLogin,
+    onGooglePress,
+    googleLoading,
+}: {
+    visible: boolean;
+    onClose: () => void;
+    onOpenLogin: () => void;
+    onGooglePress: () => void;
+    googleLoading: boolean;
+}) {
+    const { setUserName } = useUser();
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const passwordRequirements = getPasswordRequirements(password);
+
+    const handleSignUp = async () => {
+        if (!supabase) {
+            Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
+            return;
+        }
+
+        if (!name.trim()) {
+            Alert.alert('Missing name', 'Please enter your name.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            Alert.alert('Invalid email', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert('Weak password', 'Password must be at least 8 characters and include both letters and numbers.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const normalizedEmail = email.trim();
+            const normalizedName = name.trim();
+            const { data, error } = await supabase.auth.signUp({
+                email: normalizedEmail,
+                password,
+                options: {
+                    data: {
+                        full_name: normalizedName,
+                        name: normalizedName,
+                    },
+                },
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            await setUserName(normalizedName);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+            if (data.session) {
+                Alert.alert('Account created', 'Your account has been created and you are now logged in.');
+                setName('');
+                setEmail('');
+                setPassword('');
+                onClose();
+                return;
+            }
+
+            Alert.alert('Check your inbox', 'Your account was created. Please verify your email, then log in.');
+            setName('');
+            setEmail('');
+            setPassword('');
+            onOpenLogin();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to create account.';
+            Alert.alert('Signup failed', message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+            <View style={styles.modalOverlay}>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
+                        <View style={styles.modalCard}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Sign Up</Text>
+                                <Pressable onPress={onClose}>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
+                                </Pressable>
+                            </View>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <Text style={styles.modalIntro}>Create your account with Google or with your name, email, and password.</Text>
+
+                            <Pressable
+                                style={[styles.googleAuthBtn, googleLoading && styles.submitBtnDisabled]}
+                                onPress={onGooglePress}
+                                disabled={googleLoading}
+                            >
+                                <MaterialCommunityIcons name="google" size={18} color={Colors.light.accentText} />
+                                <Text style={styles.googleAuthBtnText}>{googleLoading ? 'Opening Google...' : 'Continue with Google'}</Text>
+                            </Pressable>
+
+                            <View style={styles.authDividerRow}>
+                                <View style={styles.authDividerLine} />
+                                <Text style={styles.authDividerText}>or create with email</Text>
+                                <View style={styles.authDividerLine} />
+                            </View>
+
+                            <Text style={styles.inputLabel}>NAME</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder="e.g. Alexis"
                                 placeholderTextColor="rgba(0, 0, 0, 0.35)"
-                                value={userName}
-                                onChangeText={setUserName}
-                                maxLength={20}
+                                value={name}
+                                onChangeText={setName}
+                                maxLength={60}
                             />
 
                             <Text style={styles.inputLabel}>EMAIL</Text>
@@ -703,25 +1245,48 @@ function SignUpModal({
                                 onChangeText={setPassword}
                                 secureTextEntry
                             />
-
-                            <Text style={styles.inputLabel}>SELECT YOUR ROLE</Text>
-                            <View style={styles.roleChipContainer}>
-                                {ROLES.map((role) => (
-                                    <SelectChip
-                                        key={role}
-                                        label={role}
-                                        active={selectedRole === role}
-                                        onPress={() => setSelectedRole(role)}
-                                    />
-                                ))}
-                            </View>
+                            {password.length > 0 && (
+                                <View style={styles.passwordHelpContainer}>
+                                    <View style={styles.requirementRow}>
+                                        <MaterialCommunityIcons
+                                            name={passwordRequirements.hasMinLength ? 'check-circle' : 'check-circle-outline'}
+                                            size={14}
+                                            color={Colors.light.gold}
+                                            style={styles.requirementIcon}
+                                        />
+                                        <Text style={styles.requirementText}>At least 8 characters</Text>
+                                    </View>
+                                    <View style={styles.requirementRow}>
+                                        <MaterialCommunityIcons
+                                            name={passwordRequirements.hasLetter ? 'check-circle' : 'check-circle-outline'}
+                                            size={14}
+                                            color={Colors.light.gold}
+                                            style={styles.requirementIcon}
+                                        />
+                                        <Text style={styles.requirementText}>At least one letter</Text>
+                                    </View>
+                                    <View style={styles.requirementRow}>
+                                        <MaterialCommunityIcons
+                                            name={passwordRequirements.hasNumber ? 'check-circle' : 'check-circle-outline'}
+                                            size={14}
+                                            color={Colors.light.gold}
+                                            style={styles.requirementIcon}
+                                        />
+                                        <Text style={styles.requirementText}>At least one number</Text>
+                                    </View>
+                                </View>
+                            )}
 
                             <Pressable
-                                style={[styles.submitBtn, (!userName || !email || !validateEmail(email) || !password) && styles.submitBtnDisabled]}
+                                style={[styles.submitBtn, (!name.trim() || !email || !validateEmail(email) || !validatePassword(password) || loading) && styles.submitBtnDisabled]}
                                 onPress={handleSignUp}
-                                disabled={!userName || !email || !validateEmail(email) || !password || loading}
+                                disabled={!name.trim() || !email || !validateEmail(email) || !validatePassword(password) || loading}
                             >
                                 <Text style={styles.submitText}>{loading ? 'Creating...' : 'Create Account'}</Text>
+                            </Pressable>
+
+                            <Pressable onPress={onOpenLogin} style={styles.authSwitchBtn}>
+                                <Text style={styles.authSwitchText}>Already have an account? Log In</Text>
                             </Pressable>
                         </ScrollView>
                     </View>
@@ -814,6 +1379,19 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.medium,
         textTransform: 'uppercase',
         letterSpacing: 0.8,
+    },
+    authSwitchBtn: {
+        alignSelf: 'center',
+        marginTop: Spacing.lg,
+        paddingVertical: Spacing.sm,
+    },
+    authSwitchText: {
+        color: Colors.light.accentText,
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+    },
+    authSwitchEmphasis: {
+        textDecorationLine: 'underline',
     },
     welcomeText: {
         color: Colors.light.text,
@@ -929,6 +1507,20 @@ const styles = StyleSheet.create({
     },
     inputError: { borderColor: 'rgba(255, 122, 0, 0.7)', backgroundColor: 'rgba(255, 122, 0, 0.2)' },
     errorText: { color: Colors.light.peach, fontSize: 12, fontFamily: Fonts.regular, marginTop: 4 },
+    passwordHelpContainer: { marginTop: 4 },
+    requirementRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    requirementIcon: {
+        marginRight: 6,
+    },
+    requirementText: {
+        color: 'rgba(0, 0, 0, 0.5)',
+        fontSize: 12,
+        fontFamily: Fonts.regular,
+    },
     textArea: { minHeight: 100, textAlignVertical: 'top', paddingTop: 16 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
     chip: {
@@ -1034,6 +1626,55 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'center',
         gap: 8,
+        marginTop: Spacing.md,
+    },
+    roleRequestCards: {
+        marginTop: Spacing.sm,
+        gap: Spacing.md,
+    },
+    roleRequestCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: Colors.light.borderSubtle,
+        backgroundColor: Colors.light.surfaceElevated,
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 4,
+    },
+    roleRequestCardActive: {
+        borderColor: Colors.light.gold,
+        backgroundColor: 'rgba(255, 122, 0, 0.12)',
+    },
+    roleRequestIconWrap: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 122, 0, 0.2)',
+        marginRight: 12,
+    },
+    roleRequestContent: {
+        flex: 1,
+        marginRight: 8,
+    },
+    roleRequestTitle: {
+        color: Colors.light.text,
+        fontSize: 16,
+        fontFamily: Fonts.bold,
+        marginBottom: 2,
+    },
+    roleRequestSubtitle: {
+        color: Colors.light.textSecondary,
+        fontSize: 12,
+        fontFamily: Fonts.regular,
+        lineHeight: 18,
     },
     menuBtn: {
         position: 'absolute',
@@ -1048,19 +1689,26 @@ const styles = StyleSheet.create({
         right: 16,
         backgroundColor: Colors.light.surface,
         borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingVertical: 8,
+        paddingHorizontal: 8,
         borderWidth: 1,
         borderColor: Colors.light.borderSubtle,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+        minWidth: 170,
+        gap: 2,
         zIndex: 30, // Higher than overlay
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
         shadowRadius: 5,
         elevation: 4,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 10,
+        borderRadius: 8,
     },
     menuOverlay: {
         position: 'absolute',
@@ -1075,5 +1723,113 @@ const styles = StyleSheet.create({
         color: Colors.light.peach,
         fontSize: 14,
         fontFamily: Fonts.medium,
+    },
+    menuRequestText: {
+        color: Colors.light.accentText,
+    },
+    confirmBody: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    confirmHeading: {
+        color: Colors.light.text,
+        fontSize: 24,
+        fontFamily: Fonts.bold,
+        textAlign: 'center',
+    },
+    confirmSubheading: {
+        color: 'rgba(0, 0, 0, 0.52)',
+        fontSize: 14,
+        fontFamily: Fonts.regular,
+        lineHeight: 22,
+        textAlign: 'center',
+        marginTop: Spacing.sm,
+        marginBottom: Spacing.xl,
+        maxWidth: 320,
+    },
+    confirmRoleCard: {
+        width: '100%',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: Colors.light.borderSubtle,
+        backgroundColor: Colors.light.surfaceElevated,
+        alignItems: 'center',
+        paddingVertical: Spacing.xl,
+        paddingHorizontal: Spacing.lg,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 4,
+    },
+    confirmRoleIconWrap: {
+        width: 84,
+        height: 84,
+        borderRadius: 42,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 122, 0, 0.2)',
+        marginBottom: Spacing.md,
+    },
+    confirmRoleLabel: {
+        color: Colors.light.text,
+        fontSize: 22,
+        fontFamily: Fonts.header,
+        textAlign: 'center',
+    },
+    confirmRoleDescription: {
+        color: Colors.light.textSecondary,
+        fontSize: 13,
+        fontFamily: Fonts.regular,
+        lineHeight: 20,
+        textAlign: 'center',
+        marginTop: Spacing.sm,
+    },
+    confirmRoleText: {
+        color: Colors.light.accentText,
+        fontFamily: Fonts.bold,
+    },
+    confirmFooter: {
+        paddingBottom: Spacing.sm,
+    },
+    swipeTrack: {
+        height: 87,
+        borderRadius: 44,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 122, 0, 0.4)',
+        backgroundColor: 'rgba(255, 255, 255, 0.78)',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        paddingHorizontal: 8,
+        position: 'relative',
+    },
+    swipeTrackDisabled: {
+        opacity: 0.72,
+    },
+    swipeHintRow: {
+        position: 'absolute',
+        left: 102,
+        right: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    swipeLabel: {
+        marginLeft: 4,
+        color: 'rgba(0, 0, 0, 0.45)',
+        fontSize: 15,
+        fontFamily: Fonts.medium,
+    },
+    swipeKnob: {
+        position: 'absolute',
+        top: 7,
+        backgroundColor: Colors.light.gold,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.16,
+        shadowRadius: 4,
+        elevation: 3,
     },
 });
