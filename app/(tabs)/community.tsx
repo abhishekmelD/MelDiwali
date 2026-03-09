@@ -358,13 +358,14 @@ const styles = StyleSheet.create({
     },
     filterRow: {
         flexGrow: 0,
-        marginBottom: Spacing.md,
+        marginBottom: Spacing.sm,
         paddingHorizontal: Spacing.lg,
-        height: 64,
+        minHeight: 48,
     },
     filterContent: {
         paddingRight: Spacing.lg,
-        paddingVertical: 13,
+        paddingVertical: 4,
+        alignItems: 'center',
     },
     feedContent: { paddingHorizontal: Spacing.lg },
     chip: {
