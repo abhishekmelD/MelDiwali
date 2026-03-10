@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import * as Haptics from 'expo-haptics';
+import { hapticImpact } from '@/lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
@@ -42,9 +42,7 @@ export function Button({
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
     const handlePressIn = (ev: any) => {
-        if (process.env.EXPO_OS === 'ios') {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
+        hapticImpact();
         Animated.spring(scaleAnim, {
             toValue: 0.96,
             useNativeDriver: true,

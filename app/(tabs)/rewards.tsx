@@ -4,9 +4,9 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { hapticImpact, hapticSelection, hapticSuccess } from '@/lib/haptics';
 import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
@@ -38,7 +38,10 @@ function RewardCard({
         transform: [{ scale: scale.value }],
     }));
 
-    const handlePressIn = () => { scale.value = withSpring(0.98); };
+    const handlePressIn = () => {
+        scale.value = withSpring(0.98);
+        hapticImpact();
+    };
     const handlePressOut = () => { scale.value = withSpring(1); };
 
     return (
@@ -162,6 +165,7 @@ export default function RewardsScreen() {
         setScanned(true);
         setStamps((prev) => prev + 5);
         setTotalScannedStamps((prev) => prev + 5);
+        hapticSuccess();
 
         console.log('--- QR CODE SCANNED ---');
         console.log(`User: ${userName || 'N/A'}`);
@@ -188,6 +192,7 @@ export default function RewardsScreen() {
         }
         setClaimedRewards((prev) => [...prev, reward.id]);
         setStamps((prev) => prev - reward.stamps);
+        hapticSuccess();
     };
 
     return (
@@ -233,7 +238,7 @@ export default function RewardsScreen() {
                                         <Pressable
                                             style={styles.cameraToggleBtn}
                                             onPress={() => {
-                                                Haptics.selectionAsync();
+                                                hapticSelection();
                                                 setCameraEnabled(true);
                                             }}
                                         >
@@ -253,7 +258,7 @@ export default function RewardsScreen() {
 
                                         <Pressable
                                             onPress={() => {
-                                                Haptics.selectionAsync();
+                                                hapticSelection();
                                                 setFlashOn(!flashOn);
                                             }}
                                             style={({ pressed }) => [
@@ -277,6 +282,7 @@ export default function RewardsScreen() {
                                 <Pressable
                                     style={styles.scanBtn}
                                     onPress={async () => {
+                                        hapticImpact();
                                         try {
                                             await requestPermission();
                                         } catch (error) {
@@ -307,7 +313,7 @@ export default function RewardsScreen() {
                             pressed && styles.progressCardPressed,
                         ]}
                         onPress={() => {
-                            Haptics.selectionAsync();
+                            hapticSelection();
                             setPassportModalVisible(true);
                         }}
                     >
@@ -356,11 +362,11 @@ export default function RewardsScreen() {
                                     index={index}
                                     isClaimed={claimedRewards.includes(reward.id)}
                                     onPress={() => {
-                                        Haptics.selectionAsync();
+                                        hapticSelection();
                                         setSelectedReward(reward);
                                     }}
                                     onClaim={() => {
-                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        hapticImpact();
                                         claimReward(reward);
                                     }}
                                 />
@@ -376,15 +382,27 @@ export default function RewardsScreen() {
                 visible={isPassportModalVisible}
                 animationType="fade"
                 transparent={true}
-                onRequestClose={() => setPassportModalVisible(false)}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setPassportModalVisible(false);
+                }}
             >
                 <View style={styles.modalOverlay}>
-                    <Pressable style={styles.modalBackdrop} onPress={() => setPassportModalVisible(false)} />
+                    <Pressable
+                        style={styles.modalBackdrop}
+                        onPress={() => {
+                            hapticImpact();
+                            setPassportModalVisible(false);
+                        }}
+                    />
                     <View style={styles.modalContainer}>
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Festival Passport</Text>
-                                <Pressable style={styles.modalCloseBtn} onPress={() => setPassportModalVisible(false)}>
+                                <Pressable style={styles.modalCloseBtn} onPress={() => {
+                                    hapticImpact();
+                                    setPassportModalVisible(false);
+                                }}>
                                     <Text style={styles.modalCloseText}>X</Text>
                                 </Pressable>
                             </View>
@@ -412,7 +430,10 @@ export default function RewardsScreen() {
 
                             <Pressable
                                 style={styles.modalActionBtn}
-                                onPress={() => setPassportModalVisible(false)}
+                                onPress={() => {
+                                    hapticImpact();
+                                    setPassportModalVisible(false);
+                                }}
                             >
                                 <Text style={styles.modalActionText}>Back to Rewards</Text>
                             </Pressable>
@@ -426,15 +447,27 @@ export default function RewardsScreen() {
                     visible={true}
                     animationType="fade"
                     transparent={true}
-                    onRequestClose={() => setSelectedReward(null)}
+                    onRequestClose={() => {
+                        hapticImpact();
+                        setSelectedReward(null);
+                    }}
                 >
                     <View style={styles.modalOverlay}>
-                        <Pressable style={styles.modalBackdrop} onPress={() => setSelectedReward(null)} />
+                        <Pressable
+                            style={styles.modalBackdrop}
+                            onPress={() => {
+                                hapticImpact();
+                                setSelectedReward(null);
+                            }}
+                        />
                         <View style={styles.modalContainer}>
                             <View style={styles.modalCard}>
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>{selectedReward.title}</Text>
-                                    <Pressable style={styles.modalCloseBtn} onPress={() => setSelectedReward(null)}>
+                                    <Pressable style={styles.modalCloseBtn} onPress={() => {
+                                        hapticImpact();
+                                        setSelectedReward(null);
+                                    }}>
                                         <Text style={styles.modalCloseText}>X</Text>
                                     </Pressable>
                                 </View>
@@ -455,7 +488,7 @@ export default function RewardsScreen() {
                                     ]}
                                     disabled={claimedRewards.includes(selectedReward.id)}
                                     onPress={() => {
-                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        hapticImpact();
                                         claimReward(selectedReward);
                                     }}
                                 >

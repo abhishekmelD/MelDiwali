@@ -5,6 +5,7 @@ import { EVENTS } from '@/constants/EventData';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { hapticImpact, hapticSelection } from '@/lib/haptics';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -33,7 +34,10 @@ function EventCard({ event, index, onPress }: { event: typeof EVENTS[0]; index: 
     const handlePressOut = () => { if (!isPast) scale.value = withSpring(1); };
 
     const handleRegister = () => {
-        if (!isPast) toggleEventRegistration(event.id);
+        if (!isPast) {
+            hapticSelection();
+            toggleEventRegistration(event.id);
+        }
     };
 
     return (
@@ -41,7 +45,10 @@ function EventCard({ event, index, onPress }: { event: typeof EVENTS[0]; index: 
             <Pressable
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                onPress={() => onPress(event)}
+                onPress={() => {
+                    hapticImpact();
+                    onPress(event);
+                }}
                 style={styles.eventCardContainer}
             >
                 <Animated.View style={[
@@ -120,10 +127,12 @@ export default function EventsScreen() {
     const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
 
     const prevMonth = () => {
+        hapticSelection();
         if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
         else setCurrentMonth(currentMonth - 1);
     };
     const nextMonth = () => {
+        hapticSelection();
         if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
         else setCurrentMonth(currentMonth + 1);
     };
@@ -139,6 +148,7 @@ export default function EventsScreen() {
     };
 
     const handleDayPress = (day: number) => {
+        hapticSelection();
         const monthStr = (currentMonth + 1).toString().padStart(2, '0');
         const dayStr = day.toString().padStart(2, '0');
         const isoDateString = `${currentYear}-${monthStr}-${dayStr}`;
@@ -180,6 +190,7 @@ export default function EventsScreen() {
     }, [activeTab, registeredEvents]);
 
     const handleCardPress = (event: typeof EVENTS[0]) => {
+        hapticImpact();
         setSelectedEvent(event);
     };
 
@@ -215,7 +226,10 @@ export default function EventsScreen() {
                             {TABS.map((t) => (
                                 <Pressable
                                     key={t}
-                                    onPress={() => setActiveTab(t)}
+                                    onPress={() => {
+                                        hapticSelection();
+                                        setActiveTab(t);
+                                    }}
                                     style={[styles.tab, activeTab === t && styles.tabActive]}
                                 >
                                     <Text style={[styles.tabText, activeTab === t && styles.tabTextActive]}>{t}</Text>
@@ -309,12 +323,21 @@ export default function EventsScreen() {
             {/* Event Details Popup */}
             {selectedEvent && (
                 <View style={styles.modalOverlay}>
-                    <Pressable style={styles.modalBackdrop} onPress={() => setSelectedEvent(null)} />
+                    <Pressable
+                        style={styles.modalBackdrop}
+                        onPress={() => {
+                            hapticImpact();
+                            setSelectedEvent(null);
+                        }}
+                    />
                     <Animated.View entering={FadeInDown} style={styles.modalContent}>
                         <View style={styles.modalGradient}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>{selectedEvent.title}</Text>
-                                <Pressable onPress={() => setSelectedEvent(null)} style={styles.closeBtn}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setSelectedEvent(null);
+                                }} style={styles.closeBtn}>
                                     <IconSymbol name="chevron.right" size={24} color={Colors.light.text} style={{ transform: [{ rotate: '90deg' }] }} />
                                 </Pressable>
                             </View>
@@ -347,7 +370,10 @@ export default function EventsScreen() {
                                                 styles.modalActionBtn,
                                                 registeredEvents.includes(selectedEvent.id) && styles.modalActionBtnActive
                                             ]}
-                                            onPress={() => toggleEventRegistration(selectedEvent.id)}
+                                            onPress={() => {
+                                                hapticSelection();
+                                                toggleEventRegistration(selectedEvent.id);
+                                            }}
                                         >
                                             <Text style={[
                                                 styles.modalActionText,
@@ -371,7 +397,13 @@ export default function EventsScreen() {
             {/* Day Events Popup */}
             {selectedDayEvents && (
                 <View style={styles.modalOverlay}>
-                    <Pressable style={styles.modalBackdrop} onPress={() => setSelectedDayEvents(null)} />
+                    <Pressable
+                        style={styles.modalBackdrop}
+                        onPress={() => {
+                            hapticImpact();
+                            setSelectedDayEvents(null);
+                        }}
+                    />
                     <Animated.View entering={FadeInDown} style={styles.dayModalContent}>
                         <View style={styles.modalGradient}>
                             <View style={styles.modalHeader}>
@@ -379,7 +411,10 @@ export default function EventsScreen() {
                                     <Text style={styles.dayModalTitle}>{selectedDay}</Text>
                                     <Text style={styles.dayModalSubtitle}>{selectedDayEvents.length} Registered {selectedDayEvents.length === 1 ? 'Event' : 'Events'}</Text>
                                 </View>
-                                <Pressable onPress={() => setSelectedDayEvents(null)} style={styles.closeBtn}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setSelectedDayEvents(null);
+                                }} style={styles.closeBtn}>
                                     <IconSymbol name="chevron.right" size={24} color={Colors.light.text} style={{ transform: [{ rotate: '90deg' }] }} />
                                 </Pressable>
                             </View>
@@ -389,6 +424,7 @@ export default function EventsScreen() {
                                     <Pressable
                                         key={event.id}
                                         onPress={() => {
+                                            hapticImpact();
                                             setSelectedDayEvents(null);
                                             setSelectedEvent(event);
                                         }}

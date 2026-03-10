@@ -3,10 +3,10 @@ import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { hapticImpact, hapticImpactMedium, hapticSelection, hapticSuccess } from '@/lib/haptics';
 import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as AuthSession from 'expo-auth-session';
-import * as Haptics from 'expo-haptics';
 import * as ExpoLinking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -60,7 +60,14 @@ function SelectChip({ label, active, onPress }: { label: string; active: boolean
     const handlePressOut = () => { scale.value = withSpring(1); };
 
     return (
-        <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+        <Pressable
+            onPress={() => {
+                hapticSelection();
+                onPress();
+            }}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+        >
             <Animated.View style={[styles.chip, active && styles.chipActive, animatedStyle]}>
                 <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
             </Animated.View>
@@ -85,6 +92,8 @@ function SwipeToConfirm({
     const hintShift = React.useRef(new RNAnimated.Value(0)).current;
     const hintOpacity = React.useRef(new RNAnimated.Value(0.58)).current;
     const dragStartXRef = React.useRef(0);
+    const lastHapticXRef = React.useRef(0);
+    const lastHapticAtRef = React.useRef(0);
     const [trackWidth, setTrackWidth] = useState(0);
     const [confirmed, setConfirmed] = useState(false);
     const maxTranslate = Math.max(trackWidth - knobSize - horizontalPadding * 2, 0);
@@ -153,11 +162,20 @@ function SwipeToConfirm({
             onPanResponderGrant: () => {
                 thumbX.stopAnimation((value: number) => {
                     dragStartXRef.current = value;
+                    lastHapticXRef.current = value;
+                    lastHapticAtRef.current = 0;
                 });
             },
             onPanResponderMove: (_, gestureState) => {
                 const nextX = Math.min(Math.max(dragStartXRef.current + gestureState.dx, 0), maxTranslate);
                 thumbX.setValue(nextX);
+
+                const now = Date.now();
+                if (Math.abs(nextX - lastHapticXRef.current) >= 24 && now - lastHapticAtRef.current >= 60) {
+                    hapticImpactMedium();
+                    lastHapticXRef.current = nextX;
+                    lastHapticAtRef.current = now;
+                }
             },
             onPanResponderRelease: (_, gestureState) => {
                 if (disabled || loading || confirmed) return;
@@ -316,7 +334,7 @@ export default function MoreScreen() {
     const isFormValid = volName && isEmailValid && isPhoneValid && selectedInterests.length > 0 && selectedDays.length > 0;
 
     const handleVolunteerSubmit = () => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        hapticSuccess();
         setSuccessVisible(true);
         setTimeout(() => {
             setSuccessVisible(false);
@@ -335,12 +353,13 @@ export default function MoreScreen() {
     };
 
     const handleLinkPress = (id: string) => {
-        Haptics.selectionAsync();
+        hapticImpact();
         if (id === '3') setVolunteerVisible(true);
         else if (id === '4') setContactVisible(true);
     };
 
     const handleOpenRoleRequest = () => {
+        hapticImpact();
         setMenuVisible(false);
         setRoleRequestStep('select');
         setRoleRequestVisible(true);
@@ -348,11 +367,13 @@ export default function MoreScreen() {
 
     const handleContinueRoleRequest = () => {
         if (!requestedRole) return;
+        hapticImpact();
         setRoleRequestStep('confirm');
     };
 
     const handleSendRoleRequest = async () => {
         if (!requestedRole || requestSending) return;
+        hapticImpact();
         if (!supabase) {
             Alert.alert('Request unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
@@ -382,7 +403,7 @@ export default function MoreScreen() {
                 throw insertError;
             }
 
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            hapticSuccess();
             Alert.alert(
                 'Request sent',
                 `Your request for ${requestedRole} access has been sent to the admin.`
@@ -404,6 +425,7 @@ export default function MoreScreen() {
             Alert.alert('Admin tools unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
         }
+        hapticImpact();
         setRoleApprovalVisible(true);
         setRoleApprovalLoading(true);
         setRoleApprovalError('');
@@ -432,6 +454,7 @@ export default function MoreScreen() {
     const handleApproveRoleRequest = async (item: RoleRequestRow) => {
         if (!supabase) return;
         if (roleApprovalBusyIds[item.id]) return;
+        hapticImpact();
         setRoleBusy(item.id, true);
         try {
             const { error } = await supabase
@@ -444,6 +467,7 @@ export default function MoreScreen() {
 
             if (error) throw error;
             setRoleApprovalItems((prev) => prev.filter((row) => row.id !== item.id));
+            hapticSuccess();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unable to approve role request.';
             Alert.alert('Approval failed', message);
@@ -455,6 +479,7 @@ export default function MoreScreen() {
     const handleDenyRoleRequest = async (item: RoleRequestRow) => {
         if (!supabase) return;
         if (roleApprovalBusyIds[item.id]) return;
+        hapticImpact();
         setRoleBusy(item.id, true);
         try {
             const { error } = await supabase
@@ -477,6 +502,7 @@ export default function MoreScreen() {
 
     // Contact Actions
     const handleMap = () => {
+        hapticImpact();
         const address = '2 Wharf St, Docklands VIC 3008';
         const url = Platform.select({
             ios: `maps:0,0?q=${address}`,
@@ -491,6 +517,7 @@ export default function MoreScreen() {
             Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
         }
+        hapticImpact();
 
         const handleAuthSuccess = () => {
             suppressAuthFromParamsRef.current = true;
@@ -627,7 +654,10 @@ export default function MoreScreen() {
                             <Text style={styles.welcomeText}>Welcome, {firstName}</Text>
                         ) : (
                             <View style={styles.authButtonsRow}>
-                                <Pressable style={styles.signUpBtn} onPress={() => setLoginVisible(true)}>
+                                <Pressable style={styles.signUpBtn} onPress={() => {
+                                    hapticImpact();
+                                    setLoginVisible(true);
+                                }}>
                                     <MaterialCommunityIcons name="account-plus-outline" size={18} color={Colors.light.text} />
                                     <Text style={styles.signUpBtnText}>Log In / Sign Up</Text>
                                 </Pressable>
@@ -637,14 +667,21 @@ export default function MoreScreen() {
                         {/* Name Input */}
 
 
-                        <Text style={styles.roleDisplay}>Role: <Text style={{ color: Colors.light.accentText }}>{userRole || 'Guest'}</Text></Text>
+                        {userRole && userRole !== 'Guest' && (
+                            <Text style={styles.roleDisplay}>
+                                Role: <Text style={{ color: Colors.light.accentText }}>{userRole}</Text>
+                            </Text>
+                        )}
 
                         {/* Top Right Menu Button */}
                         {isAuthenticated && (
                             <>
                                 <Pressable
                                     style={styles.menuBtn}
-                                    onPress={() => setMenuVisible(!isMenuVisible)}
+                                    onPress={() => {
+                                        hapticImpact();
+                                        setMenuVisible(!isMenuVisible);
+                                    }}
                                     hitSlop={10}
                                 >
                                     <MaterialCommunityIcons name="dots-horizontal" size={24} color="rgba(0, 0, 0, 0.4)" />
@@ -653,14 +690,20 @@ export default function MoreScreen() {
                                 {/* Menu Overlay & Dropdown */}
                                 {isMenuVisible && (
                                     <>
-                                        <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)} />
+                                        <Pressable
+                                            style={styles.menuOverlay}
+                                            onPress={() => {
+                                                hapticImpact();
+                                                setMenuVisible(false);
+                                            }}
+                                        />
                                         <View style={styles.menuDropdown}>
                                             <Pressable style={styles.menuItem} onPress={handleOpenRoleRequest}>
                                                 <MaterialCommunityIcons name="account-cog-outline" size={18} color={Colors.light.accentText} />
                                                 <Text style={[styles.menuText, styles.menuRequestText]}>Request role</Text>
                                             </Pressable>
                                             <Pressable style={styles.menuItem} onPress={() => {
-                                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                                hapticImpact();
                                                 logout().catch((e) => console.warn('Logout cleanup failed', e));
                                                 setMenuVisible(false);
                                             }}>
@@ -693,7 +736,10 @@ export default function MoreScreen() {
                     {isVendor && (
                         <Pressable
                             style={styles.linkCard}
-                            onPress={() => Linking.openURL('https://www.google.com/search?q=vendors')}
+                            onPress={() => {
+                                hapticImpact();
+                                Linking.openURL('https://www.google.com/search?q=vendors');
+                            }}
                         >
                             <MaterialCommunityIcons name="message-text-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
@@ -708,7 +754,10 @@ export default function MoreScreen() {
                     {isPerformerOrStageManager && (
                         <Pressable
                             style={styles.linkCard}
-                            onPress={() => Linking.openURL('https://chat.whatsapp.com/FGZo1aXlcpUB88DIZXw8Ub?mode=gi_t')}
+                            onPress={() => {
+                                hapticImpact();
+                                Linking.openURL('https://chat.whatsapp.com/FGZo1aXlcpUB88DIZXw8Ub?mode=gi_t');
+                            }}
                         >
                             <MaterialCommunityIcons name="account-music-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
                             <View style={styles.linkInfo}>
@@ -724,7 +773,7 @@ export default function MoreScreen() {
                         <Pressable
                             style={styles.linkCard}
                             onPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                hapticImpact();
                                 if (userRole === 'Admin') {
                                     setBTSReviewVisible(true);
                                 } else {
@@ -750,7 +799,6 @@ export default function MoreScreen() {
                         <Pressable
                             style={styles.linkCard}
                             onPress={() => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                 handleOpenRoleApprovals();
                             }}
                         >
@@ -777,13 +825,24 @@ export default function MoreScreen() {
             </SafeAreaView>
 
             {/* Volunteer Modal */}
-            <Modal visible={isVolunteerVisible} animationType="slide" transparent={true} onRequestClose={() => setVolunteerVisible(false)}>
+            <Modal
+                visible={isVolunteerVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setVolunteerVisible(false);
+                }}
+            >
                 <View style={styles.modalOverlay}>
                     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContent}>
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Join the Team</Text>
-                                <Pressable onPress={() => setVolunteerVisible(false)}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setVolunteerVisible(false);
+                                }}>
                                     <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
@@ -824,13 +883,24 @@ export default function MoreScreen() {
             </Modal>
 
             {/* Contact Modal */}
-            <Modal visible={isContactVisible} animationType="slide" transparent={true} onRequestClose={() => setContactVisible(false)}>
+            <Modal
+                visible={isContactVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setContactVisible(false);
+                }}
+            >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Contact Us</Text>
-                                <Pressable onPress={() => setContactVisible(false)}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setContactVisible(false);
+                                }}>
                                     <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
@@ -857,6 +927,7 @@ export default function MoreScreen() {
                 animationType="none"
                 transparent={true}
                 onRequestClose={() => {
+                    hapticImpact();
                     setRoleRequestVisible(false);
                     setRoleRequestStep('select');
                 }}
@@ -869,6 +940,7 @@ export default function MoreScreen() {
                                     {roleRequestStep === 'select' ? 'Request Role' : 'Confirm Request'}
                                 </Text>
                                 <Pressable onPress={() => {
+                                    hapticImpact();
                                     setRoleRequestVisible(false);
                                     setRoleRequestStep('select');
                                 }}>
@@ -886,7 +958,10 @@ export default function MoreScreen() {
                                                     styles.roleRequestCard,
                                                     requestedRole === roleOption.role && styles.roleRequestCardActive,
                                                 ]}
-                                                onPress={() => setRequestedRole(roleOption.role)}
+                                                onPress={() => {
+                                                    hapticSelection();
+                                                    setRequestedRole(roleOption.role);
+                                                }}
                                             >
                                                 <View style={styles.roleRequestIconWrap}>
                                                     <MaterialCommunityIcons
@@ -956,8 +1031,12 @@ export default function MoreScreen() {
             {/* Login Modal */}
             <LoginModal
                 visible={isLoginVisible}
-                onClose={() => setLoginVisible(false)}
+                onClose={() => {
+                    hapticImpact();
+                    setLoginVisible(false);
+                }}
                 onOpenSignUp={() => {
+                    hapticImpact();
                     setLoginVisible(false);
                     setSignUpVisible(true);
                 }}
@@ -968,8 +1047,12 @@ export default function MoreScreen() {
             {/* Sign Up Modal */}
             <SignUpModal
                 visible={isSignUpVisible}
-                onClose={() => setSignUpVisible(false)}
+                onClose={() => {
+                    hapticImpact();
+                    setSignUpVisible(false);
+                }}
                 onOpenLogin={() => {
+                    hapticImpact();
                     setSignUpVisible(false);
                     setLoginVisible(true);
                 }}
@@ -980,13 +1063,19 @@ export default function MoreScreen() {
             {/* BTS Submission Modal */}
             <BTSModal
                 visible={isBTSVisible}
-                onClose={() => setBTSVisible(false)}
+                onClose={() => {
+                    hapticImpact();
+                    setBTSVisible(false);
+                }}
             />
 
             {/* BTS Review Modal (Admin) */}
             <BTSReviewModal
                 visible={isBTSReviewVisible}
-                onClose={() => setBTSReviewVisible(false)}
+                onClose={() => {
+                    hapticImpact();
+                    setBTSReviewVisible(false);
+                }}
             />
 
             {/* Role Request Approvals (Admin) */}
@@ -994,14 +1083,20 @@ export default function MoreScreen() {
                 visible={isRoleApprovalVisible}
                 animationType="slide"
                 transparent={true}
-                onRequestClose={() => setRoleApprovalVisible(false)}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setRoleApprovalVisible(false);
+                }}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={[styles.modalTitle, styles.roleApprovalTitle]}>Approve Role Requests</Text>
-                                <Pressable onPress={() => setRoleApprovalVisible(false)}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setRoleApprovalVisible(false);
+                                }}>
                                     <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
@@ -1089,6 +1184,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
 
     const handleSubmit = async () => {
         if (!link.trim()) return;
+        hapticImpact();
         setLoading(true);
 
         console.log('\n\n' + '='.repeat(50));
@@ -1102,7 +1198,7 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
         // Simulate upload/save
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        hapticSuccess();
         alert(`Thank you. Your BTS clip has been submitted for review.`);
 
         setLoading(false);
@@ -1117,7 +1213,10 @@ function BTSModal({ visible, onClose }: { visible: boolean; onClose: () => void 
                     <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Submit BTS</Text>
-                            <Pressable onPress={onClose}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                onClose();
+                            }}>
                                 <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
@@ -1158,7 +1257,10 @@ function BTSReviewModal({ visible, onClose }: { visible: boolean; onClose: () =>
                     <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Review BTS</Text>
-                            <Pressable onPress={onClose}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                onClose();
+                            }}>
                                 <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
@@ -1190,6 +1292,7 @@ function LoginModal({
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
+        hapticImpact();
         if (!supabase) {
             Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
@@ -1216,7 +1319,7 @@ function LoginModal({
                 throw error;
             }
 
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            hapticSuccess();
             setEmail('');
             setPassword('');
             onClose();
@@ -1235,7 +1338,10 @@ function LoginModal({
                     <View style={styles.modalCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Login</Text>
-                            <Pressable onPress={onClose}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                onClose();
+                            }}>
                                 <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                             </Pressable>
                         </View>
@@ -1287,7 +1393,10 @@ function LoginModal({
                                 <Text style={styles.submitText}>{loading ? 'Logging in...' : 'Log In'}</Text>
                             </Pressable>
 
-                            <Pressable onPress={onOpenSignUp} style={styles.authSwitchBtn}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                onOpenSignUp();
+                            }} style={styles.authSwitchBtn}>
                                 <Text style={styles.authSwitchText}>
                                     Not registered? <Text style={styles.authSwitchEmphasis}>Sign Up</Text>
                                 </Text>
@@ -1321,6 +1430,7 @@ function SignUpModal({
     const passwordRequirements = getPasswordRequirements(password);
 
     const handleSignUp = async () => {
+        hapticImpact();
         if (!supabase) {
             Alert.alert('Auth unavailable', 'Supabase is not configured. Check your .env.local values.');
             return;
@@ -1361,7 +1471,7 @@ function SignUpModal({
             }
 
             await setUserName(normalizedName);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            hapticSuccess();
 
             if (data.session) {
                 Alert.alert('Account created', 'Your account has been created and you are now logged in.');
@@ -1392,7 +1502,10 @@ function SignUpModal({
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Sign Up</Text>
-                                <Pressable onPress={onClose}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    onClose();
+                                }}>
                                     <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
                                 </Pressable>
                             </View>
@@ -1485,7 +1598,10 @@ function SignUpModal({
                                 <Text style={styles.submitText}>{loading ? 'Creating...' : 'Create Account'}</Text>
                             </Pressable>
 
-                            <Pressable onPress={onOpenLogin} style={styles.authSwitchBtn}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                onOpenLogin();
+                            }} style={styles.authSwitchBtn}>
                                 <Text style={styles.authSwitchText}>Already have an account? Log In</Text>
                             </Pressable>
                         </ScrollView>
@@ -1498,7 +1614,10 @@ function SignUpModal({
 
 function ContactCard({ icon, title, value, onPress }: { icon: any; title: string; value: string; onPress: () => void }) {
     return (
-        <Pressable onPress={onPress}>
+        <Pressable onPress={() => {
+            hapticImpact();
+            onPress();
+        }}>
             <View style={styles.contactCard}>
                 <View style={styles.iconCircle}><MaterialCommunityIcons name={icon} size={24} color={Colors.light.gold} /></View>
                 <View style={styles.contactInfo}><Text style={styles.contactLabel}>{title}</Text><Text style={styles.contactValue}>{value}</Text></View>

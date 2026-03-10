@@ -3,8 +3,8 @@ import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { hapticImpact, hapticSelection, hapticSuccess } from '@/lib/haptics';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
@@ -83,7 +83,7 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
 
     const handlePressIn = () => {
         scale.value = withSpring(0.92);
-        Haptics.selectionAsync();
+        hapticSelection();
     };
     const handlePressOut = () => { scale.value = withSpring(1); };
 
@@ -104,11 +104,12 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 
     const handlePressIn = () => {
         scale.value = withSpring(0.98);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        hapticImpact();
     };
     const handlePressOut = () => { scale.value = withSpring(1); };
 
     const handlePress = () => {
+        hapticImpact();
         if (post.url) { WebBrowser.openBrowserAsync(post.url); }
     };
 
@@ -163,6 +164,7 @@ export default function CommunityScreen() {
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
     const handleCreatePost = () => {
+        hapticImpact();
         console.log('\n--- NEW COMMUNITY POST ---');
         console.log(`Author:      ${userName || 'N/A'}`);
         console.log(`Type:        ${postType}`);
@@ -176,6 +178,7 @@ export default function CommunityScreen() {
         setPostDesc('');
         setPostType('Event');
         setModalVisible(false);
+        hapticSuccess();
     };
 
     return (
@@ -194,7 +197,15 @@ export default function CommunityScreen() {
                     contentContainerStyle={styles.filterContent}
                 >
                     {FILTERS.map((f) => (
-                        <FilterChip key={f} label={f} active={activeFilter === f} onPress={() => setActiveFilter(f)} />
+                        <FilterChip
+                            key={f}
+                            label={f}
+                            active={activeFilter === f}
+                            onPress={() => {
+                                hapticSelection();
+                                setActiveFilter(f);
+                            }}
+                        />
                     ))}
                 </ScrollView>
 
@@ -224,7 +235,10 @@ export default function CommunityScreen() {
                 visible={isModalVisible}
                 animationType="slide"
                 transparent={true}
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setModalVisible(false);
+                }}
             >
                 <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}>
                     <KeyboardAvoidingView
@@ -234,7 +248,10 @@ export default function CommunityScreen() {
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>Create Post</Text>
-                                <Pressable onPress={() => setModalVisible(false)}>
+                                <Pressable onPress={() => {
+                                    hapticImpact();
+                                    setModalVisible(false);
+                                }}>
                                     <View style={styles.closeBtn}>
                                         <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                                     </View>
@@ -247,7 +264,10 @@ export default function CommunityScreen() {
                                     {POST_TYPES.map((type) => (
                                         <Pressable
                                             key={type}
-                                            onPress={() => setPostType(type)}
+                                            onPress={() => {
+                                                hapticSelection();
+                                                setPostType(type);
+                                            }}
                                             style={[styles.typeBtn, postType === type && styles.typeBtnActive]}
                                         >
                                             <Text style={[styles.typeBtnText, postType === type && styles.typeBtnTextActive]}>
@@ -296,13 +316,19 @@ export default function CommunityScreen() {
                 visible={isDraftsVisible}
                 animationType="fade"
                 transparent={true}
-                onRequestClose={() => setDraftsVisible(false)}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setDraftsVisible(false);
+                }}
             >
                 <View style={[styles.modalOverlay, styles.draftsOverlay]}>
                     <View style={styles.draftsCard}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Draft Drops</Text>
-                            <Pressable onPress={() => setDraftsVisible(false)}>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                setDraftsVisible(false);
+                            }}>
                                 <View style={styles.closeBtn}>
                                     <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                                 </View>
@@ -321,7 +347,7 @@ export default function CommunityScreen() {
                 <Pressable
                     style={styles.fab}
                     onPress={() => {
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        hapticSuccess();
                         setModalVisible(true);
                     }}
                 >
@@ -334,7 +360,7 @@ export default function CommunityScreen() {
                 <Pressable
                     style={styles.adminFab}
                     onPress={() => {
-                        Haptics.selectionAsync();
+                        hapticSelection();
                         setDraftsVisible(true);
                     }}
                 >

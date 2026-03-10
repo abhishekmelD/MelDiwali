@@ -2,8 +2,8 @@ import { AppBackground } from '@/components/AppBackground';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
+import { hapticImpact, hapticSuccess } from '@/lib/haptics';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
 import React, { useEffect, useState } from 'react';
@@ -203,7 +203,7 @@ function LiveDropCard({
 
   const handlePressIn = () => {
     scale.value = withSpring(0.96);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticImpact();
   };
 
   const handlePressOut = () => {
@@ -278,12 +278,12 @@ export default function HomeScreen() {
   const [selectedDrop, setSelectedDrop] = useState<typeof LIVE_DROPS[0] | null>(null);
   const { refreshing, onRefresh } = useReloadOnRefresh({
     onBeforeReload: () => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      hapticSuccess();
     },
   });
 
   const handleActionPress = (path: any) => {
-    Haptics.selectionAsync();
+    hapticImpact();
     if (!userRole) {
       router.push('/(tabs)/more?openSignup=true');
     } else {
@@ -327,7 +327,10 @@ export default function HomeScreen() {
           <Animated.View entering={FadeInDown.delay(600).duration(800)}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Live Drops</Text>
-              <Pressable onPress={() => setIsDropsModalVisible(true)}>
+              <Pressable onPress={() => {
+                hapticImpact();
+                setIsDropsModalVisible(true);
+              }}>
                 <Text style={styles.viewAll}>View all</Text>
               </Pressable>
             </View>
@@ -411,14 +414,20 @@ export default function HomeScreen() {
         visible={isDropsModalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setIsDropsModalVisible(false)}
+        onRequestClose={() => {
+          hapticImpact();
+          setIsDropsModalVisible(false);
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalCard}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>All Live Drops</Text>
-                <Pressable onPress={() => setIsDropsModalVisible(false)}>
+                <Pressable onPress={() => {
+                  hapticImpact();
+                  setIsDropsModalVisible(false);
+                }}>
                   <View style={styles.modalCloseBtn}>
                     <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                   </View>
@@ -468,12 +477,18 @@ export default function HomeScreen() {
       {/* Selected Drop Detail Popup */}
       {selectedDrop && (
         <View style={styles.detailOverlay}>
-          <Pressable style={styles.detailBackdrop} onPress={() => setSelectedDrop(null)} />
+          <Pressable style={styles.detailBackdrop} onPress={() => {
+            hapticImpact();
+            setSelectedDrop(null);
+          }} />
           <Animated.View entering={FadeInDown} style={[styles.detailContent, { width: detailWidth }]}>
             <View style={styles.detailGradient}>
               <View style={styles.detailHeader}>
                 <Text style={styles.detailTitle}>{selectedDrop.title}</Text>
-                <Pressable onPress={() => setSelectedDrop(null)} style={styles.closeBtnSmall}>
+                <Pressable onPress={() => {
+                  hapticImpact();
+                  setSelectedDrop(null);
+                }} style={styles.closeBtnSmall}>
                   <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
                 </Pressable>
               </View>
@@ -502,7 +517,10 @@ export default function HomeScreen() {
                 </View>
               </ScrollView>
 
-              <Pressable style={styles.detailActionBtn} onPress={() => setSelectedDrop(null)}>
+              <Pressable style={styles.detailActionBtn} onPress={() => {
+                hapticImpact();
+                setSelectedDrop(null);
+              }}>
                 <Text style={styles.detailActionText}>{selectedDrop.cta}</Text>
               </Pressable>
             </View>
