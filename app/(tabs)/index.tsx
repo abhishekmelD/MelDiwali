@@ -165,7 +165,7 @@ function CountdownTimer() {
     <Animated.View style={[styles.countdownCard, animatedTilt]}>
       <Animated.View style={[styles.countdownGlow, animatedGlow]} />
       <View style={styles.countdownContent}>
-        <Text style={styles.countdownLabel}>MELBOURNE DIWALI SATRTS IN</Text>
+        <Text style={styles.countdownLabel}>MELBOURNE DIWALI STARS IN</Text>
         <View style={styles.countdownRow}>
           {blocks.map((b) => (
             <View key={b.label} style={styles.countdownBlock}>
