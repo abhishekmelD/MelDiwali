@@ -12,9 +12,7 @@ export const hapticImpact = (style: Haptics.ImpactFeedbackStyle = Haptics.Impact
     safeCall(() => Haptics.impactAsync(style));
 };
 
-export const hapticImpactMedium = () => {
-    hapticImpact(Haptics.ImpactFeedbackStyle.Medium);
-};
+export const HapticImpactStyle = Haptics.ImpactFeedbackStyle;
 
 export const hapticSelection = () => {
     safeCall(() => Haptics.selectionAsync());

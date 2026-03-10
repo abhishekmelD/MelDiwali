@@ -3,7 +3,7 @@ import { ReloadOverlay } from '@/components/ReloadOverlay';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
-import { hapticImpact, hapticImpactMedium, hapticSelection, hapticSuccess } from '@/lib/haptics';
+import { HapticImpactStyle, hapticImpact, hapticSelection, hapticSuccess } from '@/lib/haptics';
 import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as AuthSession from 'expo-auth-session';
@@ -171,8 +171,20 @@ function SwipeToConfirm({
                 thumbX.setValue(nextX);
 
                 const now = Date.now();
-                if (Math.abs(nextX - lastHapticXRef.current) >= 24 && now - lastHapticAtRef.current >= 60) {
-                    hapticImpactMedium();
+                const progress = maxTranslate > 0 ? nextX / maxTranslate : 0;
+                const minInterval = 40;
+                const maxInterval = 120;
+                const interval = Math.round(maxInterval - (maxInterval - minInterval) * progress);
+                const distanceGate = 12;
+
+                if (Math.abs(nextX - lastHapticXRef.current) >= distanceGate && now - lastHapticAtRef.current >= interval) {
+                    const style =
+                        progress > 0.66
+                            ? HapticImpactStyle.Heavy
+                            : progress > 0.33
+                                ? HapticImpactStyle.Medium
+                                : HapticImpactStyle.Light;
+                    hapticImpact(style);
                     lastHapticXRef.current = nextX;
                     lastHapticAtRef.current = now;
                 }
