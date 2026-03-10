@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.35)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
     },
     modalCloseText: {
         color: Colors.light.text,

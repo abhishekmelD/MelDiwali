@@ -42,6 +42,25 @@ To learn more about developing your project with Expo, look at the following res
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
+## Supabase migrations
+
+This repo uses the Supabase CLI. Migrations live in `supabase/migrations`.
+
+Basic workflow:
+
+1. Link your project once:
+   ```bash
+   npm run supabase:link
+   ```
+2. Apply migrations to your remote database:
+   ```bash
+   npm run supabase:push
+   ```
+3. Pull schema changes from remote (if you changed things in the SQL editor):
+   ```bash
+   npm run supabase:pull
+   ```
+
 ## Join the community
 
 Join our community of developers creating universal apps.

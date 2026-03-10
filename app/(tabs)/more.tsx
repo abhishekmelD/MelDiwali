@@ -43,6 +43,16 @@ const getPasswordRequirements = (password: string) => {
 WebBrowser.maybeCompleteAuthSession();
 const configuredWebUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/+$/, '');
 
+type RoleRequestRow = {
+    id: string;
+    user_id: string;
+    user_email: string | null;
+    current_role: string;
+    requested_role: string;
+    status: string;
+    created_at: string;
+};
+
 function SelectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
     const scale = useSharedValue(1);
     const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -245,6 +255,11 @@ export default function MoreScreen() {
     const [isMenuVisible, setMenuVisible] = useState(false);
     const [isBTSVisible, setBTSVisible] = useState(false);
     const [isBTSReviewVisible, setBTSReviewVisible] = useState(false);
+    const [isRoleApprovalVisible, setRoleApprovalVisible] = useState(false);
+    const [roleApprovalLoading, setRoleApprovalLoading] = useState(false);
+    const [roleApprovalError, setRoleApprovalError] = useState('');
+    const [roleApprovalItems, setRoleApprovalItems] = useState<RoleRequestRow[]>([]);
+    const [roleApprovalBusyIds, setRoleApprovalBusyIds] = useState<Record<string, boolean>>({});
     const [googleLoading, setGoogleLoading] = useState(false);
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
@@ -252,6 +267,7 @@ export default function MoreScreen() {
     const isBTSAllowed = userRole && BTS_ALLOWED_ROLES.includes(userRole);
     const isVendor = userRole === 'Vendor';
     const isPerformerOrStageManager = userRole === 'Performer' || userRole === 'Stage Manager';
+    const isAdmin = userRole === 'Admin';
 
     const router = useRouter(); // Create local router instance
     const suppressAuthFromParamsRef = React.useRef(false);
@@ -382,6 +398,82 @@ export default function MoreScreen() {
         }
     };
     const selectedRoleOption = ROLE_REQUEST_OPTIONS.find((item) => item.role === requestedRole);
+
+    const handleOpenRoleApprovals = async () => {
+        if (!supabase) {
+            Alert.alert('Admin tools unavailable', 'Supabase is not configured. Check your .env.local values.');
+            return;
+        }
+        setRoleApprovalVisible(true);
+        setRoleApprovalLoading(true);
+        setRoleApprovalError('');
+        try {
+            const { data, error } = await supabase
+                .from('role_requests')
+                .select('id, user_id, user_email, current_role, requested_role, status, created_at')
+                .eq('status', 'pending')
+                .neq('current_role', 'requested_role')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setRoleApprovalItems((data as RoleRequestRow[]) ?? []);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to load role requests.';
+            setRoleApprovalError(message);
+        } finally {
+            setRoleApprovalLoading(false);
+        }
+    };
+
+    const setRoleBusy = (id: string, busy: boolean) => {
+        setRoleApprovalBusyIds((prev) => ({ ...prev, [id]: busy }));
+    };
+
+    const handleApproveRoleRequest = async (item: RoleRequestRow) => {
+        if (!supabase) return;
+        if (roleApprovalBusyIds[item.id]) return;
+        setRoleBusy(item.id, true);
+        try {
+            const { error } = await supabase
+                .from('role_requests')
+                .update({
+                    current_role: item.requested_role,
+                    status: 'approved',
+                })
+                .eq('id', item.id);
+
+            if (error) throw error;
+            setRoleApprovalItems((prev) => prev.filter((row) => row.id !== item.id));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to approve role request.';
+            Alert.alert('Approval failed', message);
+        } finally {
+            setRoleBusy(item.id, false);
+        }
+    };
+
+    const handleDenyRoleRequest = async (item: RoleRequestRow) => {
+        if (!supabase) return;
+        if (roleApprovalBusyIds[item.id]) return;
+        setRoleBusy(item.id, true);
+        try {
+            const { error } = await supabase
+                .from('role_requests')
+                .update({
+                    requested_role: item.current_role,
+                    status: 'rejected',
+                })
+                .eq('id', item.id);
+
+            if (error) throw error;
+            setRoleApprovalItems((prev) => prev.filter((row) => row.id !== item.id));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to deny role request.';
+            Alert.alert('Denial failed', message);
+        } finally {
+            setRoleBusy(item.id, false);
+        }
+    };
 
     // Contact Actions
     const handleMap = () => {
@@ -653,6 +745,24 @@ export default function MoreScreen() {
                         </Pressable>
                     )}
 
+                    {/* Admin: Approve Role Requests */}
+                    {isAdmin && (
+                        <Pressable
+                            style={styles.linkCard}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                handleOpenRoleApprovals();
+                            }}
+                        >
+                            <MaterialCommunityIcons name="account-check-outline" size={24} color={Colors.light.accentText} style={styles.linkIcon} />
+                            <View style={styles.linkInfo}>
+                                <Text style={styles.linkTitle}>Approve role requests</Text>
+                                <Text style={styles.linkSubtitle}>Review pending role changes</Text>
+                            </View>
+                            <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.light.textSecondary} />
+                        </Pressable>
+                    )}
+
                     <View style={styles.ackCard}>
                         <MaterialCommunityIcons name="dharmachakra" size={24} color={Colors.light.gold} style={styles.ackIcon} />
                         <Text style={styles.ackTitle}>Acknowledgement of Country</Text>
@@ -878,6 +988,96 @@ export default function MoreScreen() {
                 visible={isBTSReviewVisible}
                 onClose={() => setBTSReviewVisible(false)}
             />
+
+            {/* Role Request Approvals (Admin) */}
+            <Modal
+                visible={isRoleApprovalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setRoleApprovalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalCard}>
+                            <View style={styles.modalHeader}>
+                                <Text style={[styles.modalTitle, styles.roleApprovalTitle]}>Approve Role Requests</Text>
+                                <Pressable onPress={() => setRoleApprovalVisible(false)}>
+                                    <View style={styles.modalCloseBtn}><MaterialCommunityIcons name="close" size={20} color={Colors.light.text} /></View>
+                                </Pressable>
+                            </View>
+                            <Text style={styles.modalIntro}>Review pending role changes</Text>
+                            {roleApprovalLoading ? (
+                                <Text style={styles.modalIntro}>Loading role requests...</Text>
+                            ) : roleApprovalError ? (
+                                <Text style={styles.errorText}>{roleApprovalError}</Text>
+                            ) : roleApprovalItems.length === 0 ? (
+                                <Text style={styles.modalIntro}>
+                                    No pending role changes. Everyone is already on their current role.
+                                </Text>
+                            ) : (
+                                <ScrollView showsVerticalScrollIndicator={false}>
+                                    {roleApprovalItems.map((item) => (
+                                        <View key={item.id} style={styles.roleApprovalCard}>
+                                            <View style={styles.roleApprovalTopRow}>
+                                                <View style={styles.roleApprovalEmailRow}>
+                                                    <View style={styles.roleApprovalAvatar}>
+                                                        <MaterialCommunityIcons name="account-outline" size={18} color={Colors.light.accentText} />
+                                                    </View>
+                                                    <Text style={styles.roleApprovalEmail} numberOfLines={1}>
+                                                        {item.user_email || 'Unknown email'}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.roleApprovalMetaRow}>
+                                                    <Text style={styles.roleApprovalTimestamp}>
+                                                        {new Date(item.created_at).toLocaleString()}
+                                                    </Text>
+                                                    <View style={styles.roleApprovalBadge}>
+                                                        <Text style={styles.roleApprovalBadgeText}>PENDING</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+
+                                            <View style={styles.roleApprovalRoleRow}>
+                                                <View style={styles.roleApprovalRoleBlock}>
+                                                    <Text style={styles.roleApprovalRoleValue}>{item.current_role}</Text>
+                                                </View>
+                                                <MaterialCommunityIcons name="arrow-right" size={20} color="rgba(255, 122, 0, 0.7)" />
+                                                <View style={[styles.roleApprovalRoleBlock, styles.roleApprovalRoleBlockAlt]}>
+                                                    <Text style={styles.roleApprovalRoleValue}>{item.requested_role}</Text>
+                                                </View>
+                                            </View>
+                                            <View style={styles.roleApprovalActions}>
+                                                <Pressable
+                                                    style={[
+                                                        styles.roleApprovalBtn,
+                                                        styles.roleApprovalApprove,
+                                                        roleApprovalBusyIds[item.id] && styles.roleApprovalBtnDisabled,
+                                                    ]}
+                                                    onPress={() => handleApproveRoleRequest(item)}
+                                                    disabled={roleApprovalBusyIds[item.id]}
+                                                >
+                                                    <Text style={styles.roleApprovalBtnText}>Approve</Text>
+                                                </Pressable>
+                                                <Pressable
+                                                    style={[
+                                                        styles.roleApprovalBtn,
+                                                        styles.roleApprovalDeny,
+                                                        roleApprovalBusyIds[item.id] && styles.roleApprovalBtnDisabled,
+                                                    ]}
+                                                    onPress={() => handleDenyRoleRequest(item)}
+                                                    disabled={roleApprovalBusyIds[item.id]}
+                                                >
+                                                    <Text style={styles.roleApprovalBtnTextAlt}>Deny</Text>
+                                                </Pressable>
+                                            </View>
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            )}
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -1465,11 +1665,15 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.xl,
     },
     modalTitle: { color: Colors.light.text, fontSize: 28, fontFamily: Fonts.header },
+    roleApprovalTitle: {
+        flex: 1,
+        marginRight: Spacing.md,
+    },
     modalCloseBtn: {
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: 'rgba(255, 122, 0, 0.35)',
+        backgroundColor: 'rgba(255, 122, 0, 0.25)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -1479,6 +1683,118 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.regular,
         lineHeight: 22,
         marginBottom: Spacing.lg,
+    },
+    roleApprovalCard: {
+        backgroundColor: Colors.light.surfaceElevated,
+        borderRadius: 16,
+        padding: Spacing.md,
+        marginBottom: Spacing.md,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 122, 0, 0.2)',
+    },
+    roleApprovalTopRow: {
+        flexDirection: 'column',
+        marginBottom: Spacing.sm,
+    },
+    roleApprovalEmailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    roleApprovalAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(255, 122, 0, 0.15)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: Spacing.sm,
+    },
+    roleApprovalEmail: {
+        color: Colors.light.text,
+        fontSize: 17,
+        fontFamily: Fonts.bold,
+        flex: 1,
+    },
+    roleApprovalMetaRow: {
+        marginTop: 6,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    roleApprovalTimestamp: {
+        color: Colors.light.textSecondary,
+        fontSize: 12,
+    },
+    roleApprovalBadge: {
+        backgroundColor: 'rgba(255, 122, 0, 0.18)',
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+    },
+    roleApprovalBadgeText: {
+        color: Colors.light.accentText,
+        fontSize: 10,
+        fontFamily: Fonts.bold,
+        letterSpacing: 1,
+    },
+    roleApprovalRoleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: Spacing.sm,
+        marginTop: Spacing.md,
+    },
+    roleApprovalRoleBlock: {
+        flex: 1,
+        borderRadius: 14,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    },
+    roleApprovalRoleBlockAlt: {
+        backgroundColor: 'rgba(255, 122, 0, 0.1)',
+    },
+    roleApprovalRoleValue: {
+        color: Colors.light.text,
+        fontSize: 15,
+        fontFamily: Fonts.bold,
+    },
+    roleApprovalActions: {
+        flexDirection: 'row',
+        gap: Spacing.sm,
+        marginTop: Spacing.md,
+    },
+    roleApprovalBtn: {
+        flex: 1,
+        borderRadius: 12,
+        paddingVertical: 10,
+        alignItems: 'center',
+        borderWidth: 1,
+    },
+    roleApprovalApprove: {
+        backgroundColor: '#FF7A00',
+        borderColor: '#FF7A00',
+    },
+    roleApprovalDeny: {
+        backgroundColor: 'rgba(255, 122, 0, 0.08)',
+        borderColor: 'rgba(255, 122, 0, 0.4)',
+    },
+    roleApprovalBtnText: {
+        color: Colors.light.text,
+        fontSize: 13,
+        fontFamily: Fonts.bold,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    roleApprovalBtnTextAlt: {
+        color: Colors.light.accentText,
+        fontSize: 13,
+        fontFamily: Fonts.bold,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    roleApprovalBtnDisabled: {
+        opacity: 0.55,
     },
     modalFooter: {
         marginTop: Spacing.xl,

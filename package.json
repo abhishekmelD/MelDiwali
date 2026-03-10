@@ -9,7 +9,12 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "vercel-build": "expo export --platform web"
+    "vercel-build": "expo export --platform web",
+    "supabase:init": "npx supabase init",
+    "supabase:link": "npx supabase link",
+    "supabase:push": "npx supabase db push",
+    "supabase:pull": "npx supabase db pull",
+    "supabase:status": "npx supabase status"
   },
   "dependencies": {
     "@expo-google-fonts/montserrat": "^0.4.2",

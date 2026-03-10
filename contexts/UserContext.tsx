@@ -62,6 +62,28 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const sb = supabase;
         if (!sb) return;
 
+        const fetchRoleByEmail = async (email?: string | null) => {
+            if (!email) return;
+            const { data, error } = await sb
+                .from('role_requests')
+                .select('current_role')
+                .eq('user_email', email)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Failed to fetch role for user email', error);
+                return;
+            }
+
+            const role = data?.current_role || 'Guest';
+            setUserRoleState(role);
+            try {
+                await AsyncStorage.setItem('@user_role', role);
+            } catch (e) {
+                console.error('Failed to save user role', e);
+            }
+        };
+
         const applySessionUser = async () => {
             let session: Awaited<ReturnType<typeof sb.auth.getSession>>['data']['session'] | null = null;
             try {
@@ -107,11 +129,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 await AsyncStorage.setItem('@user_avatar_url', avatarUrl);
             }
 
-            const savedRole = await AsyncStorage.getItem('@user_role');
-            if (!savedRole) {
-                setUserRoleState('Guest');
-                await AsyncStorage.setItem('@user_role', 'Guest');
-            }
+            await fetchRoleByEmail(session.user.email);
         };
 
         applySessionUser().catch((e) => console.error('Failed to hydrate Supabase session', e));
@@ -147,15 +165,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 );
             }
 
-            AsyncStorage.getItem('@user_role')
-                .then((savedRole) => {
-                    if (!savedRole) {
-                        setUserRoleState('Guest');
-                        return AsyncStorage.setItem('@user_role', 'Guest');
-                    }
-                    return null;
-                })
-                .catch((e) => console.error('Failed to update role after auth', e));
+            fetchRoleByEmail(session.user.email).catch((e) =>
+                console.error('Failed to update role after auth', e)
+            );
         });
 
         return () => {
