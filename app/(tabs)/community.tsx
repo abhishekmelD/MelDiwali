@@ -198,6 +198,8 @@ export default function CommunityScreen() {
     const [dropImageName, setDropImageName] = useState('');
     const [dropImageType, setDropImageType] = useState('image/jpeg');
     const [dropImageBase64, setDropImageBase64] = useState<string | null>(null);
+    const [dropImageBlob, setDropImageBlob] = useState<Blob | null>(null);
+    const [dropImageObjectUrl, setDropImageObjectUrl] = useState<string | null>(null);
     const [dropStartDate, setDropStartDate] = useState('');
     const [dropEndDate, setDropEndDate] = useState('');
     const [dropLocation, setDropLocation] = useState('');
@@ -209,6 +211,11 @@ export default function CommunityScreen() {
         setDropImageName('');
         setDropImageType('image/jpeg');
         setDropImageBase64(null);
+        setDropImageBlob(null);
+        if (dropImageObjectUrl) {
+            URL.revokeObjectURL(dropImageObjectUrl);
+            setDropImageObjectUrl(null);
+        }
         setDropStartDate('');
         setDropEndDate('');
         setDropLocation('');
@@ -330,21 +337,37 @@ export default function CommunityScreen() {
         }
 
         let imageUrl: string | null = null;
-        if (dropImageBase64) {
+        if (dropImageBlob || dropImageBase64) {
             try {
-                const bytes = base64ToUint8Array(dropImageBase64);
                 const extension = dropImageName.split('.').pop() || 'jpg';
                 const fileName = `drop_${Date.now()}.${extension}`;
                 const path = `${userData.user.id}/${fileName}`;
 
-                const { error: uploadError } = await supabase
-                    .storage
-                    .from('drops')
-                    .upload(path, bytes, { contentType: dropImageType || 'image/jpeg' });
+                if (Platform.OS === 'web' && dropImageBlob) {
+                    const { error: uploadError } = await supabase
+                        .storage
+                        .from('drops')
+                        .upload(path, dropImageBlob, { contentType: dropImageType || 'image/jpeg' });
 
-                if (uploadError) {
-                    Alert.alert('Image upload failed', uploadError.message);
-                    return;
+                    if (uploadError) {
+                        Alert.alert('Image upload failed', uploadError.message);
+                        return;
+                    }
+                } else {
+                    if (!dropImageBase64) {
+                        Alert.alert('Image upload failed', 'Image data missing.');
+                        return;
+                    }
+                    const bytes = base64ToUint8Array(dropImageBase64);
+                    const { error: uploadError } = await supabase
+                        .storage
+                        .from('drops')
+                        .upload(path, bytes, { contentType: dropImageType || 'image/jpeg' });
+
+                    if (uploadError) {
+                        Alert.alert('Image upload failed', uploadError.message);
+                        return;
+                    }
                 }
 
                 const { data: publicUrl } = supabase.storage.from('drops').getPublicUrl(path);
@@ -436,6 +459,28 @@ export default function CommunityScreen() {
 
     const handlePickImage = async () => {
         hapticSelection();
+        if (Platform.OS === 'web') {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = () => {
+                const file = input.files?.[0];
+                if (!file) return;
+                if (dropImageObjectUrl) {
+                    URL.revokeObjectURL(dropImageObjectUrl);
+                }
+                const objectUrl = URL.createObjectURL(file);
+                setDropImageObjectUrl(objectUrl);
+                setDropImageUrl(objectUrl);
+                setDropImageName(file.name || `drop_${Date.now()}.jpg`);
+                setDropImageType(file.type || 'image/jpeg');
+                setDropImageBlob(file);
+                setDropImageBase64(null);
+            };
+            input.click();
+            return;
+        }
+
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permission.granted) {
             Alert.alert('Permission needed', 'Please allow photo access to attach an image.');
@@ -454,6 +499,11 @@ export default function CommunityScreen() {
         setDropImageUrl(asset.uri);
         setDropImageName(asset.fileName || `drop_${Date.now()}.jpg`);
         setDropImageType(asset.mimeType || 'image/jpeg');
+        setDropImageBlob(null);
+        if (dropImageObjectUrl) {
+            URL.revokeObjectURL(dropImageObjectUrl);
+            setDropImageObjectUrl(null);
+        }
 
         if (asset.base64) {
             setDropImageBase64(asset.base64);
