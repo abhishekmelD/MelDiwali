@@ -28,6 +28,7 @@ const INTERESTS = ['Event Setup', 'Information Desk', 'Food & Drink', 'Cultural 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const ROLE_REQUEST_OPTIONS: { role: string; icon: MCIconName; subtitle: string }[] = [
     { role: 'Vendor', icon: 'storefront-outline', subtitle: 'Manage stalls, offers, and vendor tools' },
+    { role: 'Sponsor', icon: 'star-circle-outline', subtitle: 'Access sponsor activations and resources' },
     { role: 'Stage Manager', icon: 'clipboard-text-outline', subtitle: 'Coordinate stage schedules and flow' },
     { role: 'Performer', icon: 'microphone-variant', subtitle: 'Access performer updates and set details' },
 ];
@@ -293,7 +294,7 @@ export default function MoreScreen() {
     const [googleLoading, setGoogleLoading] = useState(false);
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
-    const BTS_ALLOWED_ROLES = ['Admin', 'Vendor', 'Stage Manager', 'Performer'];
+    const BTS_ALLOWED_ROLES = ['Admin', 'Vendor', 'Sponsor', 'Stage Manager', 'Performer'];
     const isBTSAllowed = userRole && BTS_ALLOWED_ROLES.includes(userRole);
     const isVendor = userRole === 'Vendor';
     const isPerformerOrStageManager = userRole === 'Performer' || userRole === 'Stage Manager';
