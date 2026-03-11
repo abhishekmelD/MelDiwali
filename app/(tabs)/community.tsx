@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const FILTERS = ['All', 'Events', 'Food', 'Culture'];
 type CommunityPost = {
     id: string;
+    dropId?: string;
     user: string;
     date: string;
     content: string;
@@ -67,7 +68,19 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
     );
 }
 
-function CommunityPost({ post, index }: { post: CommunityPost; index: number }) {
+function CommunityPost({
+    post,
+    index,
+    userRole,
+    onDeleteDrop,
+    deleting,
+}: {
+    post: CommunityPost;
+    index: number;
+    userRole: string | null;
+    onDeleteDrop: (dropId: string) => void;
+    deleting: boolean;
+}) {
     const scale = useSharedValue(1);
     const [detailVisible, setDetailVisible] = useState(false);
     const animatedStyle = useAnimatedStyle(() => ({
@@ -111,6 +124,15 @@ function CommunityPost({ post, index }: { post: CommunityPost; index: number }) 
                             <Text style={[styles.userName, { color: headerColor }]}>{post.user}</Text>
                             <Text style={styles.postDate}>{post.date}</Text>
                         </View>
+                        {userRole === 'Admin' && post.dropId ? (
+                            <Pressable
+                                style={[styles.postMenuBtn, deleting && styles.postMenuBtnDisabled]}
+                                onPress={() => onDeleteDrop(post.dropId as string)}
+                                disabled={deleting}
+                            >
+                                <MaterialCommunityIcons name="dots-vertical" size={20} color={Colors.light.text} />
+                            </Pressable>
+                        ) : null}
                     </View>
                     {post.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
                     {post.imageUrl ? (
@@ -191,6 +213,7 @@ export default function CommunityScreen() {
     const [draftDropsLoading, setDraftDropsLoading] = useState(false);
     const [draftDropsError, setDraftDropsError] = useState('');
     const [draftDropBusyIds, setDraftDropBusyIds] = useState<Record<string, boolean>>({});
+    const [dropDeleteBusyIds, setDropDeleteBusyIds] = useState<Record<string, boolean>>({});
 
     const [dropTitle, setDropTitle] = useState('');
     const [dropDescription, setDropDescription] = useState('');
@@ -274,6 +297,7 @@ export default function CommunityScreen() {
 
             return {
                 id: `drop-${drop.id}`,
+                dropId: drop.id,
                 user: drop.user_name || drop.user_email || 'Community',
                 date: new Date(drop.created_at).toLocaleDateString(),
                 title: drop.title,
@@ -444,6 +468,36 @@ export default function CommunityScreen() {
         setDraftDropBusy(drop.id, false);
     };
 
+    const setDropDeleteBusy = (dropId: string, value: boolean) => {
+        setDropDeleteBusyIds((prev) => ({ ...prev, [dropId]: value }));
+    };
+
+    const handleDeleteDrop = (dropId: string) => {
+        if (!supabase || dropDeleteBusyIds[dropId]) return;
+        Alert.alert(
+            'Delete drop?',
+            'This will permanently remove the drop from the community feed.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setDropDeleteBusy(dropId, true);
+                        const { error } = await supabase.from('drops').delete().eq('id', dropId);
+                        if (error) {
+                            Alert.alert('Unable to delete', 'Please try again.');
+                            setDropDeleteBusy(dropId, false);
+                            return;
+                        }
+                        setApprovedDropPosts((prev) => prev.filter((post) => post.dropId !== dropId));
+                        setDropDeleteBusy(dropId, false);
+                    },
+                },
+            ]
+        );
+    };
+
     useEffect(() => {
         loadApprovedDrops();
     }, []);
@@ -561,7 +615,14 @@ export default function CommunityScreen() {
                     }
                 >
                     {approvedDropPosts.map((post, index) => (
-                        <CommunityPost key={post.id} post={post} index={index} />
+                        <CommunityPost
+                            key={post.id}
+                            post={post}
+                            index={index}
+                            userRole={userRole}
+                            onDeleteDrop={handleDeleteDrop}
+                            deleting={!!(post.dropId && dropDeleteBusyIds[post.dropId])}
+                        />
                     ))}
 
                     {dropsLoading && <Text style={styles.emptyText}>Loading drops...</Text>}
@@ -872,6 +933,17 @@ const styles = StyleSheet.create({
     headerInfo: { flex: 1 },
     userName: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.bold },
     postDate: { color: Colors.light.textSecondary, fontSize: 12, fontFamily: Fonts.regular, marginTop: 1 },
+    postMenuBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    },
+    postMenuBtnDisabled: {
+        opacity: 0.5,
+    },
     postContent: {
         color: 'rgba(0, 0, 0, 0.9)',
         fontSize: 15,
