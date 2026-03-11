@@ -403,12 +403,18 @@ export default function MoreScreen() {
                 throw new Error('You must be logged in to request a role.');
             }
 
+            const effectiveCurrentRole = userRole || 'Guest';
+            const status =
+                effectiveCurrentRole === 'Guest' && requestedRole === 'Guest'
+                    ? 'approved'
+                    : 'pending';
+
             const { error: insertError } = await supabase.from('role_requests').insert({
                 user_id: authUser.id,
                 user_email: authUser.email ?? null,
-                current_role: userRole || 'Guest',
+                current_role: effectiveCurrentRole,
                 requested_role: requestedRole,
-                status: 'pending',
+                status,
             });
 
             if (insertError) {
