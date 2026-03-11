@@ -1489,6 +1489,20 @@ function SignUpModal({
             }
 
             await setUserName(normalizedName);
+
+            if (data.user?.id) {
+                const { error: roleInsertError } = await supabase.from('role_requests').insert({
+                    user_id: data.user.id,
+                    user_email: data.user.email ?? normalizedEmail,
+                    current_role: 'Guest',
+                    requested_role: 'Guest',
+                    status: 'approved',
+                });
+                if (roleInsertError) {
+                    console.warn('Role request seed failed:', roleInsertError.message);
+                }
+            }
+
             hapticSuccess();
 
             if (data.session) {
