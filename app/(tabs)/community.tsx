@@ -4,76 +4,47 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { hapticImpact, hapticSelection, hapticSuccess } from '@/lib/haptics';
+import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const FILTERS = ['All', 'Events', 'Food', 'Culture'];
-const POST_TYPES = ['Event', 'Food', 'Culture'] as const;
-type PostType = typeof POST_TYPES[number];
+type CommunityPost = {
+    id: string;
+    user: string;
+    date: string;
+    content: string;
+    category: string;
+    url?: string;
+    title?: string;
+    avatarUrl?: string | null;
+    imageUrl?: string | null;
+};
 
-const COMMUNITY_POSTS = [
-    // ... (keep existing posts)
-    {
-        id: '1',
-        user: 'Melbourne Diwali Team',
-        date: 'December 2025',
-        content: 'Recap of 2025! What an incredible year of light and community. Stay tuned for 2026 plans!',
-        category: 'Events',
-        url: 'https://newsletter.melbournediwali.com.au/dec-25'
-    },
-    {
-        id: '2',
-        user: 'Melbourne Diwali Team',
-        date: 'November 2025',
-        content: 'What an incredible journey we\'ve shared! On October 11th, 2025, we came together at Marvel Stadium to celebrate the Festival of Lights in a style never seen before.',
-        category: 'Events',
-        url: 'https://newsletter.melbournediwali.com.au/november'
-    },
-    {
-        id: '3',
-        user: 'Melbourne Diwali Team',
-        date: 'October 2025',
-        content: 'The festive guide for Melbourne Diwali at Marvel Stadium Square is here! Check out the map and schedule.',
-        category: 'Events',
-        url: 'https://newsletter.melbournediwali.com.au/october'
-    },
-    {
-        id: '4',
-        user: 'Melbourne Diwali Team',
-        date: 'September 2025',
-        content: 'Save the date! September highlights upcoming festivities, community stories, and cultural celebrations across Melbourne.',
-        category: 'Culture',
-        url: 'https://newsletter.melbournediwali.com.au/sept-25'
-    },
-    {
-        id: '5',
-        user: 'Melbourne Diwali Team',
-        date: 'August 2025',
-        content: 'Monthly news and updates highlighting the final preparations for Melbourne Diwali 2025.',
-        category: 'All',
-        url: 'https://newsletter.melbournediwali.com.au/august'
-    },
-    {
-        id: '6',
-        user: 'Melbourne Diwali Team',
-        date: 'July 2025',
-        content: 'Amazing updates on how Melbourne Diwali at Marvel Stadium Square is shaping the community through inclusive celebrations.',
-        category: 'Local',
-        url: 'https://newsletter.melbournediwali.com.au/july'
-    },
-    {
-        id: '7',
-        user: 'Melbourne Diwali Team',
-        date: 'June 2025',
-        content: 'The launch of Melbourne Diwali newsletter! Follow us for monthly developments and behind-the-scenes festival prep.',
-        category: 'All',
-        url: 'https://newsletter.melbournediwali.com.au/june'
-    }
-];
+type DropRow = {
+    id: string;
+    user_id: string;
+    user_email: string | null;
+    user_name: string | null;
+    user_role: string | null;
+    user_avatar_url: string | null;
+    title: string;
+    description: string;
+    image_url: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    location: string | null;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+};
+
+const COMMUNITY_POSTS: CommunityPost[] = [];
 
 function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
     const scale = useSharedValue(1);
@@ -96,8 +67,9 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
     );
 }
 
-function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index: number }) {
+function CommunityPost({ post, index }: { post: CommunityPost; index: number }) {
     const scale = useSharedValue(1);
+    const [detailVisible, setDetailVisible] = useState(false);
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
     }));
@@ -110,13 +82,14 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
 
     const handlePress = () => {
         hapticImpact();
-        if (post.url) { WebBrowser.openBrowserAsync(post.url); }
+        setDetailVisible(true);
     };
 
     const categoryColors: Record<string, string> = {
         'Events': Colors.light.gold,
         'Food': '#FF7A00', // Lime Green
         'Culture': '#FF7A00', // Lavender
+        'Drops': Colors.light.accentText,
         'All': 'rgba(255, 122, 0, 0.25)'
     };
 
@@ -128,22 +101,72 @@ function CommunityPost({ post, index }: { post: typeof COMMUNITY_POSTS[0]; index
                 <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
                     <View style={styles.postHeader}>
                         <View style={[styles.avatar, { backgroundColor: headerColor + '20', borderColor: headerColor + '40', borderWidth: 1 }]}>
-                            <Text style={styles.avatarText}>🪔</Text>
+                            {post.avatarUrl ? (
+                                <Image source={{ uri: post.avatarUrl }} style={styles.avatarImage} />
+                            ) : (
+                                <Text style={styles.avatarText}>🪔</Text>
+                            )}
                         </View>
                         <View style={styles.headerInfo}>
                             <Text style={[styles.userName, { color: headerColor }]}>{post.user}</Text>
                             <Text style={styles.postDate}>{post.date}</Text>
                         </View>
                     </View>
+                    {post.title ? <Text style={styles.postTitle}>{post.title}</Text> : null}
+                    {post.imageUrl ? (
+                        <Image source={{ uri: post.imageUrl }} style={styles.postImage} />
+                    ) : null}
                     <Text style={styles.postContent}>{post.content}</Text>
-                    <View style={styles.postFooter}>
-                        <Pressable style={styles.readMoreBtn} onPress={handlePress}>
-                            <Text style={styles.readMoreText}>Read Newsletter</Text>
-                            <MaterialCommunityIcons name="arrow-right" size={16} color={Colors.light.gold} />
-                        </Pressable>
-                    </View>
+                    <View style={styles.postFooter} />
                 </Pressable>
             </Animated.View>
+
+            <Modal
+                visible={detailVisible}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => {
+                    hapticImpact();
+                    setDetailVisible(false);
+                }}
+            >
+                <View style={[styles.modalOverlay, styles.detailOverlay]}>
+                    <View style={styles.detailCard}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Drop Details</Text>
+                            <Pressable onPress={() => {
+                                hapticImpact();
+                                setDetailVisible(false);
+                            }}>
+                                <View style={styles.closeBtn}>
+                                    <MaterialCommunityIcons name="close" size={20} color={Colors.light.text} />
+                                </View>
+                            </Pressable>
+                        </View>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <View style={styles.detailHeaderRow}>
+                                <View style={[styles.avatar, styles.detailAvatar]}>
+                                    {post.avatarUrl ? (
+                                        <Image source={{ uri: post.avatarUrl }} style={styles.avatarImage} />
+                                    ) : (
+                                        <Text style={styles.avatarText}>🪔</Text>
+                                    )}
+                                </View>
+                                <View style={styles.headerInfo}>
+                                    <Text style={styles.detailUserName}>{post.user}</Text>
+                                    <Text style={styles.postDate}>{post.date}</Text>
+                                </View>
+                            </View>
+
+                            {post.title ? <Text style={styles.detailTitleText}>{post.title}</Text> : null}
+                            {post.imageUrl ? (
+                                <Image source={{ uri: post.imageUrl }} style={styles.detailImage} />
+                            ) : null}
+                            <Text style={styles.detailBodyText}>{post.content}</Text>
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </Animated.View>
     );
 }
@@ -154,31 +177,297 @@ export default function CommunityScreen() {
     const appFrameWidth = isExpanded
         ? Math.max(320, Math.min(viewportWidth * 0.5, viewportHeight * 0.56))
         : viewportWidth;
-    const { userName, userRole } = useUser();
+    const { userName, userRole, userAvatarUrl } = useUser();
     const [activeFilter, setActiveFilter] = useState('All');
     const [isModalVisible, setModalVisible] = useState(false);
     const [isDraftsVisible, setDraftsVisible] = useState(false);
-    const [postType, setPostType] = useState<PostType>('Event');
-    const [postTitle, setPostTitle] = useState('');
-    const [postDesc, setPostDesc] = useState('');
     const { refreshing, onRefresh } = useReloadOnRefresh();
 
-    const handleCreatePost = () => {
-        hapticImpact();
-        console.log('\n--- NEW COMMUNITY POST ---');
-        console.log(`Author:      ${userName || 'N/A'}`);
-        console.log(`Type:        ${postType}`);
-        console.log(`Title:       ${postTitle}`);
-        console.log(`Description: ${postDesc}`);
-        console.log(`Timestamp:   ${new Date().toISOString()}`);
-        console.log('---------------------------\n');
+    const [approvedDropPosts, setApprovedDropPosts] = useState<CommunityPost[]>([]);
+    const [dropsLoading, setDropsLoading] = useState(false);
+    const [dropsError, setDropsError] = useState('');
 
-        // Reset and close
-        setPostTitle('');
-        setPostDesc('');
-        setPostType('Event');
-        setModalVisible(false);
+    const [draftDrops, setDraftDrops] = useState<DropRow[]>([]);
+    const [draftDropsLoading, setDraftDropsLoading] = useState(false);
+    const [draftDropsError, setDraftDropsError] = useState('');
+    const [draftDropBusyIds, setDraftDropBusyIds] = useState<Record<string, boolean>>({});
+
+    const [dropTitle, setDropTitle] = useState('');
+    const [dropDescription, setDropDescription] = useState('');
+    const [dropImageUrl, setDropImageUrl] = useState('');
+    const [dropImageName, setDropImageName] = useState('');
+    const [dropImageType, setDropImageType] = useState('image/jpeg');
+    const [dropImageBase64, setDropImageBase64] = useState<string | null>(null);
+    const [dropStartDate, setDropStartDate] = useState('');
+    const [dropEndDate, setDropEndDate] = useState('');
+    const [dropLocation, setDropLocation] = useState('');
+
+    const resetDropForm = () => {
+        setDropTitle('');
+        setDropDescription('');
+        setDropImageUrl('');
+        setDropImageName('');
+        setDropImageType('image/jpeg');
+        setDropImageBase64(null);
+        setDropStartDate('');
+        setDropEndDate('');
+        setDropLocation('');
+    };
+
+    const base64ToUint8Array = (base64: string) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        let outputLength = base64.length * 3 / 4;
+        if (base64[base64.length - 1] === '=') outputLength--;
+        if (base64[base64.length - 2] === '=') outputLength--;
+
+        const bytes = new Uint8Array(outputLength | 0);
+        let buffer = 0;
+        let bits = 0;
+        let index = 0;
+
+        for (let i = 0; i < base64.length; i += 1) {
+            const value = chars.indexOf(base64.charAt(i));
+            if (value < 0) continue;
+            buffer = (buffer << 6) | value;
+            bits += 6;
+            if (bits >= 8) {
+                bits -= 8;
+                bytes[index++] = (buffer >> bits) & 0xff;
+            }
+        }
+        return bytes;
+    };
+
+    const loadApprovedDrops = async () => {
+        if (!supabase) {
+            setDropsError('Supabase is not configured.');
+            return;
+        }
+        setDropsLoading(true);
+        setDropsError('');
+        const { data, error } = await supabase
+            .from('drops')
+            .select('id, user_email, user_name, user_avatar_url, title, description, image_url, start_date, end_date, location, created_at')
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            setDropsError('Unable to load drops.');
+            setDropsLoading(false);
+            return;
+        }
+
+        const dropPosts = (data as DropRow[] | null)?.map((drop) => {
+            const metaParts: string[] = [];
+            if (drop.location) metaParts.push(`Location: ${drop.location}`);
+            if (drop.start_date || drop.end_date) {
+                metaParts.push(`Dates: ${drop.start_date || '—'} → ${drop.end_date || '—'}`);
+            }
+            const meta = metaParts.length ? `\n${metaParts.join(' · ')}` : '';
+
+            return {
+                id: `drop-${drop.id}`,
+                user: drop.user_name || drop.user_email || 'Community',
+                date: new Date(drop.created_at).toLocaleDateString(),
+                title: drop.title,
+                content: `${drop.description}${meta}`,
+                category: 'Drops',
+                avatarUrl: drop.user_avatar_url || null,
+                imageUrl: drop.image_url || null,
+            };
+        }) ?? [];
+
+        setApprovedDropPosts(dropPosts);
+        setDropsLoading(false);
+    };
+
+    const loadDraftDrops = async () => {
+        if (!supabase) {
+            setDraftDropsError('Supabase is not configured.');
+            return;
+        }
+        setDraftDropsLoading(true);
+        setDraftDropsError('');
+        const { data, error } = await supabase
+            .from('drops')
+            .select('id, user_email, user_name, user_role, user_avatar_url, title, description, image_url, start_date, end_date, location, created_at')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            setDraftDropsError('Unable to load draft drops.');
+            setDraftDropsLoading(false);
+            return;
+        }
+
+        setDraftDrops((data as DropRow[]) ?? []);
+        setDraftDropsLoading(false);
+    };
+
+    const handleSubmitDrop = async () => {
+        hapticImpact();
+        if (!supabase) {
+            Alert.alert('Submission unavailable', 'Supabase is not configured.');
+            return;
+        }
+        if (!dropTitle.trim() || !dropDescription.trim()) {
+            Alert.alert('Missing info', 'Please add a title and description.');
+            return;
+        }
+        if (dropStartDate && !isValidDate(dropStartDate)) {
+            Alert.alert('Invalid from date', 'Use YYYY-MM-DD format.');
+            return;
+        }
+        if (dropEndDate && !isValidDate(dropEndDate)) {
+            Alert.alert('Invalid till date', 'Use YYYY-MM-DD format.');
+            return;
+        }
+
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+            Alert.alert('Auth required', 'Please log in to submit a drop.');
+            return;
+        }
+
+        let imageUrl: string | null = null;
+        if (dropImageBase64) {
+            try {
+                const bytes = base64ToUint8Array(dropImageBase64);
+                const extension = dropImageName.split('.').pop() || 'jpg';
+                const fileName = `drop_${Date.now()}.${extension}`;
+                const path = `${userData.user.id}/${fileName}`;
+
+                const { error: uploadError } = await supabase
+                    .storage
+                    .from('drops')
+                    .upload(path, bytes, { contentType: dropImageType || 'image/jpeg' });
+
+                if (uploadError) {
+                    Alert.alert('Image upload failed', uploadError.message);
+                    return;
+                }
+
+                const { data: publicUrl } = supabase.storage.from('drops').getPublicUrl(path);
+                imageUrl = publicUrl?.publicUrl ?? null;
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Unable to upload image.';
+                Alert.alert('Image upload failed', message);
+                return;
+            }
+        }
+
+        const { error } = await supabase.from('drops').insert({
+            user_id: userData.user.id,
+            user_email: userData.user.email ?? null,
+            user_name: userName || userData.user.email || 'Community',
+            user_role: userRole || 'Guest',
+            user_avatar_url: userAvatarUrl || null,
+            title: dropTitle.trim(),
+            description: dropDescription.trim(),
+            image_url: imageUrl,
+            start_date: dropStartDate.trim() || null,
+            end_date: dropEndDate.trim() || null,
+            location: dropLocation.trim() || null,
+            status: 'pending',
+        });
+
+        if (error) {
+            Alert.alert('Submission failed', error.message);
+            return;
+        }
+
         hapticSuccess();
+        resetDropForm();
+        setModalVisible(false);
+        Alert.alert('Drop submitted', 'Your drop was sent for admin approval.');
+    };
+
+    const setDraftDropBusy = (id: string, busy: boolean) => {
+        setDraftDropBusyIds((prev) => ({ ...prev, [id]: busy }));
+    };
+
+    const handleApproveDrop = async (drop: DropRow) => {
+        if (!supabase || draftDropBusyIds[drop.id]) return;
+        setDraftDropBusy(drop.id, true);
+        const { error } = await supabase
+            .from('drops')
+            .update({ status: 'approved' })
+            .eq('id', drop.id);
+
+        if (error) {
+            Alert.alert('Approval failed', error.message);
+        } else {
+            hapticSuccess();
+            setDraftDrops((prev) => prev.filter((item) => item.id !== drop.id));
+            loadApprovedDrops();
+        }
+        setDraftDropBusy(drop.id, false);
+    };
+
+    const handleDenyDrop = async (drop: DropRow) => {
+        if (!supabase || draftDropBusyIds[drop.id]) return;
+        setDraftDropBusy(drop.id, true);
+        const { error } = await supabase
+            .from('drops')
+            .update({ status: 'rejected' })
+            .eq('id', drop.id);
+
+        if (error) {
+            Alert.alert('Denial failed', error.message);
+        } else {
+            hapticImpact();
+            setDraftDrops((prev) => prev.filter((item) => item.id !== drop.id));
+        }
+        setDraftDropBusy(drop.id, false);
+    };
+
+    useEffect(() => {
+        loadApprovedDrops();
+    }, []);
+
+    useEffect(() => {
+        if (isDraftsVisible) {
+            loadDraftDrops();
+        }
+    }, [isDraftsVisible]);
+
+    const isValidDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+    const isDropFormValid = !!dropTitle.trim() && !!dropDescription.trim();
+
+    const handlePickImage = async () => {
+        hapticSelection();
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+            Alert.alert('Permission needed', 'Please allow photo access to attach an image.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            quality: 0.8,
+            base64: true,
+        });
+
+        if (result.canceled || !result.assets?.length) return;
+
+        const asset = result.assets[0];
+        setDropImageUrl(asset.uri);
+        setDropImageName(asset.fileName || `drop_${Date.now()}.jpg`);
+        setDropImageType(asset.mimeType || 'image/jpeg');
+
+        if (asset.base64) {
+            setDropImageBase64(asset.base64);
+        } else {
+            try {
+                const fileBase64 = await FileSystem.readAsStringAsync(asset.uri, {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+                setDropImageBase64(fileBase64);
+            } catch (error) {
+                console.warn('Failed to read image file', error);
+                setDropImageBase64(null);
+            }
+        }
     };
 
     return (
@@ -221,11 +510,15 @@ export default function CommunityScreen() {
                         />
                     }
                 >
-                    {COMMUNITY_POSTS.map((post, index) => (
+                    {approvedDropPosts.map((post, index) => (
                         <CommunityPost key={post.id} post={post} index={index} />
                     ))}
 
-                    <Text style={styles.emptyText}>You&apos;re all caught up!</Text>
+                    {dropsLoading && <Text style={styles.emptyText}>Loading drops...</Text>}
+                    {!dropsLoading && dropsError ? <Text style={styles.emptyText}>{dropsError}</Text> : null}
+                    {!dropsLoading && !dropsError && approvedDropPosts.length === 0 ? (
+                        <Text style={styles.emptyText}>No drops yet.</Text>
+                    ) : null}
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </SafeAreaView>
@@ -247,7 +540,7 @@ export default function CommunityScreen() {
                     >
                         <View style={styles.modalCard}>
                             <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Create Post</Text>
+                                <Text style={styles.modalTitle}>Submit Drop</Text>
                                 <Pressable onPress={() => {
                                     hapticImpact();
                                     setModalVisible(false);
@@ -259,51 +552,75 @@ export default function CommunityScreen() {
                             </View>
 
                             <ScrollView showsVerticalScrollIndicator={false}>
-                                <Text style={styles.inputLabel}>CHOOSE TYPE</Text>
-                                <View style={styles.typeRow}>
-                                    {POST_TYPES.map((type) => (
-                                        <Pressable
-                                            key={type}
-                                            onPress={() => {
-                                                hapticSelection();
-                                                setPostType(type);
-                                            }}
-                                            style={[styles.typeBtn, postType === type && styles.typeBtnActive]}
-                                        >
-                                            <Text style={[styles.typeBtnText, postType === type && styles.typeBtnTextActive]}>
-                                                {type}
-                                            </Text>
-                                        </Pressable>
-                                    ))}
-                                </View>
+                                <Text style={styles.modalIntro}>
+                                    Share a drop for the community. Your submission will be reviewed by admin before it goes live.
+                                </Text>
 
-                                <Text style={styles.inputLabel}>POST TITLE</Text>
+                                <Text style={styles.inputLabel}>DROP TITLE</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="What's happening?"
+                                    placeholder="e.g. Festival Special Combo"
                                     placeholderTextColor="rgba(0, 0, 0, 0.35)"
-                                    value={postTitle}
-                                    onChangeText={setPostTitle}
+                                    value={dropTitle}
+                                    onChangeText={setDropTitle}
                                 />
 
                                 <Text style={styles.inputLabel}>DESCRIPTION</Text>
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
-                                    placeholder="Tell us more about it..."
+                                    placeholder="Tell the community what this drop is about..."
                                     placeholderTextColor="rgba(0, 0, 0, 0.35)"
-                                    value={postDesc}
-                                    onChangeText={setPostDesc}
+                                    value={dropDescription}
+                                    onChangeText={setDropDescription}
                                     multiline
                                     numberOfLines={4}
                                     textAlignVertical="top"
                                 />
 
+                                <Text style={styles.inputLabel}>IMAGE (OPTIONAL)</Text>
+                                <Pressable style={styles.imagePickBtn} onPress={handlePickImage}>
+                                    <MaterialCommunityIcons name="image-plus" size={18} color={Colors.light.text} />
+                                    <Text style={styles.imagePickText}>
+                                        {dropImageUrl ? 'Change image' : 'Add image'}
+                                    </Text>
+                                </Pressable>
+                                {dropImageUrl ? (
+                                    <Image source={{ uri: dropImageUrl }} style={styles.imagePreview} />
+                                ) : null}
+
+                                <Text style={styles.inputLabel}>FROM DATE (OPTIONAL)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="YYYY-MM-DD"
+                                    placeholderTextColor="rgba(0, 0, 0, 0.35)"
+                                    value={dropStartDate}
+                                    onChangeText={setDropStartDate}
+                                />
+
+                                <Text style={styles.inputLabel}>TILL DATE (OPTIONAL)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="YYYY-MM-DD"
+                                    placeholderTextColor="rgba(0, 0, 0, 0.35)"
+                                    value={dropEndDate}
+                                    onChangeText={setDropEndDate}
+                                />
+
+                                <Text style={styles.inputLabel}>LOCATION (OPTIONAL)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="e.g. Marvel Stadium"
+                                    placeholderTextColor="rgba(0, 0, 0, 0.35)"
+                                    value={dropLocation}
+                                    onChangeText={setDropLocation}
+                                />
+
                                 <Pressable
-                                    style={[styles.postBtn, (!postTitle || !postDesc) && styles.postBtnDisabled]}
-                                    onPress={handleCreatePost}
-                                    disabled={!postTitle || !postDesc}
+                                    style={[styles.postBtn, !isDropFormValid && styles.postBtnDisabled]}
+                                    onPress={handleSubmitDrop}
+                                    disabled={!isDropFormValid}
                                 >
-                                    <Text style={styles.postBtnText}>Post to Community</Text>
+                                    <Text style={styles.postBtnText}>Submit Drop for Review</Text>
                                 </Pressable>
                             </ScrollView>
                         </View>
@@ -334,10 +651,62 @@ export default function CommunityScreen() {
                                 </View>
                             </Pressable>
                         </View>
-                        <Text style={styles.draftsEmptyTitle}>No drafts yet</Text>
-                        <Text style={styles.draftsEmptyText}>
-                            Draft drops submitted by the community will appear here for approval.
-                        </Text>
+                        {draftDropsLoading ? (
+                            <Text style={styles.draftsEmptyTitle}>Loading drops...</Text>
+                        ) : draftDropsError ? (
+                            <Text style={styles.draftsEmptyText}>{draftDropsError}</Text>
+                        ) : draftDrops.length === 0 ? (
+                            <>
+                                <Text style={styles.draftsEmptyTitle}>No drafts yet</Text>
+                                <Text style={styles.draftsEmptyText}>
+                                    Draft drops submitted by the community will appear here for approval.
+                                </Text>
+                            </>
+                        ) : (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                {draftDrops.map((drop) => (
+                                    <View key={drop.id} style={styles.draftDropCard}>
+                                        <Text style={styles.draftDropTitle}>{drop.title}</Text>
+                                        <Text style={styles.draftDropMeta}>
+                                            {drop.user_name || drop.user_email || 'Community'} · {drop.user_role || 'Guest'}
+                                        </Text>
+                                        <Text style={styles.draftDropBody}>{drop.description}</Text>
+                                        {drop.location ? (
+                                            <Text style={styles.draftDropMeta}>Location: {drop.location}</Text>
+                                        ) : null}
+                                        {drop.start_date || drop.end_date ? (
+                                            <Text style={styles.draftDropMeta}>
+                                                Dates: {drop.start_date || '—'} → {drop.end_date || '—'}
+                                            </Text>
+                                        ) : null}
+                                        <View style={styles.draftDropActions}>
+                                            <Pressable
+                                                style={[
+                                                    styles.draftDropBtn,
+                                                    styles.draftDropApprove,
+                                                    draftDropBusyIds[drop.id] && styles.draftDropBtnDisabled,
+                                                ]}
+                                                onPress={() => handleApproveDrop(drop)}
+                                                disabled={draftDropBusyIds[drop.id]}
+                                            >
+                                                <Text style={styles.draftDropBtnText}>Approve</Text>
+                                            </Pressable>
+                                            <Pressable
+                                                style={[
+                                                    styles.draftDropBtn,
+                                                    styles.draftDropDeny,
+                                                    draftDropBusyIds[drop.id] && styles.draftDropBtnDisabled,
+                                                ]}
+                                                onPress={() => handleDenyDrop(drop)}
+                                                disabled={draftDropBusyIds[drop.id]}
+                                            >
+                                                <Text style={styles.draftDropBtnTextAlt}>Deny</Text>
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
                     </View>
                 </View>
             </Modal>
@@ -444,6 +813,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginRight: 12,
     },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 20,
+    },
     avatarText: { fontSize: 20 },
     headerInfo: { flex: 1 },
     userName: { color: Colors.light.text, fontSize: 15, fontFamily: Fonts.bold },
@@ -455,6 +829,19 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         marginBottom: Spacing.lg,
     },
+    postTitle: {
+        color: Colors.light.text,
+        fontSize: 16,
+        fontFamily: Fonts.bold,
+        marginBottom: 6,
+    },
+    postImage: {
+        width: '100%',
+        height: 180,
+        borderRadius: 16,
+        marginBottom: Spacing.md,
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    },
     postFooter: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -462,15 +849,49 @@ const styles = StyleSheet.create({
         borderTopColor: Colors.light.borderSubtle,
         paddingTop: Spacing.md,
     },
-    readMoreBtn: {
+    detailOverlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+        justifyContent: 'center',
+        paddingHorizontal: Spacing.lg,
+    },
+    detailCard: {
+        backgroundColor: Colors.light.surfaceElevated,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: Colors.light.borderSubtle,
+        padding: Spacing.xl,
+        maxHeight: '85%',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 4,
+    },
+    detailHeaderRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        marginBottom: Spacing.md,
     },
-    readMoreText: {
-        color: Colors.light.accentText,
-        fontSize: 14,
-        fontFamily: Fonts.medium,
+    detailAvatar: {
+        marginRight: 12,
+    },
+    detailUserName: {
+        color: Colors.light.text,
+        fontSize: 16,
+        fontFamily: Fonts.bold,
+    },
+    detailTitleText: {
+        color: Colors.light.text,
+        fontSize: 20,
+        fontFamily: Fonts.bold,
+        marginBottom: Spacing.sm,
+    },
+    detailBodyText: {
+        color: Colors.light.text,
+        fontSize: 15,
+        fontFamily: Fonts.regular,
+        lineHeight: 22,
+        opacity: 0.9,
     },
 
     emptyText: { color: 'rgba(0, 0, 0, 0.25)', fontSize: 14, textAlign: 'center', marginTop: Spacing.xl },
@@ -559,6 +980,30 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
     },
     postBtnText: { color: Colors.light.text, fontSize: 16, fontFamily: Fonts.bold },
+    imagePickBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        backgroundColor: 'rgba(255, 122, 0, 0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 122, 0, 0.35)',
+        marginBottom: Spacing.md,
+    },
+    imagePickText: {
+        color: Colors.light.text,
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+    },
+    imagePreview: {
+        width: '100%',
+        height: 180,
+        borderRadius: 16,
+        marginBottom: Spacing.lg,
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    },
 
     fab: {
         position: 'absolute',
@@ -610,6 +1055,65 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 5,
         elevation: 4,
+    },
+    draftDropCard: {
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: Colors.light.borderSubtle,
+        padding: Spacing.lg,
+        marginTop: Spacing.md,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    },
+    draftDropTitle: {
+        color: Colors.light.text,
+        fontSize: 16,
+        fontFamily: Fonts.bold,
+        marginBottom: 6,
+    },
+    draftDropMeta: {
+        color: Colors.light.textSecondary,
+        fontSize: 12,
+        fontFamily: Fonts.medium,
+        marginBottom: 8,
+    },
+    draftDropBody: {
+        color: Colors.light.text,
+        fontSize: 14,
+        fontFamily: Fonts.regular,
+        lineHeight: 20,
+        marginBottom: 10,
+    },
+    draftDropActions: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    draftDropBtn: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    draftDropApprove: {
+        backgroundColor: Colors.light.gold,
+    },
+    draftDropDeny: {
+        backgroundColor: 'rgba(0, 0, 0, 0.06)',
+        borderWidth: 1,
+        borderColor: Colors.light.borderSubtle,
+    },
+    draftDropBtnText: {
+        color: Colors.light.text,
+        fontSize: 13,
+        fontFamily: Fonts.bold,
+    },
+    draftDropBtnTextAlt: {
+        color: Colors.light.text,
+        fontSize: 13,
+        fontFamily: Fonts.bold,
+    },
+    draftDropBtnDisabled: {
+        opacity: 0.5,
     },
     draftsEmptyTitle: {
         color: Colors.light.text,

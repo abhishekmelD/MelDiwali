@@ -3,6 +3,7 @@ import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useUser } from '@/contexts/UserContext';
 import { useReloadOnRefresh } from '@/hooks/use-reload-on-refresh';
 import { hapticImpact, hapticSuccess } from '@/lib/haptics';
+import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { DeviceMotion } from 'expo-sensors';
@@ -34,42 +35,15 @@ function getTimeRemaining() {
   };
 }
 
-// ----- Live Drops Data -----
-const LIVE_DROPS = [
-  {
-    id: '1',
-    badge: 'SPONSOR DROP',
-    badgeColor: '#FF7A00',
-    title: 'Sponsor Drop: Rangoli Competition',
-    description: 'Enter & share your design to unlock a festival stamp.',
-    cta: 'Enter now',
-    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
-    image: require('@/assets/images/drop_rangoli.png'),
-    tintColor: '#FF7A00',
-  },
-  {
-    id: '2',
-    badge: 'VENDOR',
-    badgeColor: '#FF7A00',
-    title: 'Vendor Spotlight: Curry House',
-    description: 'Exclusive tasting menu drop this week. Limited serves.',
-    cta: 'View menu',
-    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
-    image: require('@/assets/images/drop_curry.png'),
-    tintColor: '#FF7A00',
-  },
-  {
-    id: '3',
-    badge: 'PERFORMER',
-    badgeColor: '#000000',
-    title: 'Performer Reveal: DJ Karma',
-    description: 'Get ready for the main stage! Preview the setlist.',
-    cta: 'Listen now',
-    gradient: ['rgba(255, 255, 255, 0.2)', 'rgba(255, 122, 0, 0.5)'] as const,
-    image: require('@/assets/images/drop_dj.png'),
-    tintColor: '#FF7A00',
-  },
-];
+type LiveDrop = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+};
 
 const QUICK_ACTIONS = [
   {
@@ -188,7 +162,7 @@ function LiveDropCard({
   height,
   marginRight = Spacing.md,
 }: {
-  item: typeof LIVE_DROPS[0];
+  item: LiveDrop;
   index: number;
   onPress: () => void;
   width: number;
@@ -222,22 +196,27 @@ function LiveDropCard({
           >
             <View style={styles.dropCardInner}>
               <View style={styles.dropImageWrap}>
-                <ImageBackground
-                  source={item.image}
-                  style={styles.dropImage}
-                  imageStyle={styles.dropImageStyle}
-                  resizeMode="cover"
-                />
+                {item.imageUrl ? (
+                  <ImageBackground
+                    source={{ uri: item.imageUrl }}
+                    style={styles.dropImage}
+                    imageStyle={styles.dropImageStyle}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={[styles.dropImage, styles.dropImageFallback]}>
+                    <MaterialCommunityIcons name="image-outline" size={28} color={Colors.light.textSecondary} />
+                  </View>
+                )}
               </View>
 
               <View style={styles.dropContent}>
-                <View style={[styles.dropBadge, { backgroundColor: item.badgeColor }]}>
-                  <Text style={styles.dropBadgeText}>{item.badge}</Text>
+                <View style={styles.dropBadge}>
+                  <Text style={styles.dropBadgeText}>LIVE</Text>
                 </View>
-                <Text style={styles.dropTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.dropDesc} numberOfLines={2}>{item.description}</Text>
+                <Text style={styles.dropTitle} numberOfLines={2}>{item.title}</Text>
                 <View style={styles.dropCta}>
-                  <Text style={styles.dropCtaText}>{item.cta}</Text>
+                  <Text style={styles.dropCtaText}>View details</Text>
                   <MaterialCommunityIcons name="arrow-right" size={15} color={Colors.light.accentText} />
                 </View>
               </View>
@@ -275,7 +254,9 @@ export default function HomeScreen() {
   const { userName, userRole } = useUser();
   const firstName = userName?.trim() ? userName.trim().split(/\s+/)[0] : '';
   const [isDropsModalVisible, setIsDropsModalVisible] = useState(false);
-  const [selectedDrop, setSelectedDrop] = useState<typeof LIVE_DROPS[0] | null>(null);
+  const [selectedDrop, setSelectedDrop] = useState<LiveDrop | null>(null);
+  const [liveDrops, setLiveDrops] = useState<LiveDrop[]>([]);
+  const [dropsLoading, setDropsLoading] = useState(false);
   const { refreshing, onRefresh } = useReloadOnRefresh({
     onBeforeReload: () => {
       hapticSuccess();
@@ -290,6 +271,35 @@ export default function HomeScreen() {
       router.push(path);
     }
   };
+
+  const loadLiveDrops = async () => {
+    if (!supabase) return;
+    setDropsLoading(true);
+    const { data, error } = await supabase
+      .from('drops')
+      .select('id, title, description, image_url, start_date, end_date, location, created_at')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!error) {
+      const mapped = (data as any[] | null)?.map((drop) => ({
+        id: drop.id,
+        title: drop.title,
+        description: drop.description,
+        imageUrl: drop.image_url ?? null,
+        startDate: drop.start_date ?? null,
+        endDate: drop.end_date ?? null,
+        location: drop.location ?? null,
+      })) ?? [];
+      setLiveDrops(mapped);
+    }
+    setDropsLoading(false);
+  };
+
+  useEffect(() => {
+    loadLiveDrops();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -336,7 +346,7 @@ export default function HomeScreen() {
             </View>
             {isTablet ? (
               <View style={styles.liveDropGrid}>
-                {LIVE_DROPS.map((item, index) => (
+                {liveDrops.map((item, index) => (
                   <View
                     key={item.id}
                     style={[
@@ -361,7 +371,7 @@ export default function HomeScreen() {
             ) : (
               <FlatList
                 horizontal
-                data={LIVE_DROPS}
+                data={liveDrops}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => (
                   <LiveDropCard
@@ -378,6 +388,9 @@ export default function HomeScreen() {
                 decelerationRate="fast"
               />
             )}
+            {!dropsLoading && liveDrops.length === 0 ? (
+              <Text style={styles.emptyDropsText}>No drops yet.</Text>
+            ) : null}
           </Animated.View>
 
           {/* Quick Actions */}
@@ -435,7 +448,7 @@ export default function HomeScreen() {
               </View>
 
               <FlatList
-                data={LIVE_DROPS}
+                data={liveDrops}
                 keyExtractor={(item) => item.id}
                 key={liveDropColumns}
                 numColumns={liveDropColumns}
@@ -494,34 +507,44 @@ export default function HomeScreen() {
               </View>
 
               <ScrollView style={styles.detailBody} showsVerticalScrollIndicator={false}>
-                <ImageBackground
-                  source={selectedDrop.image}
-                  style={styles.detailImage}
-                  imageStyle={{ borderRadius: 16 }}
-                >
-                  <View style={[styles.detailBadge, { backgroundColor: selectedDrop.badgeColor }]}>
-                    <Text style={styles.detailBadgeText}>{selectedDrop.badge}</Text>
+                {selectedDrop.imageUrl ? (
+                  <ImageBackground
+                    source={{ uri: selectedDrop.imageUrl }}
+                    style={styles.detailImage}
+                    imageStyle={{ borderRadius: 16 }}
+                  />
+                ) : (
+                  <View style={[styles.detailImage, styles.detailImageFallback]}>
+                    <MaterialCommunityIcons name="image-outline" size={36} color={Colors.light.textSecondary} />
                   </View>
-                </ImageBackground>
+                )}
 
                 <View style={styles.detailDescriptionRow}>
-                  <Text style={styles.detailDescriptionHeader}>OFFER DETAILS</Text>
+                  <Text style={styles.detailDescriptionHeader}>DROP DETAILS</Text>
                   <Text style={styles.detailDescriptionText}>{selectedDrop.description}</Text>
                 </View>
 
-                <View style={styles.detailInstructionRow}>
-                  <Text style={styles.detailDescriptionHeader}>HOW TO REDEEM</Text>
-                  <Text style={styles.detailDescriptionText}>
-                    Show this screen at the venue or follow the instructions in the {selectedDrop.cta.toLowerCase()} link to claim your reward.
-                  </Text>
-                </View>
+                {selectedDrop.location ? (
+                  <View style={styles.detailInstructionRow}>
+                    <Text style={styles.detailDescriptionHeader}>LOCATION</Text>
+                    <Text style={styles.detailDescriptionText}>{selectedDrop.location}</Text>
+                  </View>
+                ) : null}
+                {selectedDrop.startDate || selectedDrop.endDate ? (
+                  <View style={styles.detailInstructionRow}>
+                    <Text style={styles.detailDescriptionHeader}>DATES</Text>
+                    <Text style={styles.detailDescriptionText}>
+                      {selectedDrop.startDate || '—'} → {selectedDrop.endDate || '—'}
+                    </Text>
+                  </View>
+                ) : null}
               </ScrollView>
 
               <Pressable style={styles.detailActionBtn} onPress={() => {
                 hapticImpact();
                 setSelectedDrop(null);
               }}>
-                <Text style={styles.detailActionText}>{selectedDrop.cta}</Text>
+                <Text style={styles.detailActionText}>Close</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -633,10 +656,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  dropImageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+  },
   dropImageStyle: {
     borderRadius: 12,
   },
-  dropBadge: { alignSelf: 'flex-start', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  dropBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: Colors.light.accentText,
+  },
   dropBadgeText: { color: Colors.light.text, fontWeight: '800', fontSize: 10, letterSpacing: 0.5 },
   dropContent: { flex: 1, justifyContent: 'space-between', paddingBottom: Spacing.lg },
   dropTitle: {
@@ -645,13 +679,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     marginTop: Spacing.xs,
     marginBottom: 4,
-  },
-  dropDesc: {
-    color: Colors.light.textSecondary,
-    fontSize: 13,
-    fontFamily: Fonts.regular,
-    lineHeight: 18,
-    marginBottom: Spacing.sm,
   },
   dropCta: {
     alignSelf: 'flex-start',
@@ -822,17 +849,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 12,
   },
-  detailBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  detailBadgeText: {
-    color: Colors.light.text,
-    fontSize: 11,
-    fontFamily: Fonts.bold,
-    textTransform: 'uppercase',
+  detailImageFallback: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
   },
   detailDescriptionRow: {
     marginBottom: Spacing.lg,
@@ -853,6 +875,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     lineHeight: 22,
     opacity: 0.8,
+  },
+  emptyDropsText: {
+    color: Colors.light.textSecondary,
+    fontSize: 14,
+    marginTop: Spacing.md,
   },
   detailActionBtn: {
     backgroundColor: '#FF7A00',
